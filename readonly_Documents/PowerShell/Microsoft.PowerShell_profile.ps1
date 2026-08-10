@@ -30,9 +30,7 @@ function mosh {
 # into mojibake like "ΓöÇΓöÇΓöÇ" - even when [Console]::OutputEncoding claims UTF-8.
 chcp 65001 | Out-Null
 
-# fzf: use fd as the backend, pointed explicitly at ~/.config/fd/ignore so the same
-# ignore file applies on Windows and Linux (fd has no XDG_CONFIG_HOME override on Windows
-# the way Neovim does, so we pass --ignore-file instead of relying on fd's OS default)
+# fzf via fd, pinned to ~/.config/fd/ignore (fd has no XDG override on Windows, unlike nvim)
 $env:FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-file `"$HOME\.config\fd\ignore`""
 $env:FZF_CTRL_T_COMMAND  = $env:FZF_DEFAULT_COMMAND
 

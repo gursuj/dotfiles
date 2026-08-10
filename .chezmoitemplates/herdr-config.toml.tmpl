@@ -8,10 +8,7 @@ onboarding = false
 channel = "preview"
 
 [terminal]
-# default_shell intentionally unset — herdr falls back to $SHELL, which is set
-# at the OS level on both platforms (pwsh 7 on Windows via a user env var,
-# since it's otherwise unset there and herdr would fall back to PowerShell 5;
-# already set correctly by the OS/login shell on Linux). See README.
+# default_shell unset — falls back to $SHELL (set per-OS, see README).
 new_cwd = "follow"
 
 [keys]
