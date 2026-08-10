@@ -1,0 +1,7 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Windows doesn't understand shebang lines, so chezmoi needs to be told explicitly
+# to run .sh scripts through sh (git-bash's, already on PATH) rather than trying
+# to exec them directly as a native Windows binary.
+[interpreters.sh]
+    command = "sh"
+{{- end -}}
