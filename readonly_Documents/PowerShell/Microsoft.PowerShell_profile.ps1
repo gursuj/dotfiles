@@ -1,0 +1,216 @@
+function cdd { cd D:\ }
+
+# Cygwin bash re-execs itself internally on startup (pty setup) using a bare
+# PATH lookup for "bash", not the absolute path it was launched with. Git for
+# Windows' usr\bin sits earlier on $env:PATH than C:\cygwin64\bin, so without
+# this it silently re-execs into Git's MSYS bash instead — wrong mount table,
+# wrong HOME, "command not found" for anything actually installed in Cygwin.
+# Scoped to the function call and restored after, so it doesn't affect any
+# other Git/MSYS tooling in the rest of the session.
+function Invoke-CygwinBash {
+    $origPath = $env:PATH
+    $env:PATH = 'C:\cygwin64\bin;' + $env:PATH
+    try { & 'C:\cygwin64\bin\bash.exe' @args }
+    finally { $env:PATH = $origPath }
+}
+
+# Cygwin bash login shell, in place of the current console (used for mosh —
+# see [[updating tools on the vps]]/setup.md for why Cygwin over MSYS2/WSL).
+function cyg { Invoke-CygwinBash --login -i }
+
+# Runs mosh via Cygwin without needing to drop into a Cygwin shell first.
+# `mosh vps` on this Windows PowerShell prompt now Just Works — args pass
+# through untouched via bash's "$@", no manual quoting/escaping needed.
+function mosh {
+    Invoke-CygwinBash --login -c 'exec mosh "$@"' bash @args
+}
+
+# Force UTF-8 console codepage. Windows defaults to legacy OEM (437), which
+# mangles any CLI tool that prints raw UTF-8 (box-drawing chars, emoji, etc.)
+# into mojibake like "ΓöÇΓöÇΓöÇ" - even when [Console]::OutputEncoding claims UTF-8.
+chcp 65001 | Out-Null
+
+# fzf: use fd as the backend, pointed explicitly at ~/.config/fd/ignore so the same
+# ignore file applies on Windows and Linux (fd has no XDG_CONFIG_HOME override on Windows
+# the way Neovim does, so we pass --ignore-file instead of relying on fd's OS default)
+$env:FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-file `"$HOME\.config\fd\ignore`""
+$env:FZF_CTRL_T_COMMAND  = $env:FZF_DEFAULT_COMMAND
+
+$env:PATH += ";$HOME\scripts"
+
+$env:OBS  = "$HOME\Documents\obsidian"
+$env:DOTS = "$HOME\Documents\obsidian\dotfiles.md"
+
+# Find-ClaudeSession needs to run in this scope (not a child process) so its Set-Location
+# actually changes the shell's cwd - dot-source it here rather than relying on PATH.
+. "$HOME\scripts\Find-ClaudeSession.ps1"
+
+function cc {
+    # -y / -n skip the prompt and force the same branch a manual y/n answer would take.
+    # Any other args pass straight through to claude.
+    $sandboxDir = 'D:\claude-sandbox'
+    $skipPrompt = $false
+    $useSandbox = $false
+    $claudeArgs = @()
+    foreach ($a in $args) {
+        if ($a -eq '-y') { $skipPrompt = $true; $useSandbox = $false }
+        elseif ($a -eq '-n') { $skipPrompt = $true; $useSandbox = $true }
+        else { $claudeArgs += $a }
+    }
+    if (-not $skipPrompt) {
+        $currentDir = $PWD.Path
+        $answer = Read-Host "Run Claude Code in '$currentDir'? [Y/n]"
+        $useSandbox = $answer -ne '' -and $answer -notmatch '^[Yy]'
+    }
+    if ($useSandbox) { Set-Location $sandboxDir }
+    claude @claudeArgs
+}
+
+# ch — Claude Code History (https://github.com/halooojustin/cch)
+# use ch help for available commands
+function cl  { ch ls @args }       # Browse history
+function cps { ch ps @args }       # Active multiplexer sessions
+function cs  { ch search @args }   # Keyword search
+# alternatively, run ch <search-term> to search with AI
+
+Set-Alias -Name vi -Value nvim
+Set-Alias -Name lg -Value lazygit
+function gs  {  git status }   # Keyword search
+Set-Alias -Name oc -Value opencode
+Set-Alias -Name pwd -Value gl
+function td {
+    vi .\Documents\todos.md
+}
+function pwsh-hist {
+		vi  (Get-PSReadLineOption).HistorySavePath
+}
+
+# Set-PSReadlineOption -EditMode v
+Set-PSReadlineOption -EditMode Vi
+Set-PSReadLineOption -ViModeIndicator Cursor
+
+# yazi cd on quit
+function f {
+	$tmp = [System.IO.Path]::GetTempFileName()
+	yazi $args --cwd-file="$tmp"
+	if (Test-Path $tmp) {
+		$cwd = Get-Content $tmp
+		if ($cwd -and $cwd -ne $PWD) {
+			Set-Location $cwd
+		}
+		Remove-Item $tmp
+	}
+}
+
+# remove alias for unix binaries because microsoft equivalent commands don't have exact flags 
+# Git's usr\bin already on PATH so real flags work.
+# Default PS aliases are ReadOnly, hence -Force. Silent if already gone.
+$unshadow = @(
+    # file/text commands: real flags (ls -la, cp -r, rm -rf, diff -u). No downside.
+    'ls','cat','cp','mv','rm','sort','tee','diff',
+    # unix coreutils flavour over PS cmdlets. Trades object pipelines for unix output.
+    'echo','sleep','clear','ps','kill'
+)
+foreach ($a in $unshadow) {
+    if (Test-Path "Alias:\$a") { Remove-Item "Alias:\$a" -Force -ErrorAction SilentlyContinue }
+}
+Remove-Variable a, unshadow -ErrorAction SilentlyContinue
+
+# CommandNotFound: suggest winget packages for missing commands
+$ExecutionContext.InvokeCommand.CommandNotFoundAction = {
+    param($commandName, $commandLookupEventArgs)
+    if ($commandName -match '[/\\]') { return }
+    $results = winget search $commandName --source winget 2>$null |
+        Where-Object { $_ -match '^\S' -and $_ -notmatch '^(-|Name\s)' } |
+        Select-Object -First 5
+    if ($results) {
+        Write-Host "`nCommand '$commandName' not found. Winget packages:" -ForegroundColor Yellow
+        $results | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+        Write-Host "  winget install <Id>" -ForegroundColor DarkGray
+    }
+}
+
+# PSReadLine: zsh-style autosuggestions (ghost text from history) + dropdown list.
+# Accept full suggestion with End (works alongside Vi edit mode set above).
+# Guarded: predictions need an interactive VT-capable host, else it throws on redirected/piped pwsh.
+try { Set-PSReadLineOption -PredictionSource HistoryAndPlugin -PredictionViewStyle ListView -ErrorAction Stop } catch {}
+# Navigate the suggestion list with Ctrl+n / Ctrl+p, scoped to Vi insert mode (where predictions show).
+Set-PSReadLineKeyHandler -Key 'Ctrl+n' -Function NextSuggestion     -ViMode Insert
+Set-PSReadLineKeyHandler -Key 'Ctrl+p' -Function PreviousSuggestion -ViMode Insert
+# zsh-style Tab completion: Tab opens a navigable menu of options, Tab/arrows move through it,
+# Enter selects, Esc cancels. Shift+Tab navigates backward.
+Set-PSReadLineKeyHandler -Key 'Tab'       -Function MenuComplete -ViMode Insert
+Set-PSReadLineKeyHandler -Key 'Shift+Tab' -Function MenuComplete -ViMode Insert
+
+# git tab completion — lazy-loaded on first Tab press (avoids ~3s import of 68 files at startup)
+Register-ArgumentCompleter -CommandName git,gitk -Native -ScriptBlock {
+    param($wordToComplete, $CommandAst, $CursorPosition)
+    if (-not (Get-Module git-completion)) {
+        git rev-parse --git-dir *> $null
+        if ($LASTEXITCODE -ne 0) { return }
+        Import-Module git-completion
+    }
+    $cmd = $CommandAst.CommandElements[0].Value
+    if ($cmd -eq 'gitk') { return Complete-Gitk -CommandAst $CommandAst -CursorPosition $CursorPosition }
+    return Complete-Git -CommandAst $CommandAst -CursorPosition $CursorPosition
+}
+
+# starship prompt
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    Invoke-Expression (&starship init powershell)
+}
+
+# Starship's init hijacks vi mode switches to rerun the whole prompt (spawns starship.exe),
+# causing a visible flash. Put it back to a plain cursor-shape swap, no handler.
+Set-PSReadLineOption -ViModeIndicator Cursor -ViModeChangeHandler $null
+
+# zoxide: smarter cd. `z <partial>` jumps, `zi` picks interactively.
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
+# Override zoxide's `zi`: it pre-filters candidates using the same "last word
+# must match last path segment" rule as `z`, so a query like "voyagers" won't
+# surface D:\wp-sites\voyagers\app\public (last segment is "public"). This
+# skips zoxide's filter and hands the full path list to fzf directly, so the
+# query fuzzy-matches anywhere in the path.
+function __wpc_zi {
+    $dir = zoxide query -l | fzf --height 40% --reverse --query ($args -join ' ')
+    if ($LASTEXITCODE -eq 0 -and $dir) { Set-Location -LiteralPath $dir }
+}
+Set-Alias -Name zi -Value __wpc_zi -Option AllScope -Scope Global -Force
+
+
+
+function gcd {
+    $root = git rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -eq 0 -and $root) { Set-Location $root }
+    else { Write-Warning ''Not inside a git repository.'' }
+}
+
+# SSH passphrase caching via gpg-agent (gives a real timeout the Windows agent can't).
+# Gpg4win's gpg-agent serves the native ssh pipe and forgets the passphrase after 10 min
+# (see %APPDATA%\gnupg\gpg-agent.conf). Native ssh/git talk to it unchanged.
+# Put Gpg4win's gpg (2.5.x, supports win32-openssh) ahead of Git's older bundled gpg.
+$env:PATH = 'C:\Program Files\GnuPG\bin;' + $env:PATH
+# Ensure gpg-agent is running — non-blocking so it doesn't delay startup.
+# The agent pipe will be ready by the time any key use actually needs it.
+Start-Process 'C:\Program Files\GnuPG\bin\gpg-connect-agent.exe' -ArgumentList '/bye' -WindowStyle Hidden
+
+# Zellij cwd inheritance.
+# On new-pane startup: restore the last cwd for this session.
+# On every prompt: update the saved cwd so new panes inherit it.
+# Scoped to $env:ZELLIJ (session name) so fresh Zellij launches always start in home.
+if ($env:ZELLIJ) {
+    $zellijCwdFile = "$env:APPDATA\Zellij\cwd_$($env:ZELLIJ).txt"
+    if (Test-Path $zellijCwdFile) {
+        $saved = (Get-Content $zellijCwdFile -Raw).Trim()
+        if ($saved -and (Test-Path $saved)) { Set-Location $saved }
+    }
+    $global:_zellijPromptBase = $Function:prompt
+    function prompt {
+        Set-Content "$env:APPDATA\Zellij\cwd_$($env:ZELLIJ).txt" $PWD.Path -NoNewline
+        & $global:_zellijPromptBase
+    }
+}
+

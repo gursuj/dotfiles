@@ -1,0 +1,7 @@
+[[plugin.deps]]
+use = "Ape/smart-enter"
+rev = "1c835cc"
+hash = "388549e452690b06535968d596e913b6"
+
+[flavor]
+deps = []

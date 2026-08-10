@@ -1,0 +1,32 @@
+[mgr]
+# empty so the terminal handles mouse events (click-drag text selection, scroll)
+# instead of yazi capturing them for its own UI
+# mouse_events = []
+
+[preview]
+# Windows Terminal doesn't report pixel dimensions to yazi, so it falls back
+# to 0x0 and skips rendering unless we set explicit fallback sizes here.
+max_width = 1200
+max_height = 1200
+
+[opener]
+# use windows default opener
+win-open = [
+    { run = 'start "" %*', desc = "System Default", for = "windows" }
+]
+# Define Neovim as an opener
+nvim = [
+    { run = 'nvim %*', block = true, desc = "Neovim", for = "windows" }
+]
+
+[open]
+rules = [
+    # 1. Specific rules first (Text & Markdown)
+    { mime = "text/*", use = ["nvim", "win-open", "reveal"] },
+    { mime = "*/txt", use = ["nvim", "win-open", "reveal"] },
+    { mime = "*/markdown", use = ["nvim", "win-open", "reveal"] },
+    
+    # 2. Generic catch-all last (Matches everything else)
+    { mime = "*", use = ["win-open"] }
+# enhancement: Use the open-with-cmd yazi Community Plugin to type out custom opener command
+]
