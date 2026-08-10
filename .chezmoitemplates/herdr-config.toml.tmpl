@@ -1,0 +1,46 @@
+# Run `herdr --default-config` to see all available settings and their defaults.
+# This dumps the defaults compiled into whatever herdr binary is currently
+# installed locally — it does not fetch from upstream. Run `herdr update` first
+# if you want the dump to reflect the latest release.
+
+onboarding = false
+[update]
+channel = "preview"
+
+[terminal]
+# default_shell intentionally unset — herdr falls back to $SHELL, which is set
+# at the OS level on both platforms (pwsh 7 on Windows via a user env var,
+# since it's otherwise unset there and herdr would fall back to PowerShell 5;
+# already set correctly by the OS/login shell on Linux). See README.
+new_cwd = "follow"
+
+[keys]
+prefix = "ctrl+x"
+next_agent = "prefix+tab"
+previous_agent = "prefix+shift+tab"
+settings = "prefix+comma"
+workspace_picker = "prefix+shift+w"
+rename_workspace = "prefix+shift+e"
+previous_workspace = "prefix+w"
+next_workspace = "prefix+s"
+
+{{- if eq .chezmoi.os "windows" }}
+
+[[keys.command]]
+key = "prefix+n"
+type = "shell"
+command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
+{{- end }}
+
+[ui]
+agent_panel_sort = "spaces"
+
+[ui.toast]
+delivery = "herdr"
+
+[theme]
+name = "nord"
+auto_switch = false
+
+[experimental]
+kitty_graphics = true

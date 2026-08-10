@@ -18,7 +18,7 @@ repo owner (not via the `gh` CLI default account on this machine).
 | Yazi config | `dot_config/yazi/` | `yazi.toml`, `keymap.toml`, `package.toml`. Targets `~/.config/yazi` on both OSes — see below. The `ya pkg`-installed `plugins/` dir is deliberately **not** tracked (reproducible from `package.toml`, same reasoning as not tracking nvim's data dir). |
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
-| Herdr config | `AppData/Roaming/herdr/config.toml.tmpl` | Templated — `default_shell` and the `prefix+n` custom keybinding (which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile) are both Windows-only, omitted entirely on Linux rather than guessed at. Everything else (keys, theme, ui, experimental) is portable as-is. **Open question:** still targets the literal Windows path (`AppData/Roaming/herdr`) — herdr's Linux config location isn't confirmed, so this isn't unified into one cross-platform path yet the way nvim/yazi/fd are. |
+| Herdr config | `.chezmoitemplates/herdr-config.toml.tmpl` | Shared content, included by two thin per-OS stub files (`AppData/Roaming/herdr/config.toml.tmpl` for Windows, `dot_config/herdr/config.toml.tmpl` for Linux/Mac — confirmed from herdr's own docs) — see below. `default_shell` is left unset entirely now (see below); the `prefix+n` custom keybinding, which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile, is still gated to Windows only. |
 | Agent skills (8 of them) | `dot_agents/skills/<name>/` | See below. |
 
 ### Agent skills tracked
@@ -97,6 +97,28 @@ Same shape of problem as nvim, different fix per tool since neither honours
   The equivalent Linux shell rc (bashrc/zshrc, not yet tracked here) needs the same
   `--ignore-file` flag added when it's set up — the ignore file itself is already in place
   and ready for that.
+
+## Herdr: same content, two target paths (resolved 2026-08-10)
+
+Herdr has no XDG override and its config path genuinely differs per OS (confirmed from its
+own docs): `~/.config/herdr/config.toml` on Linux/Mac, `%APPDATA%\herdr\config.toml` on
+Windows. Rather than duplicate the actual settings twice, the real content lives in
+`.chezmoitemplates/herdr-config.toml.tmpl` (a shared partial, edit this one file), and both
+`AppData/Roaming/herdr/config.toml.tmpl` and `dot_config/herdr/config.toml.tmpl` are thin
+stubs that just `{{ template "herdr-config.toml.tmpl" . }}` it in. `.chezmoiignore`
+excludes whichever target path doesn't match the current OS, so only one ever actually
+applies. Side effect: an empty `~/.config/herdr` placeholder directory still gets created
+on Windows even though its one file inside is ignored — harmless, just a chezmoi quirk with
+ignored files inside otherwise-empty managed directories.
+
+`default_shell` itself is left unset in the config now (was previously hardcoded to pwsh 7
+on Windows only). Per herdr's own docs: "When unset or empty, Herdr uses `$SHELL`, then
+`/bin/sh` on Unix and PowerShell on Windows." `$SHELL` is already correctly set by the
+OS/login shell on Linux, but is unset by default on Windows — which is why herdr had been
+falling back to PowerShell 5 there rather than the intended pwsh 7, requiring the explicit
+override in the first place. Fixed properly by setting `$SHELL` as a Windows user env var
+(`C:\Program Files\PowerShell\7\pwsh.exe`) instead, so both OSes now resolve the right
+shell through the same mechanism rather than herdr-specific config.
 
 ## Not tracked at all (still Windows-only, out of scope for this pass)
 
