@@ -84,6 +84,11 @@ Same shape of problem as nvim, different fix per tool since neither honours
 
 - **Yazi** has its own dedicated override, `YAZI_CONFIG_HOME` — set that (Windows user env
   var) to `~/.config/yazi` and moved the live config there. One target path on both OSes.
+  `.chezmoiscripts/run_onchange_after_10-yazi-pkg-install.sh.tmpl` runs `ya pkg install`
+  whenever `package.toml`'s content changes (including the first apply on a new machine),
+  so declared plugins (currently `Ape/smart-enter`) actually get fetched instead of just
+  sitting declared-but-uninstalled. Needs `.chezmoi.toml.tmpl`'s `[interpreters.sh]`
+  mapping to run at all on Windows — chezmoi doesn't auto-detect shebangs there.
 - **fd** has no override env var at all for its ignore-file lookup. Instead of duplicating
   the ignore file per-OS target, moved it to `~/.config/fd/ignore` and updated the
   PowerShell profile's `$env:FZF_DEFAULT_COMMAND` to pass `--ignore-file` explicitly,
