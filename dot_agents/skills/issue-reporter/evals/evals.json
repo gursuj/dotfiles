@@ -1,0 +1,20 @@
+{
+  "skill_name": "issue-reporter",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "hey so i've been having this annoying issue with claude code — whenever i paste a really long chunk of text into the prompt (like 2000+ chars), the cursor jumps to the beginning of the input and i have to scroll back down. it's been happening since at least last week. windows 11, latest version. where do i report this and is it already a known thing?",
+      "expected_output": "Should find the correct GitHub repo for Claude Code, search with multiple query variations (paste, cursor jump, input, scroll, clipboard, large text, etc.), present findings with links, and if nothing found ask the user to also search before offering to file."
+    },
+    {
+      "id": 1,
+      "prompt": "getting a weird error in prettier when formatting typescript files. the error is: \"TypeError: Cannot read properties of undefined (reading 'kind')\" — it just started happening today, everything was working fine yesterday. i'm on prettier 3.3.3 and typescript 5.5. should i report this?",
+      "expected_output": "Should find the prettier GitHub repo (prettier/prettier), search with the exact error message in quotes as one variation, plus generic variations (TS formatting crash, TypeError undefined kind, etc.), include closed issues in search, check for issue template, and draft a report with env details if nothing found."
+    },
+    {
+      "id": 2,
+      "prompt": "obsidian keeps crashing on my mac when i try to open the graph view on a vault with more than ~500 notes. no error message, just quits. this is on obsidian 1.6.7, macOS 14.5. i want to report it but i'm not sure where — i don't think obsidian is open source?",
+      "expected_output": "Should correctly identify that Obsidian uses a community forum (forum.obsidian.md) rather than a public GitHub issue tracker, search the forum for existing reports about graph view crash, large vault, quit unexpectedly etc., and guide toward the forum posting flow."
+    }
+  ]
+}
