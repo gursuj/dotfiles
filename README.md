@@ -18,6 +18,7 @@ repo owner (not via the `gh` CLI default account on this machine).
 | Yazi config | `dot_config/yazi/` | `yazi.toml`, `keymap.toml`, `package.toml`. Targets `~/.config/yazi` on both OSes — see below. The `ya pkg`-installed `plugins/` dir is deliberately **not** tracked (reproducible from `package.toml`, same reasoning as not tracking nvim's data dir). |
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
+| Herdr config | `AppData/Roaming/herdr/config.toml.tmpl` | Templated — `default_shell` and the `prefix+n` custom keybinding (which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile) are both Windows-only, omitted entirely on Linux rather than guessed at. Everything else (keys, theme, ui, experimental) is portable as-is. **Open question:** still targets the literal Windows path (`AppData/Roaming/herdr`) — herdr's Linux config location isn't confirmed, so this isn't unified into one cross-platform path yet the way nvim/yazi/fd are. |
 | Agent skills (8 of them) | `dot_agents/skills/<name>/` | See below. |
 
 ### Agent skills tracked
@@ -99,10 +100,9 @@ Same shape of problem as nvim, different fix per tool since neither honours
 
 ## Not tracked at all (still Windows-only, out of scope for this pass)
 
-Herdr config, 7-Zip PATH entry, Cygwin. These don't apply on the VPS (Herdr and Cygwin are
-this-machine-specific tooling; 7-Zip's PATH entry is a one-line `winget`/PATH fix, not
-really a "config" to sync) — see `dotfiles.md` in the Obsidian vault for the full
-historical list until it's fully folded into this repo.
+7-Zip PATH entry, Cygwin — this-machine-specific tooling / a one-line PATH fix, not really
+"config" to sync — see `dotfiles.md` in the Obsidian vault for the full historical list
+until it's fully folded into this repo.
 
 ## VPS setup (run these yourself — no SSH automation)
 
