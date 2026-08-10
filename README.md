@@ -54,7 +54,7 @@ New terminals (and Neovim itself) need to be restarted to pick up the env var â€
 
 ## Not tracked at all (still Windows-only, per `dotfiles.md`)
 
-PowerShell profile, Zellij, Yazi, OpenCode config, fzf/fd ignore patterns, Herdr config,
+PowerShell profile, Yazi, OpenCode config, fzf/fd ignore patterns, Herdr config,
 7-Zip PATH entry, Cygwin. These either don't apply on the VPS or weren't in scope for this
 pass â€” see `dotfiles.md` in the Obsidian vault for the full historical list until it's
 fully folded into this repo.
@@ -64,3 +64,7 @@ fully folded into this repo.
 1. Install chezmoi: `sh -c "$(curl -fsLS get.chezmoi.io)"`
 2. Once a remote is set on this repo: `chezmoi init <remote-url>` then `chezmoi diff` to
    review before `chezmoi apply`.
+
+## TODOs
+- add configs from arch laptop, and maybe old: https://github.com/gursuj/dotfiles-old-arch
+- on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
