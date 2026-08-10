@@ -19,7 +19,7 @@ repo owner (not via the `gh` CLI default account on this machine).
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
 | Herdr config | `.chezmoitemplates/herdr-config.toml.tmpl` | Shared content, included by two thin per-OS stub files (`AppData/Roaming/herdr/config.toml.tmpl` for Windows, `dot_config/herdr/config.toml.tmpl` for Linux/Mac — confirmed from herdr's own docs) — see below. `default_shell` is left unset entirely now (see below); the `prefix+n` custom keybinding, which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile, is still gated to Windows only. |
-| Agent skills (8 of them) | `dot_agents/skills/<name>/` | See below. |
+| Agent skills (9 of them) | `dot_agents/skills/<name>/` | See below. |
 
 ### Agent skills tracked
 
@@ -32,7 +32,7 @@ means editing on any device and running `chezmoi update` on the others picks up 
 - `herdr` — not confidently installed via the skills CLI (may have just been cloned by hand); treat this repo's copy as the actual source of truth, not the CLI's lock file.
 - `dotfiles` — **being phased out.** This skill's job (tracking scattered config locations in `dotfiles.md`) is superseded by this very README now that a real repo exists. Kept for now so "edit my dotfiles" still triggers something useful in Claude Code; retarget or retire once `dotfiles.md` is fully migrated.
 - `handoff-generic` — deliberately renamed from the upstream skill name `handoff` (source: `mattpocock/skills`) because it collided with a different `handoff` skill installed via a Claude Code plugin. If `npx skills update` output ever looks confused about this skill, that's why — the plugin conflict is Claude-Code-specific, so re-evaluate if the plugin isn't installed on a given machine.
-- `issue-reporter`, `mindwtr`, `wp-plugin-update-check` — custom-authored skills, no upstream CLI source; this repo is simply their home.
+- `issue-reporter`, `mindwtr`, `wp-plugin-update-check`, `wp-plugin-search` — custom-authored skills, no upstream CLI source; this repo is simply their home. `wp-plugin-search` was renamed from `wp-search-plugins` 2026-08-10 (folder, junction, and frontmatter `name` all updated together).
 - `webclaw` — installed via `npx skills add https://github.com/0xmassi/webclaw-skill --skill webclaw`.
 
 ### npx skills CLI on a fresh device: what actually needs doing
