@@ -1,5 +1,1 @@
-{{- if eq .chezmoi.os "windows" }}
-.config/herdr/config.toml
-{{- else }}
 AppData/Roaming/herdr/config.toml
-{{- end }}

@@ -8,7 +8,15 @@ onboarding = false
 channel = "preview"
 
 [terminal]
-# default_shell unset — falls back to $SHELL (set per-OS, see README).
+{{- if eq .chezmoi.os "windows" }}
+# Hardcoded — herdr's Windows support is still beta and doesn't actually read
+# $SHELL there (confirmed by testing: set + rebooted, still fell back to
+# PowerShell 5). $SHELL works fine on Linux/Mac so it's left to the fallback
+# there; see README for the full story.
+default_shell = "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+{{- else }}
+# default_shell unset — falls back to $SHELL, which works correctly on Unix.
+{{- end }}
 new_cwd = "follow"
 
 [keys]

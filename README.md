@@ -101,25 +101,40 @@ Same shape of problem as nvim, different fix per tool since neither honours
 
 ## Herdr: same content, two target paths (resolved 2026-08-10)
 
-Herdr has no XDG override and its config path genuinely differs per OS (confirmed from its
-own docs): `~/.config/herdr/config.toml` on Linux/Mac, `%APPDATA%\herdr\config.toml` on
-Windows. Rather than duplicate the actual settings twice, the real content lives in
-`.chezmoitemplates/herdr-config.toml.tmpl` (a shared partial, edit this one file), and both
-`AppData/Roaming/herdr/config.toml.tmpl` and `dot_config/herdr/config.toml.tmpl` are thin
-stubs that just `{{ template "herdr-config.toml.tmpl" . }}` it in. `.chezmoiignore`
-excludes whichever target path doesn't match the current OS, so only one ever actually
-applies. Side effect: an empty `~/.config/herdr` placeholder directory still gets created
-on Windows even though its one file inside is ignored — harmless, just a chezmoi quirk with
-ignored files inside otherwise-empty managed directories.
+**Correction (2026-08-11):** originally assumed (from herdr's docs) that the config path
+differs per OS — `~/.config/herdr/config.toml` on Linux/Mac, `%APPDATA%\herdr\config.toml`
+on Windows — and tracked two separate stub files with a `.chezmoiignore` conditional to
+pick the right one. That was wrong: herdr's own `--help` output on this machine states its
+actual config path as `C:\Users\User\.config\herdr\config.toml`, confirmed by which file
+was actually being written to during a live session (the `.config` copy's `session.json`
+kept updating; the `AppData\Roaming` copy had gone stale). So `.config/herdr` is correct on
+**both** OSes here — no per-OS split needed. Consolidated to a single
+`dot_config/herdr/config.toml.tmpl` stub (still just `{{ template "herdr-config.toml.tmpl" . }}`,
+content lives in the shared `.chezmoitemplates/herdr-config.toml.tmpl` partial), removed the
+`AppData/Roaming/herdr/config.toml.tmpl` stub, and `.chezmoiignore` now unconditionally
+ignores `AppData/Roaming/herdr/config.toml` rather than branching on OS.
 
-`default_shell` itself is left unset in the config now (was previously hardcoded to pwsh 7
-on Windows only). Per herdr's own docs: "When unset or empty, Herdr uses `$SHELL`, then
-`/bin/sh` on Unix and PowerShell on Windows." `$SHELL` is already correctly set by the
-OS/login shell on Linux, but is unset by default on Windows — which is why herdr had been
-falling back to PowerShell 5 there rather than the intended pwsh 7, requiring the explicit
-override in the first place. Fixed properly by setting `$SHELL` as a Windows user env var
-(`C:\Program Files\PowerShell\7\pwsh.exe`) instead, so both OSes now resolve the right
-shell through the same mechanism rather than herdr-specific config.
+An older, now-untracked copy of herdr's config/session files may still exist at
+`AppData\Roaming\herdr\` on this machine from before this was sorted out — safe to archive
+or delete once you've confirmed `.config\herdr` has everything you need (check
+`session.json` there for your current workspace layout first).
+
+`default_shell` is hardcoded to pwsh 7 on Windows, left unset (falls back to `$SHELL`) on
+Linux/Mac — gated by a `{{ if eq .chezmoi.os "windows" }}` block inside the shared template.
+
+**Correction (2026-08-11):** a prior version of this note claimed herdr's docs say "$SHELL,
+then `/bin/sh` on Unix and PowerShell on Windows," and that setting `$SHELL` as a Windows
+user env var would make herdr resolve pwsh 7 the same way it does on Unix. That turned out
+to be wrong — checked herdr's actual config reference (`herdr.dev/docs/config-reference/`)
+and it only documents "`$SHELL`, then `/bin/sh`," with no Windows-specific fallback at all.
+Confirmed empirically too: `$SHELL` was set as a persistent user env var, the machine was
+fully rebooted, and herdr still fell back to Windows PowerShell 5, not pwsh 7. Herdr's
+Windows support is still marked beta on its own site — likely `$SHELL` just isn't read
+there yet. Hardcoding `default_shell` per-OS in config is the only thing that's actually
+been shown to work, so that's what's tracked now, not an env var.
+
+`$SHELL` is still worth having set as a Windows user env var for other tools that do honour
+it correctly (nvim, etc. — see below) — just don't assume herdr is one of them.
 
 ## Not tracked at all (still Windows-only, out of scope for this pass)
 
