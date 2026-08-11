@@ -2,6 +2,11 @@
 # This dumps the defaults compiled into whatever herdr binary is currently
 # installed locally — it does not fetch from upstream. Run `herdr update` first
 # if you want the dump to reflect the latest release.
+#
+# This is the chezmoi-managed source for herdr's config. If you make a live config
+# change and confirm it actually works, port it back here (edit-source-first — not
+# `chezmoi re-add`, since this file is templated) and run `chezmoi apply`.
+# Don't port over changes you haven't verified.
 
 onboarding = false
 [update]
@@ -39,6 +44,10 @@ command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
 
 [ui]
 agent_panel_sort = "spaces"
+pane_gaps = false
+# Once herdr updates past 0.8.0-preview.2026-08-04 (PR #2535 lands), also set
+# pane_outer_borders = false to remove the outer frame gap around the pane grid
+# (the gap between sidebar/top bar and panes).
 
 [ui.toast]
 delivery = "herdr"

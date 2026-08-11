@@ -89,6 +89,7 @@ MiniDeps.add('neovim/nvim-lspconfig')
 MiniDeps.add("mbbill/undotree")
 MiniDeps.add("tpope/vim-fugitive")
 MiniDeps.add("mechatroner/rainbow_csv")
+MiniDeps.add("OXY2DEV/markview.nvim")
 MiniDeps.add({
   source = 'nvim-mini/mini.nvim',
   checkout = mini.branch,
@@ -192,6 +193,17 @@ require('mini.completion').setup({
   },
 })
 
+-- markview.nvim: hybrid mode keeps the current line raw for editing,
+-- rendered lines everywhere else. See :h markview.nvim
+require('markview').setup({
+  preview = {
+    filetypes = { 'markdown', 'quarto', 'rmd' },
+    modes = { 'n', 'no', 'c' },
+    hybrid_modes = { 'n' }, -- hybrid (linewise) rendering in normal mode
+    icon_provider = 'mini',
+  },
+})
+
 -- See :help which-key.nvim-which-key-setup
 require('which-key').setup({
   icons = {
@@ -213,7 +225,7 @@ require('which-key').add({
 -- Treesitter setup
 -- NOTE: the list of supported parsers is in the documentation:
 -- https://github.com/nvim-treesitter/nvim-treesitter/blob/main/SUPPORTED_LANGUAGES.md
-local ts_parsers = {'lua', 'vim', 'vimdoc', 'c', 'query'}
+local ts_parsers = {'lua', 'vim', 'vimdoc', 'c', 'query', 'markdown', 'markdown_inline', 'yaml'}
 
 -- See :help ts-enable-config
 vim.g.ts_enable = {
