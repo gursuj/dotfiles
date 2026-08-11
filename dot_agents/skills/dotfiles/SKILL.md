@@ -40,7 +40,7 @@ README, which is now the source of truth for what's tracked and why. Until every
 tracked" note), keep using this skill and file as before — just check the chezmoi repo
 README first if the question is "is X already tracked in the real repo."
 
-For any config already tracked in chezmoi, edit the source `.tmpl`/file under `~/.local/share/chezmoi` and run `chezmoi apply` — don't hand-edit the live target path, it gets overwritten on next apply.
+For any config already tracked in chezmoi, use the edit-source-first workflow: edit the source `.tmpl`/file under `~/.local/share/chezmoi` and run `chezmoi apply` — don't hand-edit the live target path, it gets overwritten on next apply. Don't reach for `chezmoi re-add` as a shortcut instead — it doesn't work on templated files and can clobber template logic. See the chezmoi repo README's "Using chezmoi" section for the full workflow writeup.
 
 ## Future direction (historical — chezmoi is now set up, see above)
 

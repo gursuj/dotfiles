@@ -1,3 +1,6 @@
+# Managed by chezmoi — source of truth is ~/.local/share/chezmoi/readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+# Edit there and run `chezmoi apply`, not here — this file gets overwritten on next apply.
+
 function cdd { cd D:\ }
 
 # Cygwin bash re-execs itself internally on startup (pty setup) using a bare
@@ -71,16 +74,16 @@ function cps { ch ps @args }       # Active multiplexer sessions
 function cs  { ch search @args }   # Keyword search
 # alternatively, run ch <search-term> to search with AI
 
-Set-Alias -Name vi -Value nvim
+Set-Alias -Name nv -Value nvim -Force
 Set-Alias -Name lg -Value lazygit
 function gs  {  git status }   # Keyword search
 Set-Alias -Name oc -Value opencode
 Set-Alias -Name pwd -Value gl
 function td {
-    vi .\Documents\todos.md
+    nvim .\Documents\todos.md
 }
 function pwsh-hist {
-		vi  (Get-PSReadLineOption).HistorySavePath
+		nvim  (Get-PSReadLineOption).HistorySavePath
 }
 
 # Set-PSReadlineOption -EditMode v

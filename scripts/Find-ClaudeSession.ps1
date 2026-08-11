@@ -51,7 +51,7 @@ function Find-ClaudeSession {
 
     if (Test-Path $cwd) {
         Set-Location $cwd
-				claude $SessionId
+        claude --resume $SessionId
     }
     else {
         Write-Warning "Path '$cwd' does not exist on disk."

@@ -7,6 +7,42 @@ not a custom choice, so it's the same on Windows and Linux without any config.
 This repo is local-only for now (no remote set). A remote will be added directly by the
 repo owner (not via the `gh` CLI default account on this machine).
 
+## Using chezmoi (workflow)
+
+Two ways to make a change; pick edit-source-first as the default.
+
+- **Edit-source-first (default).** `chezmoi edit <target>` opens the source file directly
+  (handles templates and encryption transparently), then `chezmoi apply` (or
+  `chezmoi edit --apply` to do both at once). This is the safe default, especially for
+  templated files like `dot_claude/settings.json.tmpl` — see below for why.
+- **Edit-live-then-sync-back.** Edit the live file directly, then `chezmoi re-add` (or
+  `chezmoi add <file>` for a single one) to pull the change back into source. Faster for a
+  quick one-off tweak, but **`re-add` does not work on templated files** — it operates on
+  plain source files only, so running it against a `.tmpl` will either skip it or clobber
+  the template logic (`{{- if ... }}` blocks etc.) with flattened, rendered output. Given
+  several files here are templated (`settings.json.tmpl`, the herdr config template), treat
+  this path as the exception, not the habit.
+
+Other useful commands: `chezmoi diff` (preview before apply — note it can show CRLF/LF
+noise as spurious diff lines on Windows-tracked files, not real content changes; check
+before assuming something changed), `chezmoi status` (quick out-of-sync check), `chezmoi
+merge` / `merge-all` (three-way merge when both source and live have drifted — safer than
+`re-add` for that case).
+
+If a tracked file keeps showing a large diff on every check even though nothing meaningful
+changed, check for a line-ending mismatch before assuming real drift: some external tool
+that writes the live file may hardcode a line ending regardless of OS (e.g. Claude Code
+always saves `settings.json` with LF, even on Windows — confirmed 2026-08-11, source template
+had CRLF from whenever it was first created/edited, causing a whole-file diff on every
+`chezmoi status`). Fix by converting the *source* file's line endings to match what the
+external tool actually writes, not the other way round — track in whatever format the thing
+saving the live file uses, don't fight it.
+
+Note: this workflow duplication (manually running `chezmoi edit`/`apply`/`diff` each time)
+is exactly the kind of repeatable, rule-based task that might be better served by a proper
+Claude Code skill instead of relying on CLAUDE.md prose reminders — worth revisiting once
+this repo's usage patterns settle.
+
 ## Currently tracked
 
 | What | Source path | Notes |
@@ -152,3 +188,9 @@ until it's fully folded into this repo.
 - add configs from arch laptop, and maybe old: https://github.com/gursuj/dotfiles-old-arch
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
+- vet nvim plugins for security, if really necessary
+    - need to slowly build nvim config. just ask AI to help
+- firefox profile configs for performance, css, sideberry?
+- replace bash w/ zsh on vps.
+    - compare if anything useful from bashrc should be inherited
+    - will prob need separate zsh configs for laptop and vps?
