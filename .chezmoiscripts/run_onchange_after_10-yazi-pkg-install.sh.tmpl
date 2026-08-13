@@ -1,34 +1,42 @@
 #!/bin/sh
-# Installs the yazi plugins listed below. `ya pkg add` is the tool that's
-# actually supposed to own package.toml (it rewrites the `hash` field on
-# every run, which fought chezmoi's own change-detection when package.toml
-# was chezmoi-managed -- see README's yazi section for the full story). This
-# script, not package.toml, is now what chezmoi watches: the trigger hash
-# below is over the declared plugin list, so it only reruns when you actually
-# add/remove a plugin here, not whenever `ya` touches its own lockfile.
+# Installs the yazi plugins listed in desired-plugins.txt (one owner/repo per
+# line, deployed to ~/.config/yazi/desired-plugins.txt by chezmoi before this
+# script runs -- the "_after_" in this script's filename guarantees that
+# ordering). To add a plugin, edit that file, not this script.
+#
+# package.toml itself is deliberately NOT read as the source of desired
+# plugins: `ya pkg add`/`install` rewrite it locally on every run (its hash
+# field churns per-machine), and it only reflects what's already installed
+# on THIS machine -- there's nothing there for chezmoi to sync to other
+# machines. desired-plugins.txt is the actual chezmoi-managed, cross-machine
+# declaration; package.toml stays pure local generated state (see README).
 #
 # `ya pkg add` errors if the plugin is already declared, so it's only called
 # for genuinely new ones; `ya pkg install` afterwards is safe to always run
 # and re-fetches anything already declared but missing on disk.
 #
-# To add a plugin, edit ONLY the $plugins list below -- the trigger hash is
-# derived from it automatically, so this is the single place to touch.
-{{- $plugins := list "Ape/smart-enter" }}
-#
-# desired plugins hash: {{ $plugins | join " " | sha256sum }}
+# desired plugins hash: {{ include "dot_config/yazi/desired-plugins.txt" | sha256sum }}
 
 if ! command -v ya >/dev/null 2>&1; then
   echo "ya (yazi) not found on PATH, skipping plugin install" >&2
   exit 0
 fi
 
-pkg_toml="${YAZI_CONFIG_HOME:-$HOME/.config/yazi}/package.toml"
+config_home="${YAZI_CONFIG_HOME:-$HOME/.config/yazi}"
+desired="$config_home/desired-plugins.txt"
+pkg_toml="$config_home/package.toml"
 
-for plugin in {{ $plugins | join " " }}; do
+if [ ! -f "$desired" ]; then
+  echo "desired-plugins.txt not found at $desired, skipping plugin install" >&2
+  exit 0
+fi
+
+while IFS= read -r plugin; do
+  [ -n "$plugin" ] || continue
   if [ -f "$pkg_toml" ] && grep -q "use = \"$plugin\"" "$pkg_toml"; then
     continue
   fi
   ya pkg add "$plugin"
-done
+done < "$desired"
 
 ya pkg install

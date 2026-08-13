@@ -52,7 +52,7 @@ this repo's usage patterns settle.
 | Claude Code terse output style | `dot_claude/output-styles/terse.md` | `outputStyle: Terse` in settings.json above makes this the global default for every session. Has an explicit exception for drafting messages meant for someone else (emails, ClickUp updates, LinkedIn posts, client-facing docs) — those use normal writing-voice guidance instead, and for code comments specifically it now applies the same fragment/abbreviation rules as prose (previously exempted all code content wholesale). |
 | Neovim config | `dot_config/nvim/` | `init.lua`, `after/`, `readme.md`. Previously its own repo (`gursuj/nvim-temp`, created only as a temporary sync mechanism) — folded in here instead, so that repo can be retired. Targets `~/.config/nvim` on both OSes — see below. |
 | PowerShell profile | `readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1` | Windows-only content (PowerShell doesn't run on the VPS) — tracked as-is, no templating needed. `readonly_` prefix just reflects the live folder's read-only attribute, not a chezmoi behaviour choice. |
-| Yazi config | `dot_config/yazi/` | `yazi.toml`, `keymap.toml`. Targets `~/.config/yazi` on both OSes — see below. Both the `ya pkg`-installed `plugins/` dir and `package.toml` itself are deliberately **not** tracked (see below) — only `yazi.toml`/`keymap.toml` are real hand-edited config. |
+| Yazi config | `dot_config/yazi/` | `yazi.toml`, `keymap.toml`, `desired-plugins.txt`. Targets `~/.config/yazi` on both OSes — see below. Both the `ya pkg`-installed `plugins/` dir and `package.toml` itself are deliberately **not** tracked (see below); `desired-plugins.txt` is the real cross-machine plugin declaration instead. |
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
 | Herdr config | `.chezmoitemplates/herdr-config.toml.tmpl` | Shared content, included by two thin per-OS stub files (`AppData/Roaming/herdr/config.toml.tmpl` for Windows, `dot_config/herdr/config.toml.tmpl` for Linux/Mac — confirmed from herdr's own docs) — see below. `default_shell` is left unset entirely now (see below); the `prefix+n` custom keybinding, which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile, is still gated to Windows only. |
@@ -123,21 +123,27 @@ Same shape of problem as nvim, different fix per tool since neither honours
 
 - **Yazi** has its own dedicated override, `YAZI_CONFIG_HOME` — set that (Windows user env
   var) to `~/.config/yazi` and moved the live config there. One target path on both OSes.
-  `.chezmoiscripts/run_onchange_after_10-yazi-pkg-install.sh.tmpl` runs `ya pkg add
-  Ape/smart-enter` (idempotent — safe to rerun) whenever the plugin list declared inside
-  the script itself changes, including the first apply on a new machine, so declared
-  plugins actually get fetched instead of just sitting declared-but-uninstalled. Needs
-  `.chezmoi.toml.tmpl`'s `[interpreters.sh]` mapping to run at all on Windows — chezmoi
-  doesn't auto-detect shebangs there.
+  `.chezmoiscripts/run_onchange_after_10-yazi-pkg-install.sh.tmpl` reads
+  `dot_config/yazi/desired-plugins.txt` (one `owner/repo` per line, plain chezmoi-managed
+  file — deployed before this script runs, guaranteed by the `_after_` in its filename) and
+  for each entry not already in the local `package.toml`, runs `ya pkg add` (errors if
+  already declared, so it's skipped in that case), then always runs `ya pkg install`
+  afterwards to catch anything declared but not yet fetched on disk. The trigger hash is
+  `{{ include "dot_config/yazi/desired-plugins.txt" | sha256sum }}`, so the script only
+  reruns when `desired-plugins.txt` actually changes — **to add a plugin, edit that file,
+  not the script.** Needs `.chezmoi.toml.tmpl`'s `[interpreters.sh]` mapping to run at all
+  on Windows — chezmoi doesn't auto-detect shebangs there.
   **`package.toml` itself is deliberately *not* chezmoi-managed** (added to
   `.chezmoiignore` 2026-08-13) — `ya pkg add`/`install` rewrite its `hash` field on every
   run, on every machine, which fought chezmoi's own "target changed since I last wrote it"
-  safety check on every subsequent apply (hit repeatedly syncing the VPS). Since the script
-  triggers off its own declared plugin list now instead of `package.toml`'s content, chezmoi
-  never touches that file at all — `ya` owns it entirely as local generated state, same as
-  the `plugins/` dir. Separately, if `ya pkg add`/`install` ever aborts with "you have
-  modified the contents of the `<plugin>` plugin" — that's `ya`'s own safety check, unrelated
-  to chezmoi: delete `~/.config/yazi/plugins/<plugin>` by hand and rerun.
+  safety check on every subsequent apply (hit repeatedly syncing the VPS). It also can't
+  serve as the cross-machine plugin declaration even read-only: it only reflects what's
+  already installed on whichever machine you ran `ya pkg add` on, so there's nothing there
+  for chezmoi to propagate to other machines — that's exactly what `desired-plugins.txt`
+  is for. `ya` owns `package.toml` entirely as local generated state, same as the
+  `plugins/` dir. Separately, if `ya pkg add`/`install` ever aborts with "you have modified
+  the contents of the `<plugin>` plugin" — that's `ya`'s own safety check, unrelated to
+  chezmoi: delete `~/.config/yazi/plugins/<plugin>` by hand and rerun.
 - **fd** has no override env var at all for its ignore-file lookup. Instead of duplicating
   the ignore file per-OS target, moved it to `~/.config/fd/ignore` and updated the
   PowerShell profile's `$env:FZF_DEFAULT_COMMAND` to pass `--ignore-file` explicitly,
