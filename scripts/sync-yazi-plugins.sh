@@ -1,18 +1,11 @@
 #!/bin/sh
-# Extracts installed yazi plugin names from the local package.toml and writes
-# them into the chezmoi source's desired-plugins.txt -- run this after
-# `ya pkg add <plugin>` so other machines pick it up on their next
-# `chezmoi apply`, once you've committed the result.
+# Pulls plugin names out of local package.toml into chezmoi's
+# desired-plugins.txt. Run after `ya pkg add <plugin>`, commit the result,
+# other machines pick it up on next `chezmoi apply`.
 #
-# This is the one manual step chezmoi can't remove: propagation across
-# machines only happens through committed source, not live device-to-device
-# sync, so *something* has to turn "what I just installed here" into "what
-# every machine should have." This script does that mechanically -- you
-# never type a plugin name by hand, you just run this after `ya pkg add`.
-#
-# package.toml itself stays untracked by chezmoi (its `hash` field churns
-# per machine on every `ya pkg add`/`install` run); this only lifts the
-# stable `use = "..."` declarations out of it. See README's yazi section.
+# Manual step chezmoi can't remove -- no live sync between devices, only
+# committed source. package.toml itself stays untracked (hash churns per
+# machine); this just mirrors its `use = "..."` lines. See README.
 
 set -eu
 
