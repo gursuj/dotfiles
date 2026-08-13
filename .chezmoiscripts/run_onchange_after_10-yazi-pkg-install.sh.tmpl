@@ -1,11 +1,15 @@
 #!/bin/sh
-# Installs the yazi plugins listed below via `ya pkg add`, which is the tool
-# that's actually supposed to own package.toml (it rewrites the `hash` field
-# on every run, which fought chezmoi's own change-detection when package.toml
+# Installs the yazi plugins listed below. `ya pkg add` is the tool that's
+# actually supposed to own package.toml (it rewrites the `hash` field on
+# every run, which fought chezmoi's own change-detection when package.toml
 # was chezmoi-managed -- see README's yazi section for the full story). This
 # script, not package.toml, is now what chezmoi watches: the trigger hash
 # below is over the declared plugin list, so it only reruns when you actually
 # add/remove a plugin here, not whenever `ya` touches its own lockfile.
+#
+# `ya pkg add` errors if the plugin is already declared, so it's only called
+# for genuinely new ones; `ya pkg install` afterwards is safe to always run
+# and re-fetches anything already declared but missing on disk.
 #
 # desired plugins hash: {{ "Ape/smart-enter" | sha256sum }}
 
@@ -14,4 +18,13 @@ if ! command -v ya >/dev/null 2>&1; then
   exit 0
 fi
 
-ya pkg add Ape/smart-enter
+pkg_toml="${YAZI_CONFIG_HOME:-$HOME/.config/yazi}/package.toml"
+
+for plugin in Ape/smart-enter; do
+  if [ -f "$pkg_toml" ] && grep -q "use = \"$plugin\"" "$pkg_toml"; then
+    continue
+  fi
+  ya pkg add "$plugin"
+done
+
+ya pkg install
