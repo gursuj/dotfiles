@@ -76,7 +76,7 @@ function cs  { ch search @args }   # Keyword search
 
 Set-Alias -Name nv -Value nvim -Force
 Set-Alias -Name lg -Value lazygit
-function chz { chezmoi @args }   # chezmoi shorthand, e.g. chz status / chz apply
+function cz { chezmoi @args }   # chezmoi shorthand, e.g. cz status / cz apply
 function gs  {  git status }   # Keyword search
 Set-Alias -Name oc -Value opencode
 Set-Alias -Name pwd -Value gl
