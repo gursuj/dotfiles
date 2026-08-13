@@ -3,3 +3,4 @@ Documents/PowerShell/Microsoft.PowerShell_profile.ps1
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
+.config/yazi/package.toml
