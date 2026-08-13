@@ -2,7 +2,9 @@
 # Installs the yazi plugins listed in desired-plugins.txt (one owner/repo per
 # line, deployed to ~/.config/yazi/desired-plugins.txt by chezmoi before this
 # script runs -- the "_after_" in this script's filename guarantees that
-# ordering). To add a plugin, edit that file, not this script.
+# ordering). desired-plugins.txt is generated, not hand-edited: after
+# `ya pkg add owner/repo` locally, run scripts/sync-yazi-plugins.sh to mirror
+# package.toml's declarations into it, then commit.
 #
 # package.toml itself is deliberately NOT read as the source of desired
 # plugins: `ya pkg add`/`install` rewrite it locally on every run (its hash
