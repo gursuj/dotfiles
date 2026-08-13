@@ -11,7 +11,11 @@
 # for genuinely new ones; `ya pkg install` afterwards is safe to always run
 # and re-fetches anything already declared but missing on disk.
 #
-# desired plugins hash: {{ "Ape/smart-enter" | sha256sum }}
+# To add a plugin, edit ONLY the $plugins list below -- the trigger hash is
+# derived from it automatically, so this is the single place to touch.
+{{- $plugins := list "Ape/smart-enter" }}
+#
+# desired plugins hash: {{ $plugins | join " " | sha256sum }}
 
 if ! command -v ya >/dev/null 2>&1; then
   echo "ya (yazi) not found on PATH, skipping plugin install" >&2
@@ -20,7 +24,7 @@ fi
 
 pkg_toml="${YAZI_CONFIG_HOME:-$HOME/.config/yazi}/package.toml"
 
-for plugin in Ape/smart-enter; do
+for plugin in {{ $plugins | join " " }}; do
   if [ -f "$pkg_toml" ] && grep -q "use = \"$plugin\"" "$pkg_toml"; then
     continue
   fi
