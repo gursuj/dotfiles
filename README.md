@@ -56,6 +56,7 @@ this repo's usage patterns settle.
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
 | Herdr config | `.chezmoitemplates/herdr-config.toml.tmpl` | Shared content, included by two thin per-OS stub files (`AppData/Roaming/herdr/config.toml.tmpl` for Windows, `dot_config/herdr/config.toml.tmpl` for Linux/Mac — confirmed from herdr's own docs) — see below. `default_shell` is left unset entirely now (see below); the `prefix+n` custom keybinding, which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile, is still gated to Windows only. |
+| Kanata config | `dot_config/kanata/kanata.kbd` | Targets `~/.config/kanata/kanata.kbd`, plain file (no templating needed — cross-platform as-is). Caps Lock is a layer key: tap = Esc, hold = arrow-key layer on WASD, replacing the PowerToys Keyboard Manager remap for this (PowerToys KM's chorded-hold-modifier remaps were intermittently dropping the intercept on a cheap membrane keyboard — confirmed not a rollover/ghosting issue via NKRO tester first). Runs via an elevated Task Scheduler entry (`AtLogOn`, 15s delay — Kanata is known to fail silently if started too early at boot) rather than the Startup folder, since Startup can't grant admin rights. |
 | Agent skills (9 of them) | `dot_agents/skills/<name>/` | See below. |
 
 ### Agent skills tracked
@@ -194,3 +195,5 @@ until it's fully folded into this repo.
 - replace bash w/ zsh on vps.
     - compare if anything useful from bashrc should be inherited
     - will prob need separate zsh configs for laptop and vps?
+- find some way to automate npx skills installation. check notes above regarding this
+- fd ignorefile isn't being used in linux currently. should fix

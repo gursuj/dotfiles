@@ -1,0 +1,22 @@
+;; Caps Lock becomes a layer key: tap = Esc, hold = arrow-key layer on WASD.
+;; Physical CapsLock is fully intercepted here, so its lock/toggle behavior
+;; is gone unless remapped back explicitly.
+
+(defcfg
+  process-unmapped-keys no
+)
+
+(defsrc
+  caps
+  w a s d
+)
+
+(deflayer base
+  (tap-hold 200 200 esc (layer-while-held arrows))
+  w a s d
+)
+
+(deflayer arrows
+  _
+  up left down right
+)
