@@ -56,6 +56,7 @@ this repo's usage patterns settle.
 | fd ignore patterns | `dot_config/fd/ignore` | Targets `~/.config/fd/ignore` on both OSes — see below. |
 | OpenCode config | `dot_config/opencode/opencode.jsonc` | The `mcp.mindwtr` entry (pointed at a Windows-only `D:\git-clone\Mindwtr\...` path) was removed rather than templated — Mindwtr moved to REST-API-only, so a local MCP server entry was stale, not just non-portable. |
 | Herdr config | `.chezmoitemplates/herdr-config.toml.tmpl` | Shared content, included by two thin per-OS stub files (`AppData/Roaming/herdr/config.toml.tmpl` for Windows, `dot_config/herdr/config.toml.tmpl` for Linux/Mac — confirmed from herdr's own docs) — see below. `default_shell` is left unset entirely now (see below); the `prefix+n` custom keybinding, which shells out to a Windows-only PowerShell script depending on the `cc` function in the tracked PowerShell profile, is still gated to Windows only. |
+| Herdr plugins | `dot_config/herdr/desired-plugins.txt` | One `owner/repo` per line, same shape as yazi's file above. `run_onchange_after_20-herdr-plugin-install.sh.tmpl` runs `herdr plugin install` for anything not already present — see below. |
 | Kanata config | `dot_config/kanata/kanata.kbd` | Targets `~/.config/kanata/kanata.kbd`, plain file. Caps = layer key: tap Esc, hold = arrow layer on WASD. Replaces PowerToys KM, which was intermittently dropping the intercept on a cheap membrane keyboard (confirmed not rollover/ghosting first, via NKRO tester). Runs via elevated Task Scheduler (`AtLogOn`, 15s delay — Kanata fails silently if started too early) since Startup folder can't grant admin rights. |
 | Agent skills (9 of them) | `dot_agents/skills/<name>/` | See below. |
 
@@ -183,6 +184,59 @@ been shown to work, so that's what's tracked now, not an env var.
 
 `$SHELL` is still worth having set as a Windows user env var for other tools that do honour
 it correctly (nvim, etc. — see below) — just don't assume herdr is one of them.
+
+## Herdr plugins: same pattern as yazi (2026-08-13)
+
+`herdr-auto-namer` was forked to `gursuj/herdr-auto-namer` on GitHub (own copy, actively
+developed at `D:\code\gursuj\herdr-auto-namer` on this machine) instead of running the
+upstream `kakigakki/herdr-auto-namer`. herdr has its own plugin manager
+(`herdr plugin install owner/repo`, `herdr plugin link <path>`, `herdr plugin list`) — same
+shape as yazi's `ya pkg add`, so it gets the same treatment: chezmoi doesn't track the
+plugin's code (that lives in its own GitHub repo, `herdr plugin install` fetches it), only a
+`desired-plugins.txt` declaration, same format as yazi's.
+
+`run_onchange_after_20-herdr-plugin-install.sh.tmpl` reads
+`dot_config/herdr/desired-plugins.txt` and runs `herdr plugin install owner/repo -y` for
+each line. Plugin ids (from the plugin's own `herdr-plugin.toml`, e.g. `auto-namer`) don't
+necessarily match the repo name, so there's no reliable way to pre-check `herdr plugin
+list` by name before installing — instead the script just attempts the install and treats
+`"already linked"` / `"already installed"` in the error text as an idempotent no-op rather
+than a failure. That's what makes it safe on **this** dev machine too: `auto-namer` is
+`herdr plugin link`-ed straight to its `D:\code\gursuj\herdr-auto-namer` clone for active
+development, so the install attempt fails with "already linked" and the script swallows
+that rather than aborting — it won't clobber the local link with a fetched copy. Other
+machines have no local link, so the same command actually installs from GitHub there.
+
+**To add another plugin:** `herdr plugin install owner/repo` locally, then
+`scripts/sync-herdr-plugins.sh` — mirrors every `source.kind == "github"` entry from
+`herdr plugin list --json` into `desired-plugins.txt` (skips `local`-linked entries on
+purpose, e.g. this machine's own dev link). Review the diff, commit.
+
+Guard rail: the sync script refuses to write an empty file over a populated one. That
+matters here specifically because *this* dev machine has `auto-namer` linked, not
+installed — if it found zero github-sourced plugins and wrote anyway, it'd erase the
+declaration every other machine relies on. Run the sync script from a machine where the
+plugin is actually github-installed.
+
+**To pick up new commits on `gursuj/herdr-auto-namer`** on a machine that installed it via
+GitHub (not linked locally): `herdr plugin uninstall auto-namer` then re-run
+`chezmoi apply` (or `herdr plugin install gursuj/herdr-auto-namer -y` directly) — the
+onchange script only installs what's missing, it doesn't update what's already there.
+
+## Plugin-manager tools: apply this pattern going forward
+
+Yazi and herdr both now get the same two-piece treatment for their plugins: a
+`desired-plugins.txt` (or equivalent) that chezmoi tracks and an onchange script that
+installs anything missing on `chezmoi apply`, plus a `scripts/sync-*.sh` helper that
+regenerates the desired file from whatever the tool's own plugin manager reports installed
+locally. Chezmoi never tracks the plugin code itself — that stays owned by the tool's own
+package manager (`ya`, `herdr plugin`, whatever) and its own GitHub source.
+
+Any other tool here that grows a similar plugin/extension ecosystem with its own
+manager (nvim's lazy.nvim, opencode plugins, etc.) should get the same treatment where
+feasible, rather than a one-off or a fully manual note: tracked desired-list + onchange
+install script + sync helper. Worth checking for this whenever a new plugin-capable tool
+gets added to this repo.
 
 ## Not tracked at all (still Windows-only, out of scope for this pass)
 

@@ -1,0 +1,45 @@
+#!/bin/sh
+# Installs herdr plugins from desired-plugins.txt (one owner/repo per line).
+# See README for the pattern this mirrors (yazi's desired-plugins.txt).
+#
+# Plugin ids (from the plugin's own herdr-plugin.toml) don't necessarily match
+# the repo name -- e.g. gursuj/herdr-auto-namer installs as id "auto-namer" --
+# so there's no reliable way to pre-check `herdr plugin list` by name. Instead
+# just attempt the install and treat "already linked"/"already installed" in
+# the error output as an idempotent no-op rather than a failure. This is what
+# makes it safe on this dev machine too: auto-namer is `herdr plugin link`-ed
+# straight to its D:\code\gursuj clone for active development, and the
+# already-linked error here is swallowed instead of aborting the apply.
+#
+# desired plugins hash: {{ include "dot_config/herdr/desired-plugins.txt" | sha256sum }}
+
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "herdr not found on PATH, skipping plugin install" >&2
+  exit 0
+fi
+
+config_home="${HERDR_CONFIG_HOME:-$HOME/.config/herdr}"
+desired="$config_home/desired-plugins.txt"
+
+if [ ! -f "$desired" ]; then
+  echo "desired-plugins.txt not found at $desired, skipping plugin install" >&2
+  exit 0
+fi
+
+while IFS= read -r plugin; do
+  [ -n "$plugin" ] || continue
+  out="$(herdr plugin install "$plugin" -y 2>&1)"
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    case "$out" in
+      *"already linked"*|*"already installed"*)
+        echo "$plugin: already present, skipping ($out)" >&2
+        continue
+        ;;
+      *)
+        echo "$plugin: install failed: $out" >&2
+        exit "$status"
+        ;;
+    esac
+  fi
+done < "$desired"
