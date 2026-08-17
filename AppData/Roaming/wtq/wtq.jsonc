@@ -20,5 +20,6 @@
 			"VerticalScreenCoverage": 95
 		}
 	],
-	"ShowUiOnStart": false
+	"ShowUiOnStart": false,
+	"HorizontalAlign": "Center"
 }
