@@ -4,3 +4,7 @@ Documents/PowerShell/Microsoft.PowerShell_profile.ps1
 AppData/Roaming/herdr/config.toml
 README.md
 .config/yazi/package.toml
+AppData/Roaming/wtq/wtq.schema.json
+AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/state.json
+AppData/Roaming/SaneBreak/SaneBreak.ini
+AppData/Roaming/SaneBreak/sane-break.db
