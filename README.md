@@ -107,6 +107,14 @@ device:
 `wp-wpcli-and-ops` — all installed via `npx skills add ...` and not edited by hand, so the
 CLI's own install/update flow is enough. No point duplicating them here.
 
+## Syncthing config: deliberately not tracked (2026-08-17)
+
+`.config/syncthing/` (`config.xml`, `cert.pem`, `key.pem`, `https-cert.pem`, `https-key.pem`,
+`csrftokens.txt`, `index-v0.14.0.db/`) is not tracked here and should never be added. It
+contains TLS private keys, session tokens, and a local leveldb index — secrets and per-device
+state, not shareable config. Syncthing regenerates all of this itself on first run per device;
+there's nothing worth templating.
+
 ## Nvim cross-platform path (resolved 2026-08-10)
 
 Windows Neovim looks for its config at `~/AppData/Local/nvim` by default; Linux looks at
