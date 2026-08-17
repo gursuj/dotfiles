@@ -3,6 +3,23 @@
 
 function cdd { cd D:\ }
 
+# Claude Code launches pwsh for every tool call it runs. It's never an interactive
+# session (no prompt, no line editing, no tab completion happening), so anything
+# below that only exists to make an interactive shell nicer - starship, zoxide's
+# interactive bits, PSReadLine's vi-mode setup, the console codepage switch, the
+# gpg-agent SSH passphrase cache warmup - just costs time for no benefit. Gate
+# those behind this check instead of skipping the whole profile, since functions/
+# aliases/PATH still need to be there for scripts that use them.
+$IsInteractiveShell = -not $env:CLAUDECODE
+
+# Tried caching starship/zoxide's "init powershell" output to a file to skip
+# re-spawning the exe on every launch. Measured it: no real speedup. The ~100-
+# 200ms cost isn't the exe spawn (that's ~15-20ms on its own, confirmed by timing
+# `starship --version`) - it's PowerShell itself executing the ~200-line returned
+# script (New-Module, argument completers). Reading the same script from a cache
+# file costs the same PowerShell-side work, so there's nothing to save here.
+# Not worth the added complexity - reverted, left as a plain direct call below.
+
 # Cygwin bash re-execs itself internally on startup (pty setup) using a bare
 # PATH lookup for "bash", not the absolute path it was launched with. Git for
 # Windows' usr\bin sits earlier on $env:PATH than C:\cygwin64\bin, so without
@@ -31,7 +48,9 @@ function mosh {
 # Force UTF-8 console codepage. Windows defaults to legacy OEM (437), which
 # mangles any CLI tool that prints raw UTF-8 (box-drawing chars, emoji, etc.)
 # into mojibake like "ΓöÇΓöÇΓöÇ" - even when [Console]::OutputEncoding claims UTF-8.
-chcp 65001 | Out-Null
+# Only matters for a console someone is actually looking at, so skip it for
+# Claude Code's tool-call shells - saves ~50ms per invocation.
+if ($IsInteractiveShell) { chcp 65001 | Out-Null }
 
 # fzf via fd, pinned to ~/.config/fd/ignore (fd has no XDG override on Windows, unlike nvim)
 $env:FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-file `"$HOME\.config\fd\ignore`""
@@ -87,9 +106,14 @@ function pwsh-hist {
 		nvim  (Get-PSReadLineOption).HistorySavePath
 }
 
-# Set-PSReadlineOption -EditMode v
-Set-PSReadlineOption -EditMode Vi
-Set-PSReadLineOption -ViModeIndicator Cursor
+# Vi keybindings and prediction/list UI only matter for a human typing at a
+# prompt. Setting them forces PowerShell to autoload the PSReadLine module
+# right here (it's not imported yet), which is the single biggest chunk of
+# profile startup time (~180ms) - skip it entirely for Claude Code's shells.
+if ($IsInteractiveShell) {
+    Set-PSReadlineOption -EditMode Vi
+    Set-PSReadLineOption -ViModeIndicator Cursor
+}
 
 # yazi cd on quit
 function f {
@@ -132,17 +156,19 @@ $ExecutionContext.InvokeCommand.CommandNotFoundAction = {
     }
 }
 
-# PSReadLine: zsh-style autosuggestions (ghost text from history) + dropdown list.
-# Accept full suggestion with End (works alongside Vi edit mode set above).
-# Guarded: predictions need an interactive VT-capable host, else it throws on redirected/piped pwsh.
-try { Set-PSReadLineOption -PredictionSource HistoryAndPlugin -PredictionViewStyle ListView -ErrorAction Stop } catch {}
-# Navigate the suggestion list with Ctrl+n / Ctrl+p, scoped to Vi insert mode (where predictions show).
-Set-PSReadLineKeyHandler -Key 'Ctrl+n' -Function NextSuggestion     -ViMode Insert
-Set-PSReadLineKeyHandler -Key 'Ctrl+p' -Function PreviousSuggestion -ViMode Insert
-# zsh-style Tab completion: Tab opens a navigable menu of options, Tab/arrows move through it,
-# Enter selects, Esc cancels. Shift+Tab navigates backward.
-Set-PSReadLineKeyHandler -Key 'Tab'       -Function MenuComplete -ViMode Insert
-Set-PSReadLineKeyHandler -Key 'Shift+Tab' -Function MenuComplete -ViMode Insert
+if ($IsInteractiveShell) {
+    # PSReadLine: zsh-style autosuggestions (ghost text from history) + dropdown list.
+    # Accept full suggestion with End (works alongside Vi edit mode set above).
+    # Guarded: predictions need an interactive VT-capable host, else it throws on redirected/piped pwsh.
+    try { Set-PSReadLineOption -PredictionSource HistoryAndPlugin -PredictionViewStyle ListView -ErrorAction Stop } catch {}
+    # Navigate the suggestion list with Ctrl+n / Ctrl+p, scoped to Vi insert mode (where predictions show).
+    Set-PSReadLineKeyHandler -Key 'Ctrl+n' -Function NextSuggestion     -ViMode Insert
+    Set-PSReadLineKeyHandler -Key 'Ctrl+p' -Function PreviousSuggestion -ViMode Insert
+    # zsh-style Tab completion: Tab opens a navigable menu of options, Tab/arrows move through it,
+    # Enter selects, Esc cancels. Shift+Tab navigates backward.
+    Set-PSReadLineKeyHandler -Key 'Tab'       -Function MenuComplete -ViMode Insert
+    Set-PSReadLineKeyHandler -Key 'Shift+Tab' -Function MenuComplete -ViMode Insert
+}
 
 # git tab completion — lazy-loaded on first Tab press (avoids ~3s import of 68 files at startup)
 Register-ArgumentCompleter -CommandName git,gitk -Native -ScriptBlock {
@@ -157,17 +183,18 @@ Register-ArgumentCompleter -CommandName git,gitk -Native -ScriptBlock {
     return Complete-Git -CommandAst $CommandAst -CursorPosition $CursorPosition
 }
 
-# starship prompt
-if (Get-Command starship -ErrorAction SilentlyContinue) {
+# starship prompt - spawns starship.exe just to build the prompt string, so it's
+# purely cosmetic for an interactive session. Skip for Claude Code (~150ms saved).
+if ($IsInteractiveShell -and (Get-Command starship -ErrorAction SilentlyContinue)) {
     Invoke-Expression (&starship init powershell)
+
+    # Starship's init hijacks vi mode switches to rerun the whole prompt (spawns starship.exe),
+    # causing a visible flash. Put it back to a plain cursor-shape swap, no handler.
+    Set-PSReadLineOption -ViModeIndicator Cursor -ViModeChangeHandler $null
 }
 
-# Starship's init hijacks vi mode switches to rerun the whole prompt (spawns starship.exe),
-# causing a visible flash. Put it back to a plain cursor-shape swap, no handler.
-Set-PSReadLineOption -ViModeIndicator Cursor -ViModeChangeHandler $null
-
-# zoxide: smarter cd. `z <partial>` jumps, `zi` picks interactively.
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+# zoxide: smarter cd. `z <partial>` jumps, `zi` picks interactively. Interactive-only.
+if ($IsInteractiveShell -and (Get-Command zoxide -ErrorAction SilentlyContinue)) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
@@ -197,7 +224,12 @@ function gcd {
 $env:PATH = 'C:\Program Files\GnuPG\bin;' + $env:PATH
 # Ensure gpg-agent is running — non-blocking so it doesn't delay startup.
 # The agent pipe will be ready by the time any key use actually needs it.
-Start-Process 'C:\Program Files\GnuPG\bin\gpg-connect-agent.exe' -ArgumentList '/bye' -WindowStyle Hidden
+# Skipped for Claude Code's shells: the agent auto-starts on first real ssh/gpg
+# use anyway, so this proactive warmup only costs time without buying anything
+# in a shell that's gone again after one command.
+if ($IsInteractiveShell) {
+    Start-Process 'C:\Program Files\GnuPG\bin\gpg-connect-agent.exe' -ArgumentList '/bye' -WindowStyle Hidden
+}
 
 # Zellij cwd inheritance.
 # On new-pane startup: restore the last cwd for this session.

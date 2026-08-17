@@ -26,8 +26,11 @@ new_cwd = "follow"
 
 [keys]
 prefix = "ctrl+x"
-next_agent = "prefix+tab"
-previous_agent = "prefix+shift+tab"
+# prefix+ctrl+tab / prefix+ctrl+shift+tab for agent switching didn't work either —
+# Windows Terminal still consumes ctrl+tab before herdr sees it, even with the
+# prefix. Left unbound rather than binding to something that silently does nothing.
+next_tab = "prefix+tab"
+previous_tab = "prefix+shift+tab"
 settings = "prefix+comma"
 workspace_picker = "prefix+shift+w"
 rename_workspace = "prefix+shift+e"
