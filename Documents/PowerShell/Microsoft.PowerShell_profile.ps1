@@ -65,7 +65,7 @@ $env:DOTS = "$HOME\Documents\obsidian\dotfiles.md"
 # actually changes the shell's cwd - dot-source it here rather than relying on PATH.
 . "$HOME\scripts\Find-ClaudeSession.ps1"
 
-function cc {
+function ccc {
     # -y / -n skip the prompt and force the same branch a manual y/n answer would take.
     # Any other args pass straight through to claude.
     $sandboxDir = 'D:\claude-sandbox'

@@ -1,4 +1,4 @@
-# Opens a new herdr tab in the current workspace and runs `cc -n` in it.
+# Opens a new herdr tab in the current workspace and runs `ccc -n` in it.
 # Bound to prefix+n in herdr config.toml (see [[keys.command]]).
 # herdr's CLI has no "create tab and run command" action in one step, so this
 # does it in four calls: find the focused pane's workspace, create a tab in
@@ -18,4 +18,4 @@ $tabId = $tab.result.tab.tab_id
 $rootPaneId = $tab.result.root_pane.pane_id
 
 herdr tab focus $tabId
-herdr pane run $rootPaneId "cc -n"
+herdr pane run $rootPaneId "ccc -n"
