@@ -62,6 +62,8 @@ this repo's usage patterns settle.
 | Kanata config | `dot_config/kanata/kanata.kbd` | Targets `~/.config/kanata/kanata.kbd`, plain file. Caps = layer key: tap Esc, hold = arrow layer on WASD. Replaces PowerToys KM, which was intermittently dropping the intercept on a cheap membrane keyboard (confirmed not rollover/ghosting first, via NKRO tester). Runs via elevated Task Scheduler (`AtLogOn`, 15s delay — Kanata fails silently if started too early) since Startup folder can't grant admin rights. |
 | Agent skills (9 of them) | `dot_agents/skills/<name>/` | See below. |
 | WTQ (quake-terminal launcher) config | `AppData/Roaming/wtq/wtq.jsonc` | Windows-only tool, plain file, no templating needed. `wtq.schema.json` in the same live folder is shipped by the app itself for schema validation, not user-authored — not tracked. |
+| Windows Terminal settings | `AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json` | Profiles, keybindings, color schemes, the `_quake` globalSummon action WTQ hotkeys into. The `8wekyb3d8bbwe` publisher-hash segment is Microsoft's own fixed ID for this package, not machine-specific — same path on any Windows install of the Store version. `state.json` in the same folder (window position, last-active tab) is runtime state, not tracked. |
+| SaneBreak config | `AppData/Roaming/SaneBreak.ini` | Break-reminder timing settings (interval, flash/confirm durations, bell sounds, postpone ratios). There's also a byte-identical copy at `AppData/Roaming/SaneBreak/SaneBreak.ini` plus a `sane-break.db` (break history) in that same subfolder — only the top-level `.ini` is tracked; the nested copy and the db are the app's own runtime data. |
 
 ### Agent skills tracked
 
