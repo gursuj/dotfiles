@@ -1,0 +1,24 @@
+{
+	"$schema": "wtq.schema.json",
+	"Apps": [
+		{
+			"Name": "Windows Terminal",
+			"Hotkeys": [
+				{
+					"Modifiers": "Alt",
+					"KeyChar": "1"
+				}
+			],
+			"FileName": "wt",
+			"ProcessName": "^WindowsTerminal$",
+			"AlwaysOnTop": false,
+			"HideOnFocusLost": "Never",
+			"TaskbarIconVisibility": "AlwaysHidden",
+			"Opacity": 100,
+			"Resize": "Never",
+			"HorizontalScreenCoverage": 100,
+			"VerticalScreenCoverage": 95
+		}
+	],
+	"ShowUiOnStart": false
+}
