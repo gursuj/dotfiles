@@ -277,6 +277,7 @@ until it's fully folded into this repo.
 
 ## TODOs
 - add configs from arch laptop, and maybe old: https://github.com/gursuj/dotfiles-old-arch
+    - definitely add zed config
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
 - vet nvim plugins for security, if really necessary
