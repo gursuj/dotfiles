@@ -2,9 +2,8 @@
 # to add paths, you can do so in /etc/profile with append_path 
 # but, just do here. you'll have to reboot for the path to get updated sometimes  
 
-# use new minimal nvim config as default
-export NVIM_APPNAME='nvim-new'
-alias nv-old='NVIM_APPNAME=; nvim'
+# nvim-new is now the default config; nv-old runs the retired packer-based config
+alias nv-old="NVIM_APPNAME=nvim-old-packer nvim"
 export PATH="$PATH:$HOME/.config/shell/"
 export PATH="$PATH:$HOME/.config/shell/cleanGradle/"
 export PATH="$PATH:$HOME/bin"
