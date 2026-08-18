@@ -10,7 +10,9 @@
 
 onboarding = false
 [update]
-channel = "preview"
+# channel unset — herdr defaults to stable on Linux/macOS, preview on Windows.
+# That's the split we want: Linux is AUR-managed, `herdr update` would clobber
+# the pacman-owned binary.
 
 [terminal]
 {{- if eq .chezmoi.os "windows" }}
