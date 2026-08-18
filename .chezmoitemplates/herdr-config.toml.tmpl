@@ -63,7 +63,14 @@ tab_bar_right = [
 tab_bar_right_separator = " · "
 
 [ui.toast]
-delivery = "herdr"
+# "herdr" (in-app toast) has no way to control display duration - it always
+# auto-dismisses after a fixed, hard-coded interval. Confirmed: no config
+# option exists (checked --default-config and docs), and two open upstream
+# discussions asking for a duration_ms/persist option are unanswered with no
+# ETA (github.com/herdrdev/herdr/discussions/2565 and /1379).
+# "system" hands the notification to Windows' own notification system
+# instead, which keeps it in the Action Center until dismissed.
+delivery = "system"
 
 [theme]
 name = "terminal"
