@@ -1,4 +1,4 @@
-;; Caps Lock becomes a layer key: tap = Esc, hold = arrow-key layer on WASD.
+;; Caps Lock becomes a layer key: tap = Esc, hold = an Fn-style layer.
 ;; Physical CapsLock is fully intercepted here, so its lock/toggle behavior
 ;; is gone unless remapped back explicitly.
 
@@ -6,17 +6,36 @@
   process-unmapped-keys no
 )
 
+;; Previous setup: hold Caps for an arrow layer on WASD. Commented out —
+;; this keyboard's own hardware Fn+WASD already sends arrows, so kanata
+;; doing the same thing was redundant. Caps now drives an Fn-style layer
+;; instead (see below): hold Caps + number row for F1-F12.
+;; (defsrc
+;;   caps
+;;   w a s d
+;; )
+;;
+;; (deflayer base
+;;   (tap-hold 200 200 esc (layer-while-held arrows))
+;;   w a s d
+;; )
+;;
+;; (deflayer arrows
+;;   _
+;;   up left down right
+;; )
+
 (defsrc
   caps
-  w a s d
+  1 2 3 4 5 6 7 8 9 0 - =
 )
 
 (deflayer base
-  (tap-hold 200 200 esc (layer-while-held arrows))
-  w a s d
+  (tap-hold 200 200 esc (layer-while-held fn))
+  1    2    3    4    5    6    7    8    9    0    -    =
 )
 
-(deflayer arrows
+(deflayer fn
   _
-  up left down right
+  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
 )
