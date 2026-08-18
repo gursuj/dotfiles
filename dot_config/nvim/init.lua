@@ -198,8 +198,8 @@ require('mini.completion').setup({
 require('markview').setup({
   preview = {
     filetypes = { 'markdown', 'quarto', 'rmd' },
-    modes = { 'n', 'no', 'c' },
-    hybrid_modes = { 'n' }, -- hybrid (linewise) rendering in normal mode
+    modes = { 'n', 'no', 'c', 'i' },
+    hybrid_modes = { 'n', 'i' }, -- hybrid (linewise) rendering in normal and insert mode
     icon_provider = 'mini',
   },
 })
