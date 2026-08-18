@@ -1,1 +1,2 @@
 Ape/smart-enter
+Ape/open-with-cmd
