@@ -1,0 +1,30 @@
+#!/bin/sh
+# run startx if in tty1 & dwm is not already running
+# if [[ "$(tty)" = "/dev/tty1" ]]; then
+# 	pgrep dwm || startx 
+# fi
+
+# launch compositor selector at startup
+# if uwsm check may-start && uwsm select; then
+#	exec systemd-cat -t uwsm_start uwsm start default
+# fi
+
+# launch hyprland at startup
+if uwsm check may-start; then
+    exec uwsm start hyprland.desktop
+fi
+
+# asks for ssh passkey & remembers for duration of remaining session
+if [ -z "$SSH_AGENT_PID" ] && [ -z "$SSH_AUTH_SOCK" ]; then
+    exec ssh-agent zsh
+fi
+
+# required for running syncthing as systemd user service
+# put this in profile for login shell (prob bash)
+export XDG_RUNTIME_DIR="/run/user/$UID"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+
+# Created by `pipx` on 2025-01-24 02:34:22
+export PATH="$PATH:/home/sujal/.local/bin"
+# disable GTK client side decorations
+export GTK_CSD=0

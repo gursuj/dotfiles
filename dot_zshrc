@@ -1,0 +1,216 @@
+#!/bin/sh
+# to add paths, you can do so in /etc/profile with append_path 
+# but, just do here. you'll have to reboot for the path to get updated sometimes  
+
+# use new minimal nvim config as default
+export NVIM_APPNAME='nvim-new'
+alias nv-old='NVIM_APPNAME=; nvim'
+export PATH="$PATH:$HOME/.config/shell/"
+export PATH="$PATH:$HOME/.config/shell/cleanGradle/"
+export PATH="$PATH:$HOME/bin"
+export PATH="$PATH:$HOME/.cargo/bin/"
+# export PATH="$PATH:$HOME/programming/shell-scripts/"
+
+# Use Native Wayland Backend for Chrome/Electron. helps with laggy scrolling
+# this affected themeing ? forgot
+# for better scrolling, launch w/ flags --ozone-platform=wayland --enable-features=TouchpadOverscrollHistoryNavigation,ImpulseScrollAnimations
+export OZONE_PLATFORM=wayland
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# Interactive-editing customizations (keybinds, zle widgets) — pointless for
+# Claude Code's non-interactive shells (CLAUDECODE=1), skipped there.
+if [[ -z "$CLAUDECODE" ]]; then
+# create a zkbd compatible hash;
+# to add other keys to this hash, see: man 5 terminfo
+typeset -g -A key
+fi
+
+export VISUAL=nvim;
+export EDITOR=nvim;
+export TERMINAL=ghostty;
+export SYSTEMD_EDITOR=nvim;
+export ALTERNATE_EDITOR=""
+export XDG_CONFIG_HOME="$HOME/.config"
+
+# show hidden files in fzf but ignore excluded folders
+export FZF_DEFAULT_COMMAND='find . \! \( -type d -path ./.git -prune \) \! -type d \! -name '\''*.tags'\'' -printf '\''%P\n'\'
+# binds
+export FZF_DEFAULT_OPTS="--bind=tab:down,shift-tab:up"
+
+
+HISTFILE=~/.zsh_histfile
+HISTSIZE=1000
+SAVEHIST=5000
+setopt extendedglob notify
+unsetopt beep
+zstyle :compinstall filename '/home/sujal/.zshrc'
+
+# Prompts
+PS1='%B%n@%m %2~ %#%b'
+PS2='%_>'
+
+
+# [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/emacs-client-rc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/emacs-client-rc"
+
+if [[ -z "$CLAUDECODE" ]]; then
+# Basic auto/tab complete:
+autoload -Uz compinit
+compinit
+autoload -Uz promptinit
+promptinit
+
+zstyle ':completion:*' menu select
+zmodload zsh/complist
+_comp_options+=(globdots)		# Include hidden files.
+
+# history
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N vi-up-line-or-history
+zle -N down-line-or-beginning-search
+zle -N vi-down-line-or-history
+
+[[ -n "${key[Up]}"   ]] && bindkey -- "${key[Up]}"   up-line-or-beginning-search
+[[ -n "${key[Down]}" ]] && bindkey -- "${key[Down]}" down-line-or-beginning-search
+
+# Use vim keys in tab complete menu:
+
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -v '^?' backward-delete-char
+
+# Vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
+# show block cursor for all modes
+# echo -ne '\e[1 q'
+
+# show current mode
+function zle-line-init zle-keymap-select {
+    RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
+    RPS2=$RPS1
+    zle reset-prompt
+}
+
+RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}" # Set up the initial prompt
+RPS2=$RPS1
+
+zle -N zle-line-init
+zle -N zle-keymap-select
+
+
+# Change cursor shape for different vi modes.
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] ||
+     [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+  elif [[ ${KEYMAP} == main ]] ||
+       [[ ${KEYMAP} == viins ]] ||
+       [[ ${KEYMAP} = '' ]] ||
+       [[ $1 = 'beam' ]]; then
+    echo -ne '\e[5 q'
+  fi
+}
+zle -N zle-keymap-select
+zle-line-init() {
+    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+    echo -ne "\e[5 q"
+}
+zle -N zle-line-init
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+fi
+
+#determines search program for fzf
+if type ag &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='ag -p ~/.gitignore -g ""'
+fi
+#prefer rg over ag
+if type rg &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --hidden'
+fi
+
+
+# load history-substring-search
+if [[ -z "$CLAUDECODE" ]]; then
+    source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
+    bindkey '^[[A' history-substring-search-up
+    bindkey '^[[B' history-substring-search-down
+    bindkey -M vicmd 'k' history-substring-search-up
+    bindkey -M vicmd 'j' history-substring-search-down
+fi
+# use C-u to cancel search
+
+# keep_current_path() {
+#  printf "\e]9;9;%s\e\\" "$(wslpath -w "$PWD")"
+# }
+# precmd_functions+=(keep_current_path)
+
+export MANPAGER='nvim +Man!'
+
+# pnpm
+export PNPM_HOME="/home/sujal/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Created by `pipx` on 2025-01-24 02:34:22
+export PATH="$PATH:/home/sujal/.local/bin"
+
+export PATH="$PATH:/home/sujal/.config/composer/vendor/bin"
+export PATH="$PATH:/home/sujal/go/bin"
+export CHROME_EXECUTABLE='/usr/bin/brave'
+export ANDROID_SDK_ROOT=/opt/android-sdk
+export PATH=$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
+
+# cd when quitting yazi with q. don't cd with Q
+function f() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+# force QT apps to follow GTK theme?
+# gtk requires qt5-styleplugins package
+# export QT_STYLE_OVERRIDE='gtk2'
+export QT_STYLE_OVERRIDE='Fusion'
+
+# Slow-to-source rc snippets (subprocess forks, disk I/O, etc) go here instead
+# of being sourced unconditionally below. Skipped when CLAUDECODE=1 (Claude
+# Code's shells never need them, and paying the cost there was causing
+# session-start slowdowns) but still loaded in normal interactive terminals.
+_expensive_sources=(
+    "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zoxide-zsh"
+)
+if [[ -z "$CLAUDECODE" ]]; then
+    for _f in "${_expensive_sources[@]}"; do
+        [ -f "$_f" ] && source "$_f"
+    done
+
+    # nvm's init-nvm.sh eagerly sources all of nvm.sh + bash_completion (~1.3s)
+    # on every shell start. Stub nvm/node/npm/npx/corepack so that cost is only
+    # paid the first time one of them is actually invoked, not on every shell.
+    _nvm_lazy_load() {
+        unset -f nvm node npm npx corepack
+        [ -f /usr/share/nvm/init-nvm.sh ] && source /usr/share/nvm/init-nvm.sh
+    }
+    nvm()      { _nvm_lazy_load; nvm "$@"; }
+    node()     { _nvm_lazy_load; node "$@"; }
+    npm()      { _nvm_lazy_load; npm "$@"; }
+    npx()      { _nvm_lazy_load; npx "$@"; }
+    corepack() { _nvm_lazy_load; corepack "$@"; }
+fi
+unset _f
+
+# hyprshot
+export HYPRSHOT_DIR='/home/sujal/Pictures/screenshots/'
+# Load aliases and shortcuts if existent.
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"

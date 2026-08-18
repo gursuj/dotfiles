@@ -1,5 +1,16 @@
 {{ if ne .chezmoi.os "windows" }}
 Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+AppData
+scripts/Find-ClaudeSession.ps1
+scripts/herdr-new-cc-tab.ps1
+scripts/wpc-push.ps1
+{{ end }}
+{{ if eq .chezmoi.os "windows" }}
+.config/dunst
+.config/htop
+.config/mimeapps.list
+.zshrc
+.zprofile
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
