@@ -11,6 +11,8 @@ scripts/wpc-push.ps1
 .config/mimeapps.list
 .zshrc
 .zprofile
+.emacs.d
+.config/mpv
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
