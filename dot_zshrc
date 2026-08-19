@@ -188,6 +188,7 @@ export QT_STYLE_OVERRIDE='Fusion'
 # session-start slowdowns) but still loaded in normal interactive terminals.
 _expensive_sources=(
     "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zoxide-zsh"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/shell/herdr-completions-zsh"
 )
 if [[ -z "$CLAUDECODE" ]]; then
     for _f in "${_expensive_sources[@]}"; do
