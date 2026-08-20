@@ -2,7 +2,7 @@
 #
 # Run this after manually committing source changes. Steps:
 #   1. Abort if any dirty/untracked files exist outside build/ (uncommitted source work)
-#   2. Reset tracked build/ files to HEAD; delete untracked build/ files (e.g. source maps)
+#   2. Discard build/ changes via stash+drop (atomic), then verify tree is actually clean
 #   3. Fetch remote; abort if fetch fails; pull --rebase if remote has new commits (aborts on conflict)
 #   4. Rebuild — auto-detects whether source maps are tracked and sets WP_DEVTOOL accordingly
 #   5. Commit build output (skipped if nothing changed)
@@ -23,14 +23,19 @@ if ($nonBuild.Count -gt 0) {
     exit 1
 }
 
-# --- 2. Reset tracked build/ files; delete untracked build/ files (e.g. source maps) ---
-$trackedBuild   = @($trackedDirty   | Where-Object { $_ -match '(?:^|/)build/[^/]+$' })
-$untrackedBuild = @($untrackedFiles | Where-Object { $_ -match '(?:^|/)build/[^/]+$' })
-
-if ($trackedBuild.Count -gt 0) {
-    git checkout HEAD -- @($trackedBuild)
+# --- 2. Discard build/ changes atomically (stash + drop), then verify clean ---
+$buildDirty = @($allDirty | Where-Object { $_ -match '(?:^|/)build/[^/]+$' })
+if ($buildDirty.Count -gt 0) {
+    git stash push -u -- @($buildDirty) | Out-Null
+    git stash drop | Out-Null
 }
-$untrackedBuild | ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
+
+$stillDirty = @(git status --porcelain)
+if ($stillDirty.Count -gt 0) {
+    Write-Warning "Aborting: working tree still dirty after discarding build/ — discard didn't fully apply:"
+    $stillDirty | ForEach-Object { Write-Host "  $_" }
+    exit 1
+}
 
 # --- 3. Fetch, check divergence, rebase only if safe ---
 Write-Host "Running: git fetch"

@@ -10,9 +10,16 @@
 
 onboarding = false
 [update]
-# channel unset — herdr defaults to stable on Linux/macOS, preview on Windows.
-# That's the split we want: Linux is AUR-managed, `herdr update` would clobber
-# the pacman-owned binary.
+{{- if eq .chezmoi.os "windows" }}
+# Explicit — the channel default is per-build (preview builds default to
+# "preview", stable builds default to "stable"), not per-OS. Confirmed via
+# `herdr --default-config`. The stable build was what got installed here,
+# so it defaulted to "stable" until this override; want preview on Windows.
+channel = "preview"
+{{- else }}
+# channel unset — defaults to stable. That's what we want here: Linux is
+# AUR-managed, `herdr update` would clobber the pacman-owned binary.
+{{- end }}
 
 [terminal]
 {{- if eq .chezmoi.os "windows" }}
@@ -48,7 +55,7 @@ command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
 {{- end }}
 
 [ui]
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 pane_gaps = false
 # pane_outer_borders (PR #2535, merged 2026-08-08) is all-or-nothing across all
 # four outer edges (confirmed from the PR's own diff — LEFT/TOP/RIGHT/BOTTOM all
