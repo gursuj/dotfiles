@@ -11,12 +11,14 @@ max_height = 1200
 
 [opener]
 # use windows default opener
+# note: %* was the pre-Yazi-26 placeholder for "all selected files" and
+# silently stopped working after upgrading to Yazi 26 -- %s is the current one
 win-open = [
-    { run = 'start "" %*', desc = "System Default", for = "windows" }
+    { run = 'start "" %s', desc = "System Default", for = "windows" }
 ]
 # Define Neovim as an opener
 nvim = [
-    { run = 'nvim %*', block = true, desc = "Neovim", for = "windows" }
+    { run = 'nvim %s', block = true, desc = "Neovim", for = "windows" }
 ]
 
 [open]

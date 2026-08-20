@@ -3,12 +3,12 @@
 # prepend has higher priority than default binds, whereas append has lower
 [[mgr.prepend_keymap]]
 on   = "o"
-run  = "plugin open-with-cmd block" # blocking as in non-async
+run  = "plugin open-with-cmd-fixed block" # blocking as in non-async
 desc = "Open with command in the terminal"
 
 [[mgr.prepend_keymap]]
 on   = "O"
-run  = "plugin open-with-cmd"
+run  = "plugin open-with-cmd-fixed"
 desc = "Open with command"
 
 [[mgr.prepend_keymap]]
@@ -30,4 +30,4 @@ desc = "Goto git repo root"
 [[mgr.prepend_keymap]]
 on = "?"
 run = "help"
-desc = "Open help" 
+desc = "Open help"
