@@ -20,7 +20,7 @@
             "id": "User.globalSummon.A1BA4FE8"
         }
     ],
-    "alwaysShowTabs": false,
+    "alwaysShowTabs": true,
     "compatibility.allowHeadless": true,
     "copyFormatting": "none",
     "copyOnSelect": true,
@@ -294,7 +294,7 @@
         }
     ],
     "searchWebDefaultQueryUrl": "https://www.google.com/search?q=%22%s%22",
-    "showTabsInTitlebar": false,
+    "showTabsInTitlebar": true,
     "showTerminalTitleInTitlebar": false,
     "tabWidthMode": "equal",
     "theme": "system",
