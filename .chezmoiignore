@@ -13,6 +13,7 @@ scripts/wpc-push.ps1
 .zprofile
 .emacs.d
 .config/mpv
+.config/swayimg
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
