@@ -12,5 +12,5 @@
 {{- if $diffCmd }}
 [diff]
     command = {{ $diffCmd | quote }}
-    args = ["--strip-trailing-cr", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+    args = ["--color=always", "--strip-trailing-cr", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
 {{- end }}
