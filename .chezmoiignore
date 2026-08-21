@@ -17,6 +17,10 @@ scripts/wpc-push.ps1
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
+AGENTS.md
+CLAUDE.md
+learnings.md
+TODO.md
 .config/yazi/package.toml
 AppData/Roaming/wtq/wtq.schema.json
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/state.json

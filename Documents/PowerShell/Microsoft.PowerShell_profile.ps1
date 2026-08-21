@@ -128,8 +128,14 @@ function f {
 	}
 }
 
-# remove alias for unix binaries because microsoft equivalent commands don't have exact flags 
-# Git's usr\bin already on PATH so real flags work.
+# remove alias for unix binaries because microsoft equivalent commands don't have exact flags
+# Git's usr\bin is normally already on PATH via the Git for Windows installer, but add it
+# explicitly here too - if PATH ever gets reset (fresh machine, edited system PATH, etc.)
+# these unshadowed commands would otherwise fall through to nothing or the wrong binary.
+$gitUsrBin = 'C:\Program Files\Git\usr\bin'
+if ((Test-Path $gitUsrBin) -and ($env:PATH -notlike "*$gitUsrBin*")) {
+    $env:PATH += ";$gitUsrBin"
+}
 # Default PS aliases are ReadOnly, hence -Force. Silent if already gone.
 $unshadow = @(
     # file/text commands: real flags (ls -la, cp -r, rm -rf, diff -u). No downside.

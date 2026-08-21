@@ -199,7 +199,7 @@ require('markview').setup({
   preview = {
     filetypes = { 'markdown', 'quarto', 'rmd' },
     modes = { 'n', 'no', 'c', 'i' },
-    hybrid_modes = { 'n', 'i' }, -- hybrid (linewise) rendering in normal and insert mode
+    hybrid_modes = { 'i' }, -- hybrid (linewise) rendering only in insert mode
     icon_provider = 'mini',
   },
 })

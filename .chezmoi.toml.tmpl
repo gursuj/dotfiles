@@ -3,3 +3,14 @@
 [interpreters.sh]
     command = "sh"
 {{- end -}}
+
+{{- $diffCmd := "diff" -}}
+{{- if and (eq .chezmoi.os "windows") (not (lookPath "diff")) -}}
+  {{- $diffCmd = "" -}}
+{{- end -}}
+
+{{- if $diffCmd }}
+[diff]
+    command = {{ $diffCmd | quote }}
+    args = ["--strip-trailing-cr", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+{{- end }}

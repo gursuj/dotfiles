@@ -1,12 +1,12 @@
 ---
 name: mindwtr
 description: "Use when the user mentions mindwtr or GTD"
-compatibility: "Requires the self-hosted Mindwtr Cloud instance (https://gtd.gurungsujal.com.np). REST API only — no MCP server, no desktop Local API."
+compatibility: "Requires the self-hosted Mindwtr Cloud instance (https://gtd.gurungsujal.com.np). REST API only"
 ---
 
 # Mindwtr (GTD Task Management)
 
-Mindwtr Cloud is self-hosted on the VPS (`gtd.gurungsujal.com.np`, Caddy reverse-proxying a Docker container bound to `127.0.0.1:8787`). All devices sync through it now — the old desktop Local API (`127.0.0.1:3456`) and the Koofr/WebDAV setup are both retired. There's no MCP server for this anymore; everything goes through the REST API below.
+Mindwtr Cloud is self-hosted on the VPS (`gtd.gurungsujal.com.np`, Caddy reverse-proxying a Docker container bound to `127.0.0.1:8787`). All devices sync through it now.
 
 ## REST API
 
