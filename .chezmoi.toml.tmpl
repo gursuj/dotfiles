@@ -14,3 +14,15 @@
     command = {{ $diffCmd | quote }}
     args = ["--color=always", "--strip-trailing-cr", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
 {{- end }}
+
+{{- /* Windows is a single known device -- gated via .chezmoi.os instead.
+   Linux boxes (arch laptop vs Ubuntu VPS) need finer-grained conditionals,
+   so ask once per machine and cache the answer in that machine's own local
+   chezmoi.toml (this template is synced everywhere; the generated config
+   it produces at ~/.config/chezmoi/chezmoi.toml is per-machine and never
+   committed). */ -}}
+{{- if ne .chezmoi.os "windows" }}
+{{- $machineKind := promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps") }}
+[data]
+    machine_kind = {{ $machineKind | quote }}
+{{- end }}

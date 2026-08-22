@@ -10,11 +10,13 @@ export PATH="$PATH:$HOME/bin"
 export PATH="$PATH:$HOME/.cargo/bin/"
 # export PATH="$PATH:$HOME/programming/shell-scripts/"
 
+{{- if eq .machine_kind "arch" }}
 # Use Native Wayland Backend for Chrome/Electron. helps with laggy scrolling
 # this affected themeing ? forgot
 # for better scrolling, launch w/ flags --ozone-platform=wayland --enable-features=TouchpadOverscrollHistoryNavigation,ImpulseScrollAnimations
 export OZONE_PLATFORM=wayland
 export ELECTRON_OZONE_PLATFORM_HINT=auto
+{{- end }}
 
 # Interactive-editing customizations (keybinds, zle widgets) — pointless for
 # Claude Code's non-interactive shells (CLAUDECODE=1), skipped there.
@@ -133,9 +135,16 @@ if type rg &> /dev/null; then
 fi
 
 
-# load history-substring-search
+# antidote (zsh plugin manager) -- installed distro-agnostically via git,
+# see .chezmoiscripts/run_onchange_after_30-antidote-install.sh.tmpl.
+# Plugins listed in dot_zsh_plugins.txt (autosuggestions, history-substring-
+# search, syntax-highlighting -- must load last).
 if [[ -z "$CLAUDECODE" ]]; then
-    source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
+    antidote_home="$HOME/.antidote"
+    if [[ -f "$antidote_home/antidote.zsh" ]]; then
+        source "$antidote_home/antidote.zsh"
+        antidote load "$HOME/.zsh_plugins.txt"
+    fi
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down
     bindkey -M vicmd 'k' history-substring-search-up
@@ -163,9 +172,11 @@ export PATH="$PATH:/home/sujal/.local/bin"
 
 export PATH="$PATH:/home/sujal/.config/composer/vendor/bin"
 export PATH="$PATH:/home/sujal/go/bin"
+{{- if eq .machine_kind "arch" }}
 export CHROME_EXECUTABLE='/usr/bin/brave'
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
+{{- end }}
 
 # cd when quitting yazi with q. don't cd with Q
 function f() {
@@ -177,10 +188,12 @@ function f() {
 	rm -f -- "$tmp"
 }
 
+{{- if eq .machine_kind "arch" }}
 # force QT apps to follow GTK theme?
 # gtk requires qt5-styleplugins package
 # export QT_STYLE_OVERRIDE='gtk2'
 export QT_STYLE_OVERRIDE='Fusion'
+{{- end }}
 
 # Slow-to-source rc snippets (subprocess forks, disk I/O, etc) go here instead
 # of being sourced unconditionally below. Skipped when CLAUDECODE=1 (Claude
@@ -210,7 +223,9 @@ if [[ -z "$CLAUDECODE" ]]; then
 fi
 unset _f
 
+{{- if eq .machine_kind "arch" }}
 # hyprshot
 export HYPRSHOT_DIR='/home/sujal/Pictures/screenshots/'
+{{- end }}
 # Load aliases and shortcuts if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"

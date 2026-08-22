@@ -1,0 +1,5 @@
+# Plugin list for antidote (zsh plugin manager). Loaded via `antidote load`
+# in dot_zshrc. Order matters: zsh-syntax-highlighting must load last.
+zsh-users/zsh-autosuggestions
+zsh-users/zsh-history-substring-search
+zsh-users/zsh-syntax-highlighting

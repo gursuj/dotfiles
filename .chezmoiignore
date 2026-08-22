@@ -15,6 +15,12 @@ scripts/wpc-push.ps1
 .config/mpv
 .config/swayimg
 {{ end }}
+{{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
+# Desktop/Wayland-only GUI config -- pointless on a headless VPS.
+.config/dunst
+.config/mimeapps.list
+.config/swayimg
+{{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
 AGENTS.md

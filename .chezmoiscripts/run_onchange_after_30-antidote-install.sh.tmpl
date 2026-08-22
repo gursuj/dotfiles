@@ -1,0 +1,18 @@
+#!/bin/sh
+# Bootstraps antidote (zsh plugin manager) via git -- distro-agnostic, no
+# pacman/apt branching. Plugin fetching itself is handled by antidote at
+# shell startup (see dot_zsh_plugins.txt + `antidote load` in dot_zshrc),
+# so this script only needs to install/update antidote itself.
+#
+# run_onchange keys off this script's own content, so it won't re-run on
+# every apply. Bump the version pin below to pull antidote updates.
+#
+# antidote version pin: v1.9.10
+
+antidote_home="$HOME/.antidote"
+
+if [ ! -d "$antidote_home" ]; then
+  git clone --depth=1 https://github.com/mattmc3/antidote.git "$antidote_home"
+else
+  git -C "$antidote_home" pull --ff-only
+fi

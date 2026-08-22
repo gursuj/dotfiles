@@ -9,10 +9,12 @@
 #	exec systemd-cat -t uwsm_start uwsm start default
 # fi
 
+{{- if eq .machine_kind "arch" }}
 # launch hyprland at startup
 if uwsm check may-start; then
     exec uwsm start hyprland.desktop
 fi
+{{- end }}
 
 # asks for ssh passkey & remembers for duration of remaining session
 if [ -z "$SSH_AGENT_PID" ] && [ -z "$SSH_AUTH_SOCK" ]; then
