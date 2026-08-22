@@ -61,6 +61,8 @@ autoload -Uz promptinit
 promptinit
 
 zstyle ':completion:*' menu select
+# case-insensitive, then fuzzy (partial/substring) if exact case-insensitive fails
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zmodload zsh/complist
 _comp_options+=(globdots)		# Include hidden files.
 
