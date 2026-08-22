@@ -94,22 +94,23 @@ is **not** tracked here (it's local install-state, not something to sync), so on
 device:
 
 - For skills tracked in this repo (the list above): `chezmoi apply` puts the real file
-  content in place, but does **not** create the per-agent link. On Windows that's a
-  junction (`New-Item -ItemType Junction ...`, see old `dotfiles.md`); on Linux it's a
-  plain `ln -s ~/.agents/skills/<name> ~/.claude/skills/<name>` — no privilege issue there
-  at all, junctions were only ever a Windows problem. This isn't automated yet — do it by
-  hand per skill after the first `chezmoi apply` on a new machine, or automate later with
-  a chezmoi `run_once_` script once there's a second real device to test it against.
-- For skills **not** tracked here (`find-skills`, `skill-creator`, `frontend-design`,
-  `wp-plugin-development`, `wp-rest-api`, `wp-wpcli-and-ops`): just run
-  `npx skills add <source> --skill <name>` again — the CLI handles both download and
-  agent-linking itself, using real symlinks on Linux (no junction problem to work around).
+  content in place, and on Linux `.chezmoiscripts/run_onchange_after_40-skill-symlinks.sh.tmpl`
+  now creates the per-agent link automatically (`ln -s ~/.agents/skills/<name>
+  ~/.claude/skills/<name>`, idempotent, reruns whenever a skill is added/removed thanks to
+  a content hash of `dot_agents/skills` embedded in the script). opencode needs no link at
+  all — it reads `~/.agents/skills/<name>/SKILL.md` natively as a global fallback location.
+  hermes is still a manual TODO in that script, pending its install-method rework. On
+  Windows this is still manual: a junction (`New-Item -ItemType Junction ...`, see old
+  `dotfiles.md`) — out of scope for that script since Windows is a single known device.
+- Skills **not** tracked here no longer apply — the CLI-only ones (`find-skills`,
+  `skill-creator`, `frontend-design`, `wp-plugin-development`, `wp-rest-api`,
+  `wp-wpcli-and-ops`) were removed from the repo and the machines; see the section below.
 
-### Deliberately NOT tracked here (npx-managed, no need to duplicate)
+### Not tracked here
 
-`find-skills`, `skill-creator`, `frontend-design`, `wp-plugin-development`, `wp-rest-api`,
-`wp-wpcli-and-ops` — all installed via `npx skills add ...` and not edited by hand, so the
-CLI's own install/update flow is enough. No point duplicating them here.
+If you `npx skills add` something new later that you don't want tracked here,
+that's fine — it'll sit in `~/.agents/skills` untouched by chezmoi; just remember dangling
+symlinks won't self-clean if you later remove it by hand instead of via the CLI.
 
 Dated write-ups of how each of these was resolved (nvim, yazi/fd, herdr paths, herdr
 plugins, herdr agent integrations, syncthing exclusion) now live in `learnings.md`, kept

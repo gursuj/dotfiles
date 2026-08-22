@@ -1,0 +1,59 @@
+#!/bin/sh
+# Symlinks each skill tracked in ~/.agents/skills into the agents that don't
+# natively read that directory. Idempotent: only creates a link when one is
+# missing, never touches an existing symlink/file (whether hand-made or
+# created by `npx skills add`), so it's safe to run alongside that CLI's own
+# junction/symlink management.
+#
+# opencode reads ~/.agents/skills/<name>/SKILL.md natively as a global
+# fallback location (confirmed via https://opencode.ai/docs/skills, Aug
+# 2026) -- no symlink needed for it, just logged for visibility.
+#
+# TODO: hermes needs the same kind of symlink (~/.hermes/skills/<name>),
+# but its install method -- and possibly its whole skills path -- is being
+# reworked (see TODO.md). Revisit once that's settled instead of wiring up
+# a symlink target that might not exist next week. Also note: even once
+# it's back in scope, `command -v hermes` may not find it here if it needs
+# an env file sourced first (non-interactive script shells don't source
+# interactive rc files) -- don't trust a miss here as proof it's not
+# installed.
+#
+# Windows is out of scope here: it uses junctions, not symlinks, and is
+# a single known device -- kept a manual step per README for now.
+#
+# skills dir hash: {{ output "sh" "-c" (printf "find %s -type f | sort | xargs sha256sum | sha256sum | cut -d' ' -f1" (printf "%s/dot_agents/skills" .chezmoi.sourceDir)) }}
+
+skills_dir="$HOME/.agents/skills"
+
+if [ ! -d "$skills_dir" ]; then
+  echo "no $skills_dir, skipping skill symlinks" >&2
+  exit 0
+fi
+
+link_into() {
+  target_dir="$1"
+  mkdir -p "$target_dir"
+  for skill in "$skills_dir"/*/; do
+    [ -d "$skill" ] || continue
+    name="$(basename "$skill")"
+    link="$target_dir/$name"
+    if [ -L "$link" ]; then
+      if [ "$(readlink -f "$link" 2>/dev/null)" != "$(readlink -f "$skills_dir/$name" 2>/dev/null)" ]; then
+        echo "warning: $link points elsewhere, leaving alone" >&2
+      fi
+    elif [ -e "$link" ]; then
+      echo "warning: $link exists and isn't a symlink, leaving alone" >&2
+    else
+      ln -s "$skills_dir/$name" "$link"
+      echo "linked $name -> $target_dir"
+    fi
+  done
+}
+
+if command -v claude >/dev/null 2>&1; then
+  link_into "$HOME/.claude/skills"
+fi
+
+if command -v opencode >/dev/null 2>&1; then
+  echo "opencode detected -- reads ~/.agents/skills natively, no symlink needed"
+fi
