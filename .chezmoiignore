@@ -21,6 +21,12 @@ scripts/wpc-push.ps1
 .config/mimeapps.list
 .config/swayimg
 {{ end }}
+{{ if ne .machine_kind "arch" }}
+# kanata's systemd --user autostart is specific to this physical keyboard's
+# Linux box -- no hardware keyboard to remap on the VPS, and Windows
+# autostarts kanata a different way (not systemd).
+.config/systemd/user/kanata.service
+{{ end }}
 AppData/Roaming/herdr/config.toml
 README.md
 AGENTS.md

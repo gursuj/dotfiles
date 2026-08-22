@@ -4,6 +4,7 @@
 
 (defcfg
   process-unmapped-keys no
+{{- if eq .chezmoi.os "windows" }}
   ;; Avoids false "Unexpected keycode" errors when other apps (e.g. WTQ's
   ;; global hotkey hook) race with kanata's own key-state sync on Windows.
   ;; On 1.12.0 (installed) this is a bool (no/yes). Kanata PR #2122
@@ -15,7 +16,10 @@
   ;; not in kanata" direction. The "kanata key pressed but not in Windows"
   ;; check (the one actually firing as "Clearing kanata states: Kb1" below)
   ;; is hardcoded on in this version — this setting does not silence it.
+  ;; Windows-OS-only workaround (Microsoft Windows, not app windows) --
+  ;; irrelevant on Linux, where this key-state race doesn't exist.
   windows-sync-keystates no
+{{- end }}
 )
 
 ;; Previous setup: hold Caps for an arrow layer on WASD. Commented out —
@@ -37,6 +41,7 @@
 ;;   up left down right
 ;; )
 
+{{- if eq .chezmoi.os "windows" }}
 ;; "1" is deliberately left out of defsrc below (was included, mapped to
 ;; F1 on the fn layer). WTQ's Alt+1 global hotkey races with kanata's
 ;; always-on "kanata key pressed but not in Windows" keystate check on
@@ -47,6 +52,8 @@
 ;; F1. Once kanata ships the real fix (windows-sync-keystates none, see
 ;; NOTE above) this should be reverted: put "1" back in defsrc/deflayers
 ;; below and rely on that setting instead.
+;; Windows-OS-only workaround -- WTQ (the app racing here) is Windows-only,
+;; so Linux keeps "1" mapped normally below.
 (defsrc
   caps
   2 3 4 5 6 7 8 9 0 - =
@@ -61,3 +68,19 @@
   _
   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
 )
+{{- else }}
+(defsrc
+  caps
+  1 2 3 4 5 6 7 8 9 0 - =
+)
+
+(deflayer base
+  (tap-hold 200 200 esc (layer-while-held fn))
+  1    2    3    4    5    6    7    8    9    0    -    =
+)
+
+(deflayer fn
+  _
+  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+)
+{{- end }}

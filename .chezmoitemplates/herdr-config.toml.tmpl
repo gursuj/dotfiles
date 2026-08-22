@@ -34,7 +34,12 @@ default_shell = "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
 new_cwd = "follow"
 
 [keys]
+{{- if eq .machine_kind "vps" }}
+# ctrl+x collides with common shell/tmux-in-SSH usage on the VPS -- ctrl+a instead.
+prefix = "ctrl+a"
+{{- else }}
 prefix = "ctrl+x"
+{{- end }}
 # prefix+ctrl+tab / prefix+ctrl+shift+tab for agent switching didn't work either —
 # Windows Terminal still consumes ctrl+tab before herdr sees it, even with the
 # prefix. Left unbound rather than binding to something that silently does nothing.
@@ -57,12 +62,6 @@ command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
 [ui]
 agent_panel_sort = "priority"
 pane_gaps = false
-# pane_outer_borders (PR #2535, merged 2026-08-08) is all-or-nothing across all
-# four outer edges (confirmed from the PR's own diff — LEFT/TOP/RIGHT/BOTTOM all
-# removed together), not a per-edge toggle. Original hope was to drop just the
-# sidebar-facing gap while keeping top/right/bottom borders — not possible here,
-# that'd need a feature request/PR upstream. Tested with it off anyway and it
-# reads fine overall, so keeping it off.
 pane_outer_borders = false
 # Right-aligned tab bar status (PR #2586, merged 2026-08-09).
 tab_bar_right = [
