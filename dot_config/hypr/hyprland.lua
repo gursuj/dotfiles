@@ -401,7 +401,11 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 -- hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.window.close())                -- close window
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exit())                        -- exit hyprland
-hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen())
+-- mode 1 = maximize, matches old .conf's `fullscreen, 1`. Intent: fill screen
+-- but keep waybar visible + apps' own chrome (e.g. Firefox address bar).
+-- Currently broken upstream on 0.56.2 -- maximize geometry ignores waybar's
+-- reserved area regardless of mode. Tracked: github.com/hyprwm/Hyprland/discussions/14531
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen(1))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
