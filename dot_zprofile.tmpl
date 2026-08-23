@@ -1,24 +1,34 @@
 #!/bin/sh
 # run startx if in tty1 & dwm is not already running
 # if [[ "$(tty)" = "/dev/tty1" ]]; then
-# 	pgrep dwm || startx 
+# 	pgrep dwm || startx
 # fi
 
 # launch compositor selector at startup
 # if uwsm check may-start && uwsm select; then
 #	exec systemd-cat -t uwsm_start uwsm start default
 # fi
-
+# NOTE: dead now that ly owns the session -- ly invokes this file via
+# `zsh -c /etc/ly/setup.sh ...`, and uwsm's "may-start" check always fails with
+# "Not in login shell" for a -c-invoked shell, so this branch could never fire.
+# The actual compositor launch already happens correctly via setup.sh's own
+# `exec "$@"` at the end of the ly-provided command -- this file just needs to
+# get out of the way and not consume that exec itself (see below).
 {{- if eq .machine_kind "arch" }}
 # launch hyprland at startup
-if uwsm check may-start; then
-    exec uwsm start hyprland.desktop
-fi
+# if uwsm check may-start; then
+#     exec uwsm start hyprland.desktop
+# fi
 {{- end }}
 
 # asks for ssh passkey & remembers for duration of remaining session
+# NOTE: changed from `exec ssh-agent zsh` -- that replaced this process (the one
+# ly's setup.sh is running, about to `exec "$@"` into the real session command)
+# with a bare interactive shell, silently discarding whichever session was
+# picked at the ly login screen and dropping to a tty every time.
 if [ -z "$SSH_AGENT_PID" ] && [ -z "$SSH_AUTH_SOCK" ]; then
-    exec ssh-agent zsh
+    eval "$(ssh-agent -s)" > /dev/null
+    # exec ssh-agent zsh
 fi
 
 # required for running syncthing as systemd user service
