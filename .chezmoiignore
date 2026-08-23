@@ -1,11 +1,18 @@
+## valid machine kinds: arch, wpc, vps
+
 {{ if ne .chezmoi.os "windows" }}
+## windows only
+
 Documents/PowerShell/Microsoft.PowerShell_profile.ps1
 AppData
 scripts/Find-ClaudeSession.ps1
 scripts/herdr-new-cc-tab.ps1
 scripts/wpc-push.ps1
 {{ end }}
+
 {{ if eq .chezmoi.os "windows" }}
+## anywhere except windows (arch, vps)
+
 .config/dunst
 .config/htop
 .config/mimeapps.list
@@ -17,7 +24,10 @@ scripts/wpc-push.ps1
 .config/hypr
 .config/waybar
 {{ end }}
+
 {{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
+## exclude vps
+
 # Desktop/Wayland-only GUI config -- pointless on a headless VPS.
 .config/dunst
 .config/mimeapps.list
@@ -27,7 +37,10 @@ scripts/wpc-push.ps1
 # No physical keyboard to remap on the VPS either.
 .config/kanata
 {{ end }}
+
 {{ if ne .machine_kind "arch" }}
+## arch only 
+
 # kanata's systemd --user autostart is specific to this physical keyboard's
 # Linux box -- no hardware keyboard to remap on the VPS, and Windows
 # autostarts kanata a different way (not systemd).

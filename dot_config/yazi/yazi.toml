@@ -18,7 +18,8 @@ win-open = [
 ]
 # Define Neovim as an opener
 nvim = [
-    { run = 'nvim %s', block = true, desc = "Neovim", for = "windows" }
+    { run = 'nvim %s', block = true, desc = "Neovim", for = "windows" },
+    { run = 'nvim %s', block = true, desc = "Neovim", for = "unix" }
 ]
 
 [open]
