@@ -25,7 +25,7 @@
    it produces at ~/.config/chezmoi/chezmoi.toml is per-machine and never
    committed). */ -}}
 {{- if ne .chezmoi.os "windows" }}
-{{- $machineKind := promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps") }}
+{{- $machineKind := promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps" "wpc") }}
 [data]
     machine_kind = {{ $machineKind | quote }}
     sandbox_dir = {{ printf "%s/programming/claude-sandbox" .chezmoi.homeDir | quote }}
