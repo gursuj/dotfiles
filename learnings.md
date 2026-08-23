@@ -136,6 +136,23 @@ GitHub (not linked locally): `herdr plugin uninstall auto-namer` then re-run
 `chezmoi apply` (or `herdr plugin install gursuj/herdr-auto-namer -y` directly) — the
 onchange script only installs what's missing, it doesn't update what's already there.
 
+## ccc (Claude Code sandbox launcher): one var, per-shell scripts (2026-08-23)
+
+Ported pwsh's `ccc` (run Claude Code in `$PWD` or a scratch sandbox, `-y`/`-n` skip
+prompt) to zsh as a function in `dot_zshrc.tmpl`. Converted the pwsh profile to
+`.tmpl` too.
+
+Can't share one literal script across pwsh/zsh — different languages, no function
+import across shells (pwsh can only shell out to bash as a subprocess, e.g.
+`Invoke-CygwinBash` — doesn't share pwsh's own source with it). What's shared:
+the sandbox path, via a new `sandbox_dir` chezmoi data var in `.chezmoi.toml.tmpl`
+(same per-OS pattern as `machine_kind`). Both scripts read `{{ .sandbox_dir }}`;
+only the path is defined once, logic stays duplicated per shell.
+
+New `[data]` vars need `chezmoi init` (regenerates `~/.config/chezmoi/chezmoi.toml`,
+safe, doesn't re-prompt cached `promptChoiceOnce` answers) before `chezmoi apply`
+picks them up.
+
 ## Herdr's own agent integrations: not tracked (2026-08-18)
 
 `herdr integration install claude` and `herdr integration install opencode` each generate

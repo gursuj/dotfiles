@@ -1,4 +1,4 @@
-# Managed by chezmoi — source of truth is ~/.local/share/chezmoi/readonly_Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+# Managed by chezmoi — source of truth is ~/.local/share/chezmoi/Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl
 # Edit there and run `chezmoi apply`, not here — this file gets overwritten on next apply.
 
 function cdd { cd D:\ }
@@ -68,7 +68,7 @@ $env:DOTS = "$HOME\Documents\obsidian\dotfiles.md"
 function ccc {
     # -y / -n skip the prompt and force the same branch a manual y/n answer would take.
     # Any other args pass straight through to claude.
-    $sandboxDir = 'D:\claude-sandbox'
+    $sandboxDir = '{{ .sandbox_dir }}'
     $skipPrompt = $false
     $useSandbox = $false
     $claudeArgs = @()

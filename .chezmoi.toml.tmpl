@@ -2,6 +2,9 @@
 # Windows: no shebang support. Map .sh -> sh (git-bash) or chezmoi execs it raw and fails.
 [interpreters.sh]
     command = "sh"
+
+[data]
+    sandbox_dir = 'D:\claude-sandbox'
 {{- end -}}
 
 {{- $diffCmd := "diff" -}}
@@ -25,4 +28,5 @@
 {{- $machineKind := promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps") }}
 [data]
     machine_kind = {{ $machineKind | quote }}
+    sandbox_dir = {{ printf "%s/programming/claude-sandbox" .chezmoi.homeDir | quote }}
 {{- end }}

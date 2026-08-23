@@ -231,3 +231,26 @@ export HYPRSHOT_DIR='/home/sujal/Pictures/screenshots/'
 {{- end }}
 # Load aliases and shortcuts if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
+
+# ccc — run Claude Code in $PWD or a scratch sandbox repo. -y forces $PWD, -n
+# forces sandbox, no flag prompts. Zsh port of pwsh profile's ccc — same
+# sandbox_dir var (chezmoi data, .chezmoi.toml.tmpl), logic duplicated per-shell.
+function ccc {
+    local sandbox_dir="{{ .sandbox_dir }}"
+    local skip_prompt=0 use_sandbox=0
+    local -a claude_args=()
+    for a in "$@"; do
+        case "$a" in
+            -y) skip_prompt=1; use_sandbox=0 ;;
+            -n) skip_prompt=1; use_sandbox=1 ;;
+            *) claude_args+=("$a") ;;
+        esac
+    done
+    if [[ $skip_prompt -eq 0 ]]; then
+        local answer
+        read -r "answer?Run Claude Code in '$PWD'? [Y/n] "
+        [[ -n "$answer" && ! "$answer" =~ ^[Yy] ]] && use_sandbox=1
+    fi
+    [[ $use_sandbox -eq 1 ]] && cd "$sandbox_dir"
+    claude "${claude_args[@]}"
+}
