@@ -1,0 +1,49 @@
+#!/bin/sh
+# Auto-syncs GitHub-sourced herdr plugins into desired-plugins.txt before every
+# `chezmoi apply`, so `herdr plugin install owner/repo` gets picked up without
+# remembering to run scripts/sync-herdr-plugins.sh by hand. Mirrors that
+# script's logic (see it for the full write-up) but non-interactive: skips
+# quietly instead of failing apply when herdr/python3 aren't available, and
+# only prints when the file actually changes.
+#
+# Still a manual commit step -- this updates the source file on this machine,
+# it does not push/commit/sync to other devices. See README.
+
+set -eu
+
+if ! command -v herdr >/dev/null 2>&1; then
+  exit 0
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  exit 0
+fi
+
+dest="{{ .chezmoi.sourceDir }}/dot_config/herdr/desired-plugins.txt"
+
+repos="$(herdr plugin list --json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+plugins = data.get("result", {}).get("plugins", [])
+out = []
+for p in plugins:
+    source = p.get("source", {})
+    if source.get("kind") == "github":
+        out.append(source["owner"] + "/" + source["repo"])
+print("\n".join(sorted(out)))
+' 2>/dev/null || true)"
+
+# Guard against wiping an already-populated file on a machine where every
+# plugin is `herdr plugin link`-ed (dev machines) rather than github-installed.
+if [ -z "$repos" ] && [ -s "$dest" ]; then
+  exit 0
+fi
+
+before="$(cat "$dest" 2>/dev/null || true)"
+if [ "$before" != "$repos" ]; then
+  printf '%s\n' "$repos" > "$dest"
+  echo "herdr-plugin-sync: updated $dest -- review and commit" >&2
+fi

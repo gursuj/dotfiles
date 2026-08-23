@@ -405,7 +405,7 @@ hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exit())                        -- exit
 -- but keep waybar visible + apps' own chrome (e.g. Firefox address bar).
 -- Currently broken upstream on 0.56.2 -- maximize geometry ignores waybar's
 -- reserved area regardless of mode. Tracked: github.com/hyprwm/Hyprland/discussions/14531
-hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen(1))
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ mode = "maximized"}))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))

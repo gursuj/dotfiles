@@ -59,6 +59,19 @@ type = "shell"
 command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
 {{- end }}
 
+# herdr-drovr plugin (AVGVSTVS96/herdr-drovr, see desired-plugins.txt) keybinds.
+[[keys.command]]
+key = "prefix+M"
+type = "plugin_action"
+command = "drovr.move-tab"
+description = "move tab to workspace"
+
+[[keys.command]]
+key = "prefix+m"
+type = "plugin_action"
+command = "drovr.move-pane"
+description = "move pane to tab"
+
 [ui]
 agent_panel_sort = "priority"
 pane_gaps = false
