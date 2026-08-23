@@ -22,13 +22,12 @@
 {{- end }}
 
 # asks for ssh passkey & remembers for duration of remaining session
-# NOTE: changed from `exec ssh-agent zsh` -- that replaced this process (the one
-# ly's setup.sh is running, about to `exec "$@"` into the real session command)
-# with a bare interactive shell, silently discarding whichever session was
-# picked at the ly login screen and dropping to a tty every time.
+# NOTE: must not use `exec ssh-agent zsh` here -- that replaces this process
+# (the one ly's setup.sh is running, about to exec "$@" into the chosen
+# session) with a bare interactive shell, silently discarding whichever
+# session was picked at the ly login screen and dropping to a tty every time.
 if [ -z "$SSH_AGENT_PID" ] && [ -z "$SSH_AUTH_SOCK" ]; then
     eval "$(ssh-agent -s)" > /dev/null
-    # exec ssh-agent zsh
 fi
 
 # required for running syncthing as systemd user service
