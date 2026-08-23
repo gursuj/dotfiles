@@ -14,12 +14,18 @@ scripts/wpc-push.ps1
 .emacs.d
 .config/mpv
 .config/swayimg
+.config/hypr
+.config/waybar
 {{ end }}
 {{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
 # Desktop/Wayland-only GUI config -- pointless on a headless VPS.
 .config/dunst
 .config/mimeapps.list
 .config/swayimg
+.config/hypr
+.config/waybar
+# No physical keyboard to remap on the VPS either.
+.config/kanata
 {{ end }}
 {{ if ne .machine_kind "arch" }}
 # kanata's systemd --user autostart is specific to this physical keyboard's
