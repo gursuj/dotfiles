@@ -4,6 +4,7 @@
     command = "sh"
 
 [data]
+    machine_kind = "wpc"
     sandbox_dir = 'D:\claude-sandbox'
 {{- end -}}
 
@@ -13,9 +14,15 @@
 {{- end -}}
 
 {{- if $diffCmd }}
+{{/* chezmoi diffs a script (e.g. run_onchange_*) against its own hardcoded Windows null-
+   device sentinel "NUL:" (colon included) when there's no destination file on disk. Git for
+   Windows' diff.exe only understands "/dev/null", not "NUL:", and errors with
+   "diff: NUL:: No such file or directory". Route through sh -c to swap that sentinel for
+   /dev/null before calling the real diff -- harmless on non-Windows since Destination/Target
+   never equal "NUL:" there. */}}
 [diff]
-    command = {{ $diffCmd | quote }}
-    args = ["--color=always", "--strip-trailing-cr", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+    command = "sh"
+    args = ["-c", "a=$1; b=$2; [ \"$a\" = 'NUL:' ] && a=/dev/null; [ \"$b\" = 'NUL:' ] && b=/dev/null; exec {{ $diffCmd }} --color=always --strip-trailing-cr \"$a\" \"$b\"", "diffwrap", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
 {{- end }}
 
 {{- /* Windows is a single known device -- gated via .chezmoi.os instead.

@@ -132,9 +132,18 @@ function f {
 # Git's usr\bin is normally already on PATH via the Git for Windows installer, but add it
 # explicitly here too - if PATH ever gets reset (fresh machine, edited system PATH, etc.)
 # these unshadowed commands would otherwise fall through to nothing or the wrong binary.
+# Prepended, not appended: some names collide with real System32 binaries (find.exe is DOS
+# text-search FIND, incompatible syntax) rather than just PS cmdlet aliases. An append loses
+# that race; a PS alias wouldn't help either since it doesn't carry into child processes
+# (e.g. chezmoi spawning git-bash's own sh, which resolves `find` via inherited $env:PATH,
+# not this shell's aliases). Prepending wins PATH order for this shell and every subprocess.
 $gitUsrBin = 'C:\Program Files\Git\usr\bin'
-if ((Test-Path $gitUsrBin) -and ($env:PATH -notlike "*$gitUsrBin*")) {
-    $env:PATH += ";$gitUsrBin"
+if (Test-Path $gitUsrBin) {
+    # Always move to front, not just add-if-missing: it's often already on PATH further
+    # back (via the Git installer), which is exactly the position that loses the find.exe
+    # collision below. A plain "add if absent" guard would silently no-op in that case.
+    $rest = ($env:PATH -split ';') | Where-Object { $_ -and $_ -ne $gitUsrBin }
+    $env:PATH = (@($gitUsrBin) + @($rest)) -join ';'
 }
 # Default PS aliases are ReadOnly, hence -Force. Silent if already gone.
 $unshadow = @(
