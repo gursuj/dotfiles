@@ -1,4 +1,5 @@
-;; Caps Lock becomes a layer key: tap = Esc, hold = an Fn-style layer.
+;; Caps Lock becomes a layer key: tap = backtick (shift+tap = tilde, since
+;; shift+grv is tilde at the OS level), hold = an Fn-style layer.
 ;; Physical CapsLock is fully intercepted here, so its lock/toggle behavior
 ;; is gone unless remapped back explicitly.
 
@@ -63,7 +64,7 @@
 )
 
 (deflayer base
-  (tap-hold 200 200 esc (layer-while-held fn))
+  (tap-hold 200 200 grv (layer-while-held fn))
   _
   2    3    4    5    6    7    8    9    0    -    =
   w    a    s    d
@@ -84,7 +85,7 @@
 )
 
 (deflayer base
-  (tap-hold 200 200 esc (layer-while-held fn))
+  (tap-hold 200 200 grv (layer-while-held fn))
   _
   1    2    3    4    5    6    7    8    9    0    -    =
   w    a    s    d
