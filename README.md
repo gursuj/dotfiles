@@ -32,6 +32,11 @@ before assuming something changed), `chezmoi status` (quick out-of-sync check), 
 merge` / `merge-all` (three-way merge when both source and live have drifted — safer than
 `re-add` for that case).
 
+`chezmoi apply` can hang on an interactive prompt (e.g. asking to confirm an overwrite)
+instead of erroring out — if an agent session appears stuck on `apply`, just kill it rather
+than waiting it out. Always run `chezmoi diff` and have the user manually review the diff
+before running `apply`, rather than applying directly.
+
 If a tracked file keeps showing a large diff on every check even though nothing meaningful
 changed, check for a line-ending mismatch before assuming real drift: some external tool
 that writes the live file may hardcode a line ending regardless of OS (e.g. Claude Code

@@ -199,9 +199,15 @@ require('markview').setup({
   preview = {
     filetypes = { 'markdown', 'quarto', 'rmd' },
     modes = { 'n', 'no', 'c', 'i' },
-    hybrid_modes = { 'i' }, -- hybrid (linewise) rendering only in insert mode
+    hybrid_modes = { 'n', 'i' }, -- current line stays raw in normal mode too, not just insert
     icon_provider = 'mini',
   },
+  -- tables = {
+  --   enable = true,
+  --   -- use_virt_lines pads every column to the same rendered width,
+  --   -- so tables look aligned even if the markdown source isn't
+  --   use_virt_lines = true,
+  -- },
 })
 
 -- See :help which-key.nvim-which-key-setup

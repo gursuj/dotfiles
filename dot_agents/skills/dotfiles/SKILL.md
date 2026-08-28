@@ -42,6 +42,8 @@ README first if the question is "is X already tracked in the real repo."
 
 For any config already tracked in chezmoi, use the edit-source-first workflow: edit the source `.tmpl`/file under `~/.local/share/chezmoi` and run `chezmoi apply` — don't hand-edit the live target path, it gets overwritten on next apply. Don't reach for `chezmoi re-add` as a shortcut instead — it doesn't work on templated files and can clobber template logic. See the chezmoi repo README's "Using chezmoi" section for the full workflow writeup.
 
+`chezmoi apply` can hang waiting on an interactive prompt (e.g. an overwrite confirmation) instead of failing outright — if a background agent session looks stuck on `chezmoi apply`, kill it rather than waiting. Always run `chezmoi diff` and have the user review it before running `apply`, rather than applying straight away.
+
 ## Future direction (historical — chezmoi is now set up, see above)
 
 User wants to eventually move these into one real dotfiles git repo that works on both
