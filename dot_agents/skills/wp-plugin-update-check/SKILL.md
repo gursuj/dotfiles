@@ -16,7 +16,21 @@ Output a per-plugin, severity-tiered recommendation with reasoning, not a flat y
 
 Ask the user which situation applies, since it changes how they pull the list:
 
-**Single site** — have them open the site's wp-admin **Plugins** page and paste this into the browser console:
+**Single site** — have them open the site's wp-admin **Plugins** page and use the `wp-plugin-update-extractor.user.js` Tampermonkey script (in the shared `userscripts` folder). It adds two Tampermonkey menu commands:
+
+- **📋 Copy plugin list (JSON)** — copies the extracted list straight to clipboard
+- **💾 Export plugin list (JSON file)** — downloads it as `[sitename]-plugin-updates-[date].json`
+
+It extracts **every installed plugin**, not just the ones flagged for update — reading each plugin row's own `.plugin-version-author-uri` element rather than only rows with an update notice. This matters for Step 1 below. They hand you back JSON shaped like:
+
+```json
+[{ "name": "...", "current": "6.8.7", "updateAvailable": true, "new": "6.8.8" },
+ { "name": "...", "current": "6.3.1", "updateAvailable": false, "new": null }]
+```
+
+When reading it in, treat `current` as `currentVersion` and `new` as `latestVersion` for the rest of this skill — same data, different key names. `updateAvailable: false` means WordPress itself isn't flagging an update for that plugin (not that none exists — see Step 1). If they paste a downloaded file's contents instead of clipboard text, that's the same format, just read it directly.
+
+If Tampermonkey or the script isn't set up on their machine, fall back to this console snippet pasted into the wp-admin Plugins page's browser console (note: this fallback only captures plugins that already have an update flagged, so it can't feed Step 1's cross-check):
 
 ```js
 [...document.querySelectorAll('tr[data-plugin]')].map(row => {
@@ -29,15 +43,33 @@ Ask the user which situation applies, since it changes how they pull the list:
 });
 ```
 
-Note: WordPress only renders the "latest version" text for plugins that already have an update flagged — plugins showing no update won't have a `latestVersion` from this alone. That's fine for update-safety triage since those aren't the ones in question. Have them copy the resulting array (right-click the console output → Copy object, or `copy(...)` wrapped around the expression) and paste it back.
+Have them copy the resulting output (via the userscript's copy button, `copy(...)` wrapped around the console expression, or right-click → Copy object) and paste it back.
 
-**Multiple sites via ManageWP** — ManageWP's dashboard already shows available plugin/theme/core updates across every managed site in one place, so there's no need for the console snippet per site. Ask the user to pull the plugin + current + available version list straight from that dashboard view for the sites in scope. If they want a per-site breakdown outside ManageWP (e.g. a site not yet added to it), fall back to the single-site snippet above for that one.
+**Multiple sites via ManageWP** — ManageWP's dashboard already shows available plugin/theme/core updates across every managed site in one place, so there's no need for the console snippet per site. Ask the user to pull the plugin + current + available version list straight from that dashboard view for the sites in scope. If they want a per-site breakdown outside ManageWP (e.g. a site not yet added to it), fall back to the single-site snippet above for that one. Note: ManageWP, like WordPress core's own update check, can also be behind — Step 1's cross-check still applies.
 
-Either way, end this step with a list of `{ plugin name, current version, latest version }` per site.
+Either way, end this step with a list of `{ plugin name, current version, latest version, update flagged by WP? }` per site.
 
 ---
 
-## Step 1: Vulnerability check (do this first — it can override everything else)
+## Step 1: Cross-check for unreported updates
+
+WordPress's own update check (and ManageWP's) can be wrong — stale transients, a premium/self-hosted plugin that doesn't hook into the wp.org update API, or a vendor who released a fix out of band. Don't just trust `updateAvailable` from Step 0.
+
+For **every** plugin in the list — including ones WordPress says are already up to date — check the plugin's actual current release:
+
+- wordpress.org-hosted plugins: `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=[slug]` or the plugin's page
+- premium/vendor-hosted plugins: the vendor's own changelog or pricing/download page
+
+If the real latest release is newer than what the site reports as current, and WordPress didn't flag it (`updateAvailable: false` but a newer version genuinely exists):
+
+- **Flag this explicitly** in the output — call out that WordPress isn't surfacing this update and say why if you can tell (e.g. "premium plugin, not registered with wp.org update API" or "update check appears stale")
+- Treat that newer, unreported version as the real target and run Steps 2–5 against it, same as any flagged update
+
+Don't silently skip this check for plugins that look current — the whole point is catching the ones a lazy trust-the-dashboard pass would miss.
+
+---
+
+## Step 2: Vulnerability check (this and the unreported-update check above take priority — they can override everything else)
 
 For every plugin where the *current* (not target) version has a known vulnerability, that forces an update regardless of what Steps 2–4 find. Check at least two of:
 
@@ -49,7 +81,7 @@ Note severity (critical/high/medium/low) and whether it's confirmed exploited in
 
 ---
 
-## Step 2: Changelog diff across every intervening version
+## Step 3: Changelog diff across every intervening version
 
 Don't just read the target version's changelog — read every version between current and target. A breaking change three versions back still hits the site the moment it jumps straight to latest.
 
@@ -63,7 +95,7 @@ Source: the plugin's own changelog tab on wordpress.org (`https://wordpress.org/
 
 ---
 
-## Step 3: Real-world regression reports
+## Step 4: Real-world regression reports
 
 Changelogs under-report breakage — plenty of regressions never make it into official notes. Search, scoped to roughly the last 60 days relative to the target version's release:
 
@@ -75,7 +107,7 @@ Flag anything describing: white screen / fatal error after update, conflicts wit
 
 ---
 
-## Step 4: Compatibility surface (site-specific — ask, don't assume)
+## Step 5: Compatibility surface (site-specific — ask, don't assume)
 
 This is the part that can't be generalised from the plugin's own history. Ask the user (or infer from the plugin list already gathered) what else is active on the site:
 
@@ -84,18 +116,20 @@ This is the part that can't be generalised from the plugin's own history. Ask th
 - SEO plugin
 - Any custom code or must-use plugins known to hook into this plugin
 
-Cross-reference known conflicts from Step 3's search results against this specific stack. A regression report that only affects Elementor users is irrelevant to a site running Bricks, and shouldn't inflate that site's risk tier.
+Cross-reference known conflicts from Step 4's search results against this specific stack. A regression report that only affects Elementor users is irrelevant to a site running Bricks, and shouldn't inflate that site's risk tier.
 
 ---
 
-## Step 5: Output — severity-tiered recommendation
+## Step 6: Output — severity-tiered recommendation
 
 For each plugin, give one of:
 
 - **Update now** — active exploit or critical CVE on the current version
 - **Update this week** — patched vulnerability exists, not yet seen exploited, or a high-severity issue with no urgency signal
-- **Update, but test on staging first** — breaking changes or regressions surfaced in Steps 2–3 that could hit this site's specific stack
+- **Update, but test on staging first** — breaking changes or regressions surfaced in Steps 3–4 that could hit this site's specific stack
 - **Hold** — known regression in the target version with no fix yet, or the update requires a PHP/WP core bump the site can't currently support
+
+If Step 1 caught an unreported update, say so plainly in that plugin's entry (e.g. "WordPress shows this as up to date, but vendor has actually shipped 3.94 — flagged separately") so the recommendation isn't mistaken for a dashboard-reported one.
 
 If the user only wants the bare minimum (security-only) update pass, filter the output to plugins in the "update now" / "update this week" tiers and explicitly list which plugins were left out and why (e.g. "no known vulnerability, feature update only") — never silently drop plugins from the list without saying so.
 

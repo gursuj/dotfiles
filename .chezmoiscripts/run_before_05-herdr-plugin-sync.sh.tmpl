@@ -6,6 +6,14 @@
 # quietly instead of failing apply when herdr/python3 aren't available, and
 # only prints when the file actually changes.
 #
+# Merges with the existing file instead of overwriting -- a plugin that's
+# `herdr plugin link`-ed locally on this machine (source.kind "local", e.g.
+# gursuj/herdr-auto-namer from D:\code\gursuj) still needs to stay in the file
+# for other machines that install it fresh from GitHub. An overwrite-from-scan
+# approach silently dropped that line the moment any other github-installed
+# plugin existed alongside it. Removal is manual now: edit the source file by
+# hand if a plugin is genuinely retired everywhere.
+#
 # Still a manual commit step -- this updates the source file on this machine,
 # it does not push/commit/sync to other devices. See README.
 
@@ -36,14 +44,10 @@ for p in plugins:
 print("\n".join(sorted(out)))
 ' 2>/dev/null || true)"
 
-# Guard against wiping an already-populated file on a machine where every
-# plugin is `herdr plugin link`-ed (dev machines) rather than github-installed.
-if [ -z "$repos" ] && [ -s "$dest" ]; then
-  exit 0
-fi
-
 before="$(cat "$dest" 2>/dev/null || true)"
-if [ "$before" != "$repos" ]; then
-  printf '%s\n' "$repos" > "$dest"
+merged="$(printf '%s\n%s\n' "$before" "$repos" | sed '/^$/d' | sort -u)"
+
+if [ "$before" != "$merged" ]; then
+  printf '%s\n' "$merged" > "$dest"
   echo "herdr-plugin-sync: updated $dest -- review and commit" >&2
 fi

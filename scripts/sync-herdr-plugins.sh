@@ -3,9 +3,20 @@
 # desired-plugins.txt. Run after `herdr plugin install owner/repo`, commit the
 # result, other machines pick it up on next `chezmoi apply`.
 #
-# Local (`herdr plugin link`) plugins are skipped on purpose -- those are
-# dev-machine-only paths (e.g. D:\code\gursuj\herdr-auto-namer here), nothing
-# to sync. Only source.kind == "github" entries go in the file.
+# Local (`herdr plugin link`) plugins contribute nothing to this machine's scan
+# -- e.g. gursuj/herdr-auto-namer is linked straight to D:\code\gursuj here for
+# dev, so `herdr plugin list --json` reports it as source.kind "local", not
+# "github". That does NOT mean it should drop out of desired-plugins.txt --
+# other machines install it fresh from GitHub and still need that line. So
+# this merges (union of existing file + currently-detected github repos)
+# instead of overwriting. Bit the dev machine once: this used to fully
+# regenerate the file from source.kind=="github" entries only, which silently
+# dropped auto-namer's line the moment a second, github-installed plugin
+# (drovr) existed alongside it -- the "skip if nothing github-sourced found"
+# guard only covered an all-local machine, not this mixed case.
+#
+# Removal is intentionally manual now: if a plugin's genuinely retired
+# everywhere, delete its line from the source file by hand.
 #
 # Manual step chezmoi can't remove -- no live sync between devices, only
 # committed source. See README.
@@ -37,20 +48,13 @@ for p in plugins:
 print("\n".join(sorted(out)))
 ')"
 
-# Guard against wiping an already-populated file: this happens on a machine
-# where every plugin is `herdr plugin link`-ed (dev machines) rather than
-# github-installed -- that machine has nothing to contribute to the sync,
-# and running this here would otherwise erase what other machines rely on.
-if [ -z "$repos" ] && [ -s "$dest" ]; then
-  echo "no github-sourced plugins found (only local links here?) -- leaving $dest untouched" >&2
-  echo "$dest" >&2
-  exit 1
-fi
+existing="$(cat "$dest" 2>/dev/null || true)"
+merged="$(printf '%s\n%s\n' "$existing" "$repos" | sed '/^$/d' | sort -u)"
 
-printf '%s\n' "$repos" > "$dest"
+printf '%s\n' "$merged" > "$dest"
 
 count=$(wc -l < "$dest" | tr -d ' ')
-echo "wrote $count plugin(s) to $dest"
+echo "wrote $count plugin(s) to $dest (merged with existing entries, none removed)"
 echo
 git -C "$source_repo" diff -- dot_config/herdr/desired-plugins.txt
 echo
