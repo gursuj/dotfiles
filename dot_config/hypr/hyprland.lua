@@ -266,6 +266,10 @@ hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1" })
 
 -- hl.workspace_rule({ workspace = "5", monitor = "m[1]" }) -- unclear original intent ("m[1]"), left untranslated
 
+-----------------------------
+---- PICTURE IN PICTURE ----
+-----------------------------
+
 -- firefox Picture-in-Picture
 -- No `size` here on purpose -- Firefox already sizes the PiP window to match the
 -- video's own aspect ratio (varies per video), so forcing a fixed box would
@@ -286,6 +290,30 @@ hl.window_rule({
     no_initial_focus = true,
     suppress_event   = "activate activatefocus",
 })
+
+-- ff2mpv (yt videos played via mpv from firefox) -- same PiP treatment as
+-- firefox's native PiP. ff2mpv-rust config (~/.config/ff2mpv-rust.json) sets
+-- --wayland-app-id=ff2mpv so this matches on app class, not title (mpv's
+-- title is the video title, which varies).
+hl.window_rule({
+    name  = "pip-ff2mpv",
+    match = { class = "^(ff2mpv)$" },
+    keep_aspect_ratio = true,
+    pin   = true,
+    move  = "monitor_w-window_w monitor_h-window_h",
+    float = true,
+    no_initial_focus = true,
+    suppress_event   = "activate activatefocus",
+})
+
+-- Tried to keep pinned PiP windows below the scratchpad (special:magic)
+-- overlay via alter_zorder -- doesn't work. Pinned windows always render on
+-- top of everything, including the special workspace, regardless of
+-- z-order; confirmed live (toggled scratchpad + alter_zorder bottom on the
+-- pinned window, it stayed on top; unpinning just made it disappear from
+-- the current workspace's view entirely instead, since unpinned windows
+-- only show on their own workspace). Seems to be a Hyprland limitation, not
+-- a config mistake -- worth a discussion upstream.
 
 -- hide sensitive windows during screenshare
 -- bitwarden doesn't work cause it sets title late. new hyprland says title bug only happens for 'static' effects & no_screen_share isn't one of them, but still doesn't work
@@ -414,10 +442,12 @@ hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))
 -- hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("hyprctl dispatch toggleswallow"))
 hl.bind(mainMod .. " + slash", hl.dsp.window.toggle_swallow())
 -- hl.bind(mainMod .. " + P", hl.dsp.window.pseudo()) -- dwindle
--- One-way: float the focused window, shrink to 32% monitor width (height
--- auto-computed from the window's current aspect ratio, not forced to 16:9),
--- lock aspect ratio, and pin. Not a toggle -- use the existing float-toggle
--- bind (mainMod + SHIFT + F) to send it back to tiled.
+-- PICTURE IN PICTURE (PiP), ad-hoc: turn any window into one, same treatment
+-- as the firefox/ff2mpv PiP rules above. One-way: float the focused window,
+-- shrink to 32% monitor width (height auto-computed from the window's
+-- current aspect ratio, not forced to 16:9), lock aspect ratio, and pin. Not
+-- a toggle -- use the existing float-toggle bind (mainMod + SHIFT + F) to
+-- send it back to tiled.
 hl.bind(mainMod .. " + P", function()
     local win = hl.get_active_window()
     if not win then return end
@@ -436,14 +466,140 @@ hl.bind(mainMod .. " + P", function()
     local targetW = mon.width * 0.32
     local targetH = targetW * (curH / curW)
 
-    -- lock aspect ratio first so it also governs the resize below
-    hl.dispatch(hl.dsp.window.resize({ keep_aspect_ratio = true }))
+    -- resize's own `keep_aspect_ratio` flag only governs *this* resize call,
+    -- it doesn't stick -- dragging the window afterward would let you distort
+    -- it, unlike the window-rule-matched PiP windows above, which stay locked
+    -- via the persistent `keep_aspect_ratio` property. set_prop sets that same
+    -- persistent property here, so ad-hoc PiP behaves the same way. value
+    -- must be 1/0 (number) -- a lua boolean errors with "'value' is required".
+    hl.dispatch(hl.dsp.window.set_prop({ prop = "keep_aspect_ratio", value = 1, window = win }))
     hl.dispatch(hl.dsp.window.resize({ x = targetW, y = targetH }))
 
     if not win.pinned then
         hl.dispatch(hl.dsp.window.pin())
     end
 end)
+
+-- Free resize (dwm-style): press once, move the mouse (no button held) to
+-- resize the focused window live, press the same bind again (or Escape/
+-- Enter) to confirm and stop. Hyprland has no native "resize by just moving
+-- the mouse" mode -- window.resize/window.drag both require a held mouse
+-- button (see the mainMod+RMB bind above) -- so this fakes it with a ~60Hz
+-- timer polling the cursor position.
+--
+-- For floating windows: like dwm's patch, the corner nearest the cursor AT
+-- PRESS TIME becomes the anchor -- the opposite corner stays fixed and the
+-- grabbed corner follows the mouse, so grabbing near the top-left and
+-- moving the mouse left/up grows the window that direction instead of only
+-- ever growing right/down. Determined once at press time, not re-evaluated
+-- mid-resize (matches the dwm patch).
+--
+-- For tiled windows there's no "corner" to anchor -- the resize dispatcher
+-- just adjusts the layout split -- so it's a plain relative resize there.
+--
+-- No aspect-ratio unlock/relock needed for PiP windows here, despite them
+-- having a persistent `keep_aspect_ratio` lock (see mainMod+P above): tested
+-- live, and that lock only constrains *interactive* border-drag resizing --
+-- it does nothing to a resize dispatched with an explicit size, which is
+-- what this timer loop does every tick. So PiP windows resize freely under
+-- this bind regardless of the lock, and dragging their border by hand
+-- afterward still respects the lock as before -- no conflict.
+--
+-- Escape/Enter only exit resize mode -- scoped to the "free_resize" submap
+-- so they're only intercepted while it's active, not globally (a plain
+-- top-level bind on bare Escape/Enter would swallow those keys everywhere,
+-- in every app, all the time). mainMod+R itself stays a normal top-level
+-- bind outside the submap, marked submap_universal so it still fires to
+-- exit even while the submap has taken over -- otherwise, once a submap is
+-- active, only that submap's own binds (or ones explicitly marked
+-- universal) respond; the R press would stop doing anything.
+local MIN_SIZE = 20
+local free_resize = { active = false, win = nil, timer = nil }
+
+local function stop_free_resize()
+    free_resize.active = false
+    if free_resize.timer then free_resize.timer:set_enabled(false) end
+    free_resize.timer = nil
+    free_resize.win   = nil
+    hl.dispatch(hl.dsp.submap("reset"))
+end
+
+hl.define_submap("free_resize", function()
+    hl.bind("Escape", stop_free_resize)
+    hl.bind("Return", stop_free_resize)
+    hl.bind("mouse:272", stop_free_resize) -- left click
+    hl.bind("mouse:273", stop_free_resize) -- right click
+end)
+
+hl.bind(mainMod .. " + R", function()
+    if free_resize.active then
+        stop_free_resize()
+        return
+    end
+
+    local win = hl.get_active_window()
+    if not win then return end
+
+    local start = hl.get_cursor_pos()
+    if not start then return end
+
+    free_resize.active = true
+    free_resize.win    = win
+
+    if win.floating then
+        local pos = win.at
+        local sz  = win.size
+        local baseX, baseY = (pos and (pos.x or pos[1])) or 0, (pos and (pos.y or pos[2])) or 0
+        local baseW, baseH = (sz and (sz.x or sz.w)) or 1, (sz and (sz.y or sz.h)) or 1
+
+        -- which half of the window the cursor was in at press time picks
+        -- the anchored corner: -1 = anchor follows from the left/top edge,
+        -- 1 = grows from the right/bottom edge (the old, simple behaviour)
+        local dirX = ((start.x - baseX) / baseW < 0.5) and -1 or 1
+        local dirY = ((start.y - baseY) / baseH < 0.5) and -1 or 1
+
+        free_resize.timer = hl.timer(function()
+            if not free_resize.active then return end
+
+            local cur = hl.get_cursor_pos()
+            if not cur then return end
+
+            local dx = cur.x - start.x
+            local dy = cur.y - start.y
+
+            local newW = math.max(MIN_SIZE, baseW + dirX * dx)
+            local newH = math.max(MIN_SIZE, baseH + dirY * dy)
+            -- when anchored on the left/top, the fixed edge is the opposite
+            -- one -- so the window's own x/y has to shift to compensate as
+            -- width/height changes, otherwise it'd grow from top-left always
+            local newX = (dirX < 0) and (baseX + (baseW - newW)) or baseX
+            local newY = (dirY < 0) and (baseY + (baseH - newH)) or baseY
+
+            hl.dispatch(hl.dsp.window.resize({ x = newW, y = newH, window = free_resize.win }))
+            hl.dispatch(hl.dsp.window.move({ x = newX, y = newY, window = free_resize.win }))
+        end, { type = "repeat", timeout = 16 })
+    else
+        local last = start
+        free_resize.timer = hl.timer(function()
+            if not free_resize.active then return end
+
+            local cur = hl.get_cursor_pos()
+            if not cur then return end
+
+            local dx = cur.x - last.x
+            local dy = cur.y - last.y
+
+            if dx ~= 0 or dy ~= 0 then
+                hl.dispatch(hl.dsp.window.resize({ x = dx, y = dy, relative = true, window = free_resize.win }))
+            end
+
+            last = cur
+        end, { type = "repeat", timeout = 16 })
+    end
+
+    hl.dispatch(hl.dsp.submap("free_resize"))
+end, { submap_universal = true })
+
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
