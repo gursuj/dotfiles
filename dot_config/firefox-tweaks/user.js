@@ -1,0 +1,153 @@
+// Shared Firefox/Waterfox performance tweaks.
+// Symlinked into both profiles by .chezmoiscripts/run_onchange_after_60-browser-user-js-sync.py.tmpl
+// -- do not edit the copy inside a profile folder, it's a symlink back here.
+//
+// Base: rapidfox "Medium" preset (github.com/Eratas/rapidfox), tuned for this
+// machine (4-core, ~10GB RAM, integrated GPU). A few Fastfox.js additions
+// (github.com/yokoffing/Betterfox) folded in where they filled a gap rather
+// than duplicate an existing pref.
+//
+// Waterfox note: Betterfox's Waterfox fork docs flag that Waterfox has had
+// bugs where some about:config changes don't load or get reset after
+// restart -- see github.com/BrowserWorks/waterfox/issues/3196 and /3947.
+// If a pref here doesn't seem to be taking effect on Waterfox specifically,
+// that's a known upstream issue, not a typo here.
+
+// 2. Profile Preparation
+user_pref("browser.preferences.defaultPerformanceSettings.enabled", false);
+
+// 3. Network Performance
+user_pref("network.http.max-connections", 1800);
+user_pref("network.http.max-persistent-connections-per-server", 8);
+user_pref("network.http.max-urgent-start-excessive-connections-per-host", 5);
+user_pref("network.http.request.max-start-delay", 5);
+user_pref("network.http.pacing.requests.enabled", false);
+user_pref("network.http.pacing.requests.burst", 32);
+user_pref("network.http.pacing.requests.min-parallelism", 10);
+user_pref("network.dnsCacheExpiration", 600);
+user_pref("network.dnsCacheExpirationGracePeriod", 120);
+user_pref("network.dnsCacheEntries", 10000);
+user_pref("network.ssl_tokens_cache_capacity", 32768);
+user_pref("network.http.speculative-parallel-limit", 0);
+user_pref("network.dns.disablePrefetch", true);
+user_pref("network.dns.disablePrefetchFromHTTPS", true);
+user_pref("network.prefetch-next", false);
+user_pref("network.predictor.enabled", false);
+user_pref("network.predictor.enable-prefetch", false);
+user_pref("browser.urlbar.speculativeConnect.enabled", false);
+user_pref("browser.places.speculativeConnect.enabled", false);
+// added from Fastfox.js -- bigger packets, fewer app-to-driver transfers
+user_pref("network.buffer.cache.size", 65535);
+user_pref("network.buffer.cache.count", 48);
+
+// 4. Memory & Caching
+user_pref("javascript.options.mem.high_water_mark", 64);
+// fixed: was malformed as a single string "name = 5" (1-arg user_pref call,
+// silently ignored by Firefox instead of erroring)
+user_pref("javascript.options.mem.gc_incremental_slice_ms", 5);
+user_pref("javascript.options.mem.max", 512);
+user_pref("browser.cache.disk.enable", true);
+user_pref("browser.cache.disk.capacity", 2097152);
+user_pref("browser.cache.memory.capacity", 65536);
+user_pref("browser.cache.disk.smart_size.enabled", false);
+user_pref("browser.cache.memory.max_entry_size", 32768);
+user_pref("browser.cache.disk.metadata_memory_limit", 16384);
+user_pref("browser.cache.max_shutdown_io_lag", 100);
+user_pref("image.mem.max_decoded_image_kb", 512000);
+user_pref("image.cache.size", 10485760);
+user_pref("image.mem.decode_bytes_at_a_time", 65536);
+user_pref("image.mem.shared.unmap.min_expiration_ms", 90000);
+user_pref("media.memory_cache_max_size", 524288);
+user_pref("media.memory_caches_combined_limit_kb", 2097152);
+user_pref("media.cache_readahead_limit", 600);
+user_pref("media.cache_resume_threshold", 300);
+user_pref("dom.storage.default_quota", 20480);
+user_pref("dom.storage.shadow_writes", true);
+user_pref("browser.sessionstore.interval", 60000);
+user_pref("browser.sessionhistory.max_total_viewers", 10);
+user_pref("browser.sessionstore.max_tabs_undo", 10);
+user_pref("browser.sessionstore.max_entries", 10);
+// fixed: same malformed-string bug as above
+user_pref("browser.low_memory_notification_interval_ms", 10000);
+user_pref("browser.tabs.unloadOnLowMemory", true);
+user_pref("browser.tabs.min_inactive_duration_before_unload", 450000);
+
+// 5. JavaScript & Content
+user_pref("content.maxtextrun", 8191);
+user_pref("content.interrupt.parsing", true);
+user_pref("content.notify.ontimer", true);
+user_pref("content.notify.interval", 100000);
+user_pref("content.max.tokenizing.time", 1000000);
+user_pref("content.switch.threshold", 500000);
+user_pref("layout.frame_rate", -1);
+user_pref("nglayout.initialpaint.delay", 5);
+user_pref("gfx.content.skia-font-cache-size", 32);
+// added from Fastfox.js -- promote "warm" functions to compiled code sooner
+user_pref("javascript.options.baselinejit.threshold", 50);
+
+// 6. GPU & Rendering
+user_pref("gfx.webrender.all", true);
+user_pref("gfx.webrender.enabled", true);
+user_pref("gfx.webrender.compositor", true);
+user_pref("gfx.webrender.precache-shaders", true);
+user_pref("gfx.webrender.software", false);
+user_pref("gfx.canvas.accelerated.cache-items", 32768);
+// note: Fastfox.js documents a max of 2048 for this pref; 4096 exceeds that
+// -- left as previously set rather than silently lowered, but flagging it
+user_pref("gfx.canvas.accelerated.cache-size", 4096);
+user_pref("gfx.canvas.max-size", 16384);
+user_pref("webgl.max-size", 16384);
+user_pref("dom.webgpu.enabled", true);
+
+// 7. UI Responsiveness
+user_pref("ui.submenuDelay", 0);
+user_pref("browser.uidensity", 1);
+user_pref("dom.element.animate.enabled", true);
+user_pref("general.smoothScroll", true);
+user_pref("general.smoothScroll.msdPhysics.enabled", false);
+user_pref("general.smoothScroll.currentVelocityWeighting", 0);
+user_pref("apz.overscroll.enabled", false);
+user_pref("general.smoothScroll.stopDecelerationWeighting", 1);
+user_pref("general.smoothScroll.mouseWheel.durationMaxMS", 150);
+user_pref("general.smoothScroll.mouseWheel.durationMinMS", 50);
+user_pref("mousewheel.min_line_scroll_amount", 15);
+user_pref("mousewheel.scroll_series_timeout", 10);
+
+// 8. Processes & Tabs
+user_pref("dom.ipc.processCount", 4);
+user_pref("dom.ipc.keepProcessesAlive.web", 2);
+user_pref("dom.ipc.processPriorityManager.backgroundUsesEcoQoS", false);
+user_pref("accessibility.force_disabled", 1);
+
+// 9. Media & Codecs
+user_pref("dom.media.webcodecs.h265.enabled", true);
+user_pref("media.wmf.hevc.enabled", true); // Windows Media Foundation -- no-op on Linux, harmless
+user_pref("media.videocontrols.picture-in-picture.enable-when-switching-tabs.enabled", true);
+user_pref("media.ffmpeg.vaapi.enabled", true);
+
+// 10. Security & Privacy
+user_pref("privacy.trackingprotection.enabled", false);
+user_pref("privacy.query_stripping.enabled", false);
+user_pref("privacy.query_stripping.enabled.pbmode", true);
+user_pref("network.http.referer.XOriginPolicy", 0);
+user_pref("network.http.referer.XOriginTrimmingPolicy", 0);
+user_pref("privacy.partition.network_state", false);
+user_pref("browser.safebrowsing.downloads.remote.enabled", false);
+
+// 11. Platform-Specific
+user_pref("config.trim_on_minimize", true); // Windows only, harmless elsewhere
+user_pref("timer.auto_increase_timer_resolution", true); // Windows only, harmless elsewhere
+user_pref("widget.wayland.opaque-region.enabled", true);
+user_pref("widget.wayland.fractional-scale.enabled", true);
+user_pref("widget.macos.titlebar-blend", true); // macOS only, harmless elsewhere
+
+// 12. Reader mode / fork-exclusive
+user_pref("reader.parse-on-load.enabled", false);
+// Zen-browser-only pref -- inert on Firefox/Waterfox, kept commented for reference
+//user_pref("zen.workspaces.open-new-tab-if-last-unpinned-tab-is-closed", true);
+
+// 13. AI Tools & Automation (disabled by default -- uncomment to opt in)
+// user_pref("browser.ml.chat.enabled", false);
+// user_pref("browser.search.suggest.enabled", false);
+// user_pref("browser.urlbar.suggest.searches", false);
+// user_pref("browser.findbar.suggest.enabled", false);

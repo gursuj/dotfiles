@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+# Symlinks the tracked user.js (dot_config/firefox-tweaks/user.js) into every
+# installed Firefox/Waterfox profile's active profile dir, auto-detected from
+# each install's profiles.ini -- see scripts/sync-search-engines.py for the
+# same detection approach (search engines need a separate manual script since
+# they touch a file the browser itself rewrites on exit; user.js is only read
+# at startup, so it's safe to keep in sync automatically here).
+#
+# user.js hash: {{ include "dot_config/firefox-tweaks/user.js" | sha256sum }}
+
+import sys
+SKIP = {{ if or (eq .chezmoi.os "windows") (eq .machine_kind "vps") }}True{{ else }}False{{ end }}
+if SKIP:
+    sys.exit(0)
+
+import os
+from configparser import ConfigParser
+from pathlib import Path
+
+SOURCE = Path.home() / ".config/firefox-tweaks/user.js"
+
+BROWSERS = {
+    "firefox": Path.home() / ".mozilla/firefox",
+    "waterfox": Path.home() / ".waterfox",
+}
+
+
+def active_profile_dir(install_dir):
+    ini_path = install_dir / "profiles.ini"
+    if not ini_path.exists():
+        return None
+
+    cfg = ConfigParser()
+    cfg.read(ini_path)
+
+    for section in cfg.sections():
+        if section.startswith("Install") and cfg.getboolean(section, "Locked", fallback=False):
+            return install_dir / cfg.get(section, "Default")
+
+    for section in cfg.sections():
+        if section.startswith("Profile") and cfg.getboolean(section, "Default", fallback=False):
+            return install_dir / cfg.get(section, "Path")
+
+    return None
+
+
+def main():
+    if not SOURCE.exists():
+        print(f"no tracked user.js at {SOURCE}, skipping", file=sys.stderr)
+        return
+
+    for name, install_dir in BROWSERS.items():
+        if not install_dir.exists():
+            continue
+        profile = active_profile_dir(install_dir)
+        if profile is None or not profile.is_dir():
+            print(f"{name}: couldn't find an active profile, skipping", file=sys.stderr)
+            continue
+
+        target = profile / "user.js"
+        if target.is_symlink() and target.resolve() == SOURCE.resolve():
+            print(f"{name}: already linked")
+            continue
+
+        if target.exists() or target.is_symlink():
+            backup = target.with_suffix(f".js.bak-{os.getpid()}")
+            target.rename(backup)
+            print(f"{name}: backed up existing user.js to {backup}")
+
+        target.symlink_to(SOURCE)
+        print(f"{name}: linked {target} -> {SOURCE}")
+
+
+if __name__ == "__main__":
+    main()

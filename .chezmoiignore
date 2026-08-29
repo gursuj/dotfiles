@@ -34,6 +34,9 @@ scripts/wpc-push.ps1
 .config/swayimg
 .config/hypr
 .config/waybar
+# No browser on a headless VPS either.
+.config/firefox-tweaks
+.config/search-engines
 # No physical keyboard to remap on the VPS either.
 .config/kanata
 {{ end }}
