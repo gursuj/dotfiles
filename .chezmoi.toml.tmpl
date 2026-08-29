@@ -23,6 +23,10 @@
 [diff]
     command = "sh"
     args = ["-c", "a=$1; b=$2; [ \"$a\" = 'NUL:' ] && a=/dev/null; [ \"$b\" = 'NUL:' ] && b=/dev/null; exec {{ $diffCmd }} --color=always --strip-trailing-cr \"$a\" \"$b\"", "diffwrap", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+    exclude = ["scripts"]
+{{- else }}
+[diff]
+    exclude = ["scripts"]
 {{- end }}
 
 {{- /* Windows is a single known device -- gated via .chezmoi.os instead.
