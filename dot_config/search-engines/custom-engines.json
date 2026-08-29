@@ -1,0 +1,1431 @@
+[
+  {
+    "_definedAliases": [
+      "@ar"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@ar",
+      "order": 5
+    },
+    "_name": "ArchWiki",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://wiki.archlinux.org/index.php?search={searchTerms} "
+      }
+    ],
+    "id": "52f8e15a-aadc-4241-a73e-df6d545913a6"
+  },
+  {
+    "_definedAliases": [
+      "@gh"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 6
+    },
+    "_name": "GitHub",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://github.com/search?q={searchTerms} "
+      }
+    ],
+    "id": "4a441fde-769f-4d4b-ad5f-3c1f848b139d"
+  },
+  {
+    "_definedAliases": [
+      "@yt"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 7
+    },
+    "_name": "Youtube",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.youtube.com/results?search_query={searchTerms} "
+      }
+    ],
+    "id": "b77fe5c4-0224-4c03-9ae8-b321b02fd3d0"
+  },
+  {
+    "_definedAliases": [
+      "@dev"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 8
+    },
+    "_name": "Devdocs.io",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://devdocs.io/#q={searchTerms} "
+      }
+    ],
+    "id": "bad00f88-7100-4845-9365-35dcfde34d61"
+  },
+  {
+    "_definedAliases": [
+      "@fb"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 9
+    },
+    "_name": "Facebook",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.facebook.com/search/top/?q={searchTerms} "
+      }
+    ],
+    "id": "fd7a9158-1187-4a92-83f2-4769d71af625"
+  },
+  {
+    "_definedAliases": [
+      "@ge"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 10
+    },
+    "_name": "Genius",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://genius.com/search?q={searchTerms} "
+      }
+    ],
+    "id": "0988329f-cc51-486d-88b1-1a270acf858d"
+  },
+  {
+    "_definedAliases": [
+      "@ghme"
+    ],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACRUlEQVQ4T41TTWjUQBjNTBJ3I7vZzZ/Wi4sX8WBlDwpWsCy9qqhHqR6KWL160It49eDJk7UoKP7gQQTFiyfFFqmg4LkI7epFYZPNZtWkJJOMb7bZEktZDczu/Hzzvve9Nx+RNn31en1SUZQz2J6SON81OCbkO37fMMae9nq9heIVUljItmHclxXl3GbQ4jpl7JHr+zPYSwfY+aFsWdaiQunEqMvDM5ZlS57nHRUgAwBkfozM0wljCyxNr/T7/WO6rk9vU1W2XgFpdFz3uqZpi1q5fFNVlEkweQImZ4lpmodVWV4SgUmazne73UuYVjAyjDDPKta/MTji7yD+Yh4/QZD94bDulPNDrut+GlWGbdstmZC3IkboQRzHWaGStCfNshgl7AuCYHUUAFxqoIRlSkgJFFeJY9sRFmVk/4bsjf8RESy+gsXujPM1ARACQANAAAAzr30UDrUty5cp1QEQEaAtA22vuAF7TsGel//Q4DjiXw004PyL0OAeXtx51/PSuq5zidKW7/vvtwLZUa0e4aXSczAey124KwCa8Vr8OfgZxPD7F4YoI4JYU7D0gwisVCqtMAyfOZZlF4Fjxg6sPyTbnget2TiKxiVVbXLOL2DMwJGV/Pwg+uBjSVU37sOBW51O5/JGL5iG8Y5SOg47m7Vard9ut3uFbFWI/QPUt+f+v8ArPC3mxWYSTG5Dj1nsB9BkP/5FF4pvbKfjDOZgcsPz/WtD8L8AxKZlGFch5MkkSU6gJ7piD4wMldIHnNLXcGmuqMMfsGP6IYOu2qkAAAAASUVORK5CYII="
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "",
+      "order": 11
+    },
+    "_name": "My Github repos",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://github.com/gursuj?tab=repositories&q={searchTerms}"
+      }
+    ],
+    "id": "2f79d846-2d02-4b5b-b693-11f78028512f"
+  },
+  {
+    "_definedAliases": [
+      "@hb"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 12
+    },
+    "_name": "HamroBazaar",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://hamrobazaar.com/search/product?q={searchTerms} "
+      }
+    ],
+    "id": "1df0c8e7-21a7-49ae-b206-d7c231b72bcd"
+  },
+  {
+    "_definedAliases": [
+      "@ino"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 13
+    },
+    "_name": "Inoreader",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.inoreader.com/search/articles/{searchTerms}"
+      }
+    ],
+    "id": "d18e57f4-444c-4692-9863-1caebe65faa9"
+  },
+  {
+    "_definedAliases": [
+      "@lb"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 14
+    },
+    "_name": "Letterboxd",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://letterboxd.com/search/{searchTerms}"
+      }
+    ],
+    "id": "6d7c4767-db21-4e1b-8c58-45eb69bb9759"
+  },
+  {
+    "_definedAliases": [
+      "@map"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 15
+    },
+    "_name": "Google maps",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.google.com/maps?q={searchTerms}"
+      }
+    ],
+    "id": "45492bf6-c205-4c61-9297-6cb3f6d54fdf"
+  },
+  {
+    "_definedAliases": [
+      "@mdn"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 16
+    },
+    "_name": "MDN",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://developer.mozilla.org/en-US/search?q={searchTerms} "
+      }
+    ],
+    "id": "0577e423-df8a-4f18-9d70-69225fdec3c5"
+  },
+  {
+    "_definedAliases": [
+      "@pin"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 17
+    },
+    "_name": "Pinterest",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.pinterest.com/search/pins/?q={searchTerms} "
+      }
+    ],
+    "id": "7fb05a17-c6e9-4064-b8d4-4c50b5fccdf6"
+  },
+  {
+    "_definedAliases": [
+      "@red"
+    ],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACZ0lEQVQ4T4VTX0hTYRT/ffdud96MFpRIUZmgC4raVDBSicoedAUFEsOiwB60CGrYQ0RBhBnkQwmrOYUeeugtsgjC/mi28CHBlDDM0tIiQiNsUm3e3T+d77bN6xr2wffwnfM7v/M753yHIe0YhlGs63oDY2wXufIS7gmy9wiCECL7kDWEJR8EWEKBAQIdTSe1vgnTQRg/EUW53STgwXQfkbHCUBTEHtxBrLsL2uRHGJoOW956OCqrIO/3gUkSx4cJW8VJTAJN027yzPq3KUTO+qFOjGcUIZVshfNKwPSRknZRFI8xXjO9B3jmmeOHzaw8i1xzEFJpGSAIUF72Ye75Uzibr0Fcs85KXsQoeztlr1eHAog03Yb+k2H51RDsm9wLVei6SZbWjzZGUt5TLQVafym0qTfQZusgH7q+WB9TPlI/ygkUIrCrz5ZSYQpEz32wFdUpUOXlX/+QbSsUcelAFm+mMk/Qk03jiEN03wNb6V2UoCRfREvtPME7UlA427cZauwLXuScx74tjRlLaOqcQ++Iij0eGxq9Dq7gLW9iiJrY8GqkBeeGw/iBbAR3XEBRzsYFJKNfdZy8FYVKvbxYk4WKDSIf5Q0+Rg8hBxUtjiNPzmA88gmSYIfP5UX5qmIITMDA9DA6B2cQ/eyDK1dCW50M9vcPu5MfyRzl9O/vOBVuxhiRZDoFjnK07vQj18l49iB9pBPJryyTki7qxXZFj+Pu2GM8nAybamDQRi1bjd1ry1Dr2gvZZtbeS9hqujHrMsnE2sqV/GeZgoQ5zYNTy2QN4D0hovrEOucnfB/I3k2BHWR/bcX/AQFOHRkFYjRlAAAAAElFTkSuQmCC"
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "",
+      "order": 18
+    },
+    "_name": "Reddit",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://google.com/search?q={searchTerms}+site%3Areddit.com"
+      }
+    ],
+    "id": "55123bba-3b5b-4d62-8676-0fced4347206"
+  },
+  {
+    "_definedAliases": [
+      "@ytm"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 19
+    },
+    "_name": "YT Music",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://music.youtube.com/search?q={searchTerms} "
+      }
+    ],
+    "id": "a83bee4b-6515-4fd8-8919-bd82901a22bc"
+  },
+  {
+    "_definedAliases": [
+      "@alt"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 20
+    },
+    "_name": "AlternativeTo",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://alternativeto.net/browse/search/?q={searchTerms} "
+      }
+    ],
+    "id": "faa295ee-a9dd-44ce-940b-14899dd5641f"
+  },
+  {
+    "_definedAliases": [
+      "@glo"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 21
+    },
+    "_name": "Glohmed",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://glohmed.org/?s={searchTerms}"
+      }
+    ],
+    "id": "83372c70-e150-43f1-8dad-27cb13b1842b"
+  },
+  {
+    "_definedAliases": [
+      "@aur"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 22
+    },
+    "_name": "AUR",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://aur.archlinux.org/packages?O=0&K={searchTerms} "
+      }
+    ],
+    "id": "207a3d33-29c5-43d0-a45b-97fbab2104f0"
+  },
+  {
+    "_definedAliases": [
+      "@searx"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "",
+      "loadPathHash": "0FeUntgvw5kDHo+1XRpjJDyz5sWx/8Tf3dvdAr4hEvA=",
+      "order": 23
+    },
+    "_name": "SearxNG",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://searx.cronyakatsuki.xyz/search?q={searchTerms}"
+      }
+    ],
+    "id": "a1ae2e11-dc0a-4c26-8465-45a6e4fb513a"
+  },
+  {
+    "_definedAliases": [
+      "@way"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 24
+    },
+    "_name": "Wayback Machine",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://archive.org/search?query={searchTerms}&sin=WEB"
+      }
+    ],
+    "id": "579f7842-0b13-4819-84a7-ea70153c171d"
+  },
+  {
+    "_definedAliases": [
+      "@ways"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 25
+    },
+    "_name": "Create site archive",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://web.archive.org/save/{searchTerms}"
+      }
+    ],
+    "id": "7ad4e0dd-d946-4fc5-97c8-10f2fffa73f3"
+  },
+  {
+    "_definedAliases": [
+      "@wiki"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 26
+    },
+    "_name": "Wikipedia",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://en.wikipedia.org/w/index.php?fulltext=1&search={searchTerms}"
+      }
+    ],
+    "id": "7b0244a0-35e7-43a2-a129-1767f34b5962"
+  },
+  {
+    "_definedAliases": [
+      "@play"
+    ],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "order": 27
+    },
+    "_name": "Play Store",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://play.google.com/store/search?q={searchTerms}"
+      }
+    ],
+    "id": "c7f631da-f632-4e3c-8c12-8f185c61eabe"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": null,
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@tra",
+      "order": 28
+    },
+    "_name": "Trakt",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://trakt.tv/search?query={searchTerms}"
+      }
+    ],
+    "id": "e5c62d0c-a36f-4507-976e-55711c45fc6a"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACZ0lEQVQ4T4VTX0hTYRT/ffdud96MFpRIUZmgC4raVDBSicoedAUFEsOiwB60CGrYQ0RBhBnkQwmrOYUeeugtsgjC/mi28CHBlDDM0tIiQiNsUm3e3T+d77bN6xr2wffwnfM7v/M753yHIe0YhlGs63oDY2wXufIS7gmy9wiCECL7kDWEJR8EWEKBAQIdTSe1vgnTQRg/EUW53STgwXQfkbHCUBTEHtxBrLsL2uRHGJoOW956OCqrIO/3gUkSx4cJW8VJTAJN027yzPq3KUTO+qFOjGcUIZVshfNKwPSRknZRFI8xXjO9B3jmmeOHzaw8i1xzEFJpGSAIUF72Ye75Uzibr0Fcs85KXsQoeztlr1eHAog03Yb+k2H51RDsm9wLVei6SZbWjzZGUt5TLQVafym0qTfQZusgH7q+WB9TPlI/ygkUIrCrz5ZSYQpEz32wFdUpUOXlX/+QbSsUcelAFm+mMk/Qk03jiEN03wNb6V2UoCRfREvtPME7UlA427cZauwLXuScx74tjRlLaOqcQ++Iij0eGxq9Dq7gLW9iiJrY8GqkBeeGw/iBbAR3XEBRzsYFJKNfdZy8FYVKvbxYk4WKDSIf5Q0+Rg8hBxUtjiNPzmA88gmSYIfP5UX5qmIITMDA9DA6B2cQ/eyDK1dCW50M9vcPu5MfyRzl9O/vOBVuxhiRZDoFjnK07vQj18l49iB9pBPJryyTki7qxXZFj+Pu2GM8nAybamDQRi1bjd1ry1Dr2gvZZtbeS9hqujHrMsnE2sqV/GeZgoQ5zYNTy2QN4D0hovrEOucnfB/I3k2BHWR/bcX/AQFOHRkFYjRlAAAAAElFTkSuQmCC"
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@gi",
+      "order": 29
+    },
+    "_name": "Google Images",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.google.com/search?udm=2&q={searchTerms}"
+      }
+    ],
+    "id": "6a16b617-feb4-4ae5-aa1c-eaf245092dbd"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "32": "data:image/png;base64,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"
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@wp",
+      "order": 30
+    },
+    "_name": "WordPress",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://wordpress.org/search/{searchTerms}"
+      }
+    ],
+    "id": "0ff6acc5-c5e3-4f66-b5db-1c340ae23c8d"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "347.716552734375": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5Mm1tIiBoZWlnaHQ9IjkybW0iIHZpZXdCb3g9IjAgMCA5MiA5MiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTQwLjkyMSAtMTcuNDE3KSI+PGNpcmNsZSBjeD0iNzUuOTIxIiBjeT0iNTMuOTAzIiByPSIzMCIgc3R5bGU9ImZpbGw6bm9uZTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6IzMwNTBmZjtzdHJva2Utd2lkdGg6MTA7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIvPjxwYXRoIGQ9Ik02Ny41MTUgMzcuOTE1YTE4IDE4IDAgMCAxIDIxLjA1MSAzLjMxMyAxOCAxOCAwIDAgMSAzLjEzOCAyMS4wNzgiIHN0eWxlPSJmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiMzMDUwZmY7c3Ryb2tlLXdpZHRoOjU7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIvPjxyZWN0IHdpZHRoPSIxOC44NDYiIGhlaWdodD0iMzkuOTYzIiB4PSIzLjcwNiIgeT0iMTIyLjA5IiByeT0iMCIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOiMzMDUwZmY7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjg7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgdHJhbnNmb3JtPSJyb3RhdGUoLTQ2LjIzNSkiLz48L2c+PC9zdmc+"
+    },
+    "_loadPath": "[https]search.bladerunn.in/searxng.xml",
+    "_metaData": {
+      "loadPathHash": "fLrd489X8HonA10zqdKvC8hMCnIxpyYd2PgP+UqMbXw=",
+      "order": 31,
+      "updateexpir": 1788218369929,
+      "updatelastmodified": "Mon, 24 Aug 2026 23:19:29 GMT"
+    },
+    "_name": "SearXNG",
+    "_updateInterval": null,
+    "_updateURL": null,
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "params": [],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search?q={searchTerms}"
+      },
+      {
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "method": "POST",
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "method": "POST",
+        "params": [
+          {
+            "name": "q",
+            "value": "{searchTerms}"
+          }
+        ],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search"
+      },
+      {
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "params": [],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search?q={searchTerms}"
+      },
+      {
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.bladerunn.in/search",
+        "type": "searchform"
+      },
+      {
+        "params": [],
+        "rels": [
+          "results"
+        ],
+        "template": "https://search.bladerunn.in/search?q={searchTerms}"
+      },
+      {
+        "params": [],
+        "rels": [
+          "suggestions"
+        ],
+        "template": "https://search.bladerunn.in/autocompleter?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      },
+      {
+        "params": [],
+        "rels": [
+          "self"
+        ],
+        "template": "https://search.bladerunn.in/opensearch.xml",
+        "type": "application/opensearchdescription+xml"
+      }
+    ],
+    "id": "4a13b328-3447-49f1-bd50-43ec4d936bfb"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMC41IiByPSI4Ljc1IiBzdHJva2U9IiNBNEE3QUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxOC41IiByPSIxLjUiIGZpbGw9IiNBNEE3QUQiLz48cGF0aCBmaWxsPSIjRkI1NDJCIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Im0xNS4zOTYgOS4wNC0uMzkzLTEuMDQ2LjI3NC0uNmEuMjAzLjIwMyAwIDAgMC0uMDQzLS4yMjlsLS43NDItLjczNmExLjIxNiAxLjIxNiAwIDAgMC0xLjI0Ni0uMjg0bC0uMjA4LjA3TDExLjk1NCA1SDcuOTY2bC0xLjA3IDEuMjMtLjIwMi0uMDdjLS40NC0uMTUyLS45My0uMDQtMS4yNTcuMjg3bC0uNzU2Ljc1YS4xNjEuMTYxIDAgMCAwLS4wMzQuMTgybC4yODYuNjI0LS4zOTEgMS4wNDUuMjUzLjk0MyAxLjE1MiA0LjI5NWMuMTMyLjQ5Ni40MzguOTMuODYzIDEuMjI2IDAgMCAxLjQuOTY4IDIuNzggMS44NDZhLjcwNC43MDQgMCAwIDAgLjM4NC4xMzIuNzAyLjcwMiAwIDAgMCAuMzg1LS4xMzJjMS41NS0uOTk2IDIuNzc3LTEuODUgMi43NzctMS44NS40MjUtLjI5Ny43My0uNzMxLjg2Mi0xLjIyN2wxLjE0Ny00LjI5Ny4yNTEtLjk0NHoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGZpbGw9InVybCgjYSkiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0ibTE0LjE3IDkuMjQ4LS4wMTguMDU2LS4wMjguMWE4LjQ3OCA4LjQ3OCAwIDAgMS0uMzU4LjM5OGwtMS4xMDcgMS4xNTRjLS4xMi4xMjYtLjE4OS4yODMtLjEyLjQ0MmwuMTUuMzZjLjA2OC4xNi4wNzUuNDIyLjAwOS41OThhMS4wNjcgMS4wNjcgMCAwIDEtLjMzMy40NThsLS4xMTYuMDkyYS41NjMuNTYzIDAgMCAxLS41MzcuMDY0bC0uNTEtLjIzOGEyLjY0IDIuNjQgMCAwIDEtLjUyNi0uMzQ0bC0uNDgzLS40MjVhLjIxNi4yMTYgMCAwIDEtLjAxMi0uMzE1bDEuMTc2LS43NzhjLjE0NS0uMDk2LjIyMi0uMjc0LjE0LS40MjZsLS40MTgtLjc0NmMtLjA4My0uMTUyLS4xMTYtLjM1NC0uMDc0LS40NDkuMDQyLS4wOTUuMjEyLS4yMjIuMzc2LS4yODNsMS4zNjUtLjQ5N2MuMTY0LS4wNjEuMTU1LS4xMjQtLjAyLS4xNGwtLjg3Mi0uMDY0YTEuMjE3IDEuMjE3IDAgMCAwLS40NzMuMDU1bC0uNjYuMTZjLS4xNy4wNDctLjIwNS4yMjMtLjE3My4zOTNsLjI3MiAxLjQ0N2MuMDMyLjE3LjA0OC4zNC4wMzUuMzc5LS4wMTMuMDQtLjE2NC4xMDItLjMzNS4xNGwtLjIyNi4wNWMtLjE3Mi4wMzktLjQ1My4wNC0uNjI1LjAwNWwtLjI3My0uMDU3Yy0uMTcyLS4wMzYtLjMyMy0uMDk4LS4zMzYtLjEzNy0uMDEzLS4wNC4wMDMtLjIxLjAzNC0uMzhsLjI3MS0xLjQ0N2MuMDMyLS4xNy0uMDA0LS4zNDYtLjE3NC0uMzkybC0uNjYtLjE1OWExLjIyIDEuMjIgMCAwIDAtLjQ3My0uMDU1bC0uODcyLjA2NWMtLjE3NS4wMTYtLjE4NC4wNzktLjAyLjE0bDEuMzY2LjQ5NWMuMTY1LjA2MS4zMzQuMTg5LjM3Ni4yODQuMDQzLjA5NC4wMS4yOTYtLjA3My40NDlsLS40MTcuNzQ1Yy0uMDgyLjE1Mi0uMDA1LjMzLjE0LjQyN2wxLjE3Ny43NzZhLjIxNi4yMTYgMCAwIDEtLjAxMS4zMTVsLS40ODIuNDI2Yy0uMTMuMTE2LS4zNjguMjctLjUyNy4zNDVsLS41MS4yMzhhLjU2My41NjMgMCAwIDEtLjUzNi0uMDYzbC0uMTE2LS4wOTJhMS4wNzggMS4wNzggMCAwIDEtLjMzOS0uNDcyLjkwMS45MDEgMCAwIDEgLjAxNC0uNTgzbC4xNS0uMzYxYy4wNjgtLjE1OSAwLS4zMTYtLjEyMS0uNDQyTDYuMTQ4IDkuODA2YTguNTUgOC41NSAwIDAgMS0uMzU4LS4zOTdsLS4wMjktLjEtLjAxOC0uMDU2Yy0uMDAyLS4wNjUuMDIyLS4yNy4wNDktLjMyNi4wMjYtLjA1NS4xMjktLjIxOC4yMjctLjM2bC4yMzgtLjM0NGMuMDk4LS4xNDMuMjY5LS4zNy4zNzgtLjUwNWwuMzQ4LS40MjdjLjExLS4xMzUuMjAzLS4yNDQuMjE3LS4yNDNsLjMxNi4wNTcuNTI2LjEuNDI0LjA3OGMuMDYuMDEyLjI0Ni0uMDIzLjQxNC0uMDc2bC4zNzktLjEyYy4xNjctLjA1My40Mi0uMTIzLjU2NC0uMTU2bC4xMzIuMDAyLjEzMy0uMDAyYy4xNDMuMDMyLjM5Ny4xMDIuNTY0LjE1NWwuMzguMTJjLjE2Ny4wNTMuMzUzLjA4Ny40MTMuMDc2bC4zNS0uMDY2LjA3NC0uMDE0LjUyNi0uMWE3LjEgNy4xIDAgMCAxIC4zMjUtLjA1OGMuMDA1IDAgLjA5OC4xMDkuMjA4LjI0NGwuMzQ4LjQyNmMuMTEuMTM1LjI4LjM2Mi4zOC41MDRsLjIzNy4zNDRjLjA5OS4xNDIuMjUzLjQwMi4yNjMuNDYxLjAxLjA1OS4wMTYuMTYuMDE0LjIyNXptLTQuMTQzIDMuNDQ0Yy4wMTYgMCAuMTYxLjA1NC4zMjQuMTJsLjE1LjA2MWMuMTYzLjA2Ni40MjUuMTg0LjU4Mi4yNjJsLjQ0NC4yMjFjLjE1Ny4wNzguMTY5LjIyNC4wMjYuMzI0bC0uMzguMjY2Yy0uMTQzLjEtLjM2OC4yNzQtLjUuMzg3bC0uNDc5LjQxYS4zNzUuMzc1IDAgMCAxLS40NzMgMCA2NS4zNDcgNjUuMzQ3IDAgMCAwLS40NzQtLjQwNSA3LjcyOCA3LjcyOCAwIDAgMC0uNTAyLS4zODRsLS4zNzgtLjI2MWMtLjE0NC0uMS0uMTMzLS4yNDYuMDIzLS4zMjZsLjQ0Ny0uMjI4YTguODYgOC44NiAwIDAgMSAuNTgtLjI2NWwuMTUtLjA2MmEzLjI1IDMuMjUgMCAwIDEgLjMyMy0uMTJoLjEzN3oiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYSIgeDE9IjkuOTU3IiB4Mj0iMTMuODk4IiB5MT0iMTYuNjc0IiB5Mj0iMTYuNjc0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI2ZmZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0Y0RjRGNCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjwvc3ZnPg=="
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@img",
+      "order": 33
+    },
+    "_name": "Images",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.brave.com/images?q={searchTerms}"
+      }
+    ],
+    "id": "7fe27a34-0df6-4aea-9db2-9ef96a879dd3"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMC41IiByPSI4Ljc1IiBzdHJva2U9IiNBNEE3QUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxOC41IiByPSIxLjUiIGZpbGw9IiNBNEE3QUQiLz48cGF0aCBmaWxsPSIjRkI1NDJCIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Im0xNS4zOTYgOS4wNC0uMzkzLTEuMDQ2LjI3NC0uNmEuMjAzLjIwMyAwIDAgMC0uMDQzLS4yMjlsLS43NDItLjczNmExLjIxNiAxLjIxNiAwIDAgMC0xLjI0Ni0uMjg0bC0uMjA4LjA3TDExLjk1NCA1SDcuOTY2bC0xLjA3IDEuMjMtLjIwMi0uMDdjLS40NC0uMTUyLS45My0uMDQtMS4yNTcuMjg3bC0uNzU2Ljc1YS4xNjEuMTYxIDAgMCAwLS4wMzQuMTgybC4yODYuNjI0LS4zOTEgMS4wNDUuMjUzLjk0MyAxLjE1MiA0LjI5NWMuMTMyLjQ5Ni40MzguOTMuODYzIDEuMjI2IDAgMCAxLjQuOTY4IDIuNzggMS44NDZhLjcwNC43MDQgMCAwIDAgLjM4NC4xMzIuNzAyLjcwMiAwIDAgMCAuMzg1LS4xMzJjMS41NS0uOTk2IDIuNzc3LTEuODUgMi43NzctMS44NS40MjUtLjI5Ny43My0uNzMxLjg2Mi0xLjIyN2wxLjE0Ny00LjI5Ny4yNTEtLjk0NHoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGZpbGw9InVybCgjYSkiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0ibTE0LjE3IDkuMjQ4LS4wMTguMDU2LS4wMjguMWE4LjQ3OCA4LjQ3OCAwIDAgMS0uMzU4LjM5OGwtMS4xMDcgMS4xNTRjLS4xMi4xMjYtLjE4OS4yODMtLjEyLjQ0MmwuMTUuMzZjLjA2OC4xNi4wNzUuNDIyLjAwOS41OThhMS4wNjcgMS4wNjcgMCAwIDEtLjMzMy40NThsLS4xMTYuMDkyYS41NjMuNTYzIDAgMCAxLS41MzcuMDY0bC0uNTEtLjIzOGEyLjY0IDIuNjQgMCAwIDEtLjUyNi0uMzQ0bC0uNDgzLS40MjVhLjIxNi4yMTYgMCAwIDEtLjAxMi0uMzE1bDEuMTc2LS43NzhjLjE0NS0uMDk2LjIyMi0uMjc0LjE0LS40MjZsLS40MTgtLjc0NmMtLjA4My0uMTUyLS4xMTYtLjM1NC0uMDc0LS40NDkuMDQyLS4wOTUuMjEyLS4yMjIuMzc2LS4yODNsMS4zNjUtLjQ5N2MuMTY0LS4wNjEuMTU1LS4xMjQtLjAyLS4xNGwtLjg3Mi0uMDY0YTEuMjE3IDEuMjE3IDAgMCAwLS40NzMuMDU1bC0uNjYuMTZjLS4xNy4wNDctLjIwNS4yMjMtLjE3My4zOTNsLjI3MiAxLjQ0N2MuMDMyLjE3LjA0OC4zNC4wMzUuMzc5LS4wMTMuMDQtLjE2NC4xMDItLjMzNS4xNGwtLjIyNi4wNWMtLjE3Mi4wMzktLjQ1My4wNC0uNjI1LjAwNWwtLjI3My0uMDU3Yy0uMTcyLS4wMzYtLjMyMy0uMDk4LS4zMzYtLjEzNy0uMDEzLS4wNC4wMDMtLjIxLjAzNC0uMzhsLjI3MS0xLjQ0N2MuMDMyLS4xNy0uMDA0LS4zNDYtLjE3NC0uMzkybC0uNjYtLjE1OWExLjIyIDEuMjIgMCAwIDAtLjQ3My0uMDU1bC0uODcyLjA2NWMtLjE3NS4wMTYtLjE4NC4wNzktLjAyLjE0bDEuMzY2LjQ5NWMuMTY1LjA2MS4zMzQuMTg5LjM3Ni4yODQuMDQzLjA5NC4wMS4yOTYtLjA3My40NDlsLS40MTcuNzQ1Yy0uMDgyLjE1Mi0uMDA1LjMzLjE0LjQyN2wxLjE3Ny43NzZhLjIxNi4yMTYgMCAwIDEtLjAxMS4zMTVsLS40ODIuNDI2Yy0uMTMuMTE2LS4zNjguMjctLjUyNy4zNDVsLS41MS4yMzhhLjU2My41NjMgMCAwIDEtLjUzNi0uMDYzbC0uMTE2LS4wOTJhMS4wNzggMS4wNzggMCAwIDEtLjMzOS0uNDcyLjkwMS45MDEgMCAwIDEgLjAxNC0uNTgzbC4xNS0uMzYxYy4wNjgtLjE1OSAwLS4zMTYtLjEyMS0uNDQyTDYuMTQ4IDkuODA2YTguNTUgOC41NSAwIDAgMS0uMzU4LS4zOTdsLS4wMjktLjEtLjAxOC0uMDU2Yy0uMDAyLS4wNjUuMDIyLS4yNy4wNDktLjMyNi4wMjYtLjA1NS4xMjktLjIxOC4yMjctLjM2bC4yMzgtLjM0NGMuMDk4LS4xNDMuMjY5LS4zNy4zNzgtLjUwNWwuMzQ4LS40MjdjLjExLS4xMzUuMjAzLS4yNDQuMjE3LS4yNDNsLjMxNi4wNTcuNTI2LjEuNDI0LjA3OGMuMDYuMDEyLjI0Ni0uMDIzLjQxNC0uMDc2bC4zNzktLjEyYy4xNjctLjA1My40Mi0uMTIzLjU2NC0uMTU2bC4xMzIuMDAyLjEzMy0uMDAyYy4xNDMuMDMyLjM5Ny4xMDIuNTY0LjE1NWwuMzguMTJjLjE2Ny4wNTMuMzUzLjA4Ny40MTMuMDc2bC4zNS0uMDY2LjA3NC0uMDE0LjUyNi0uMWE3LjEgNy4xIDAgMCAxIC4zMjUtLjA1OGMuMDA1IDAgLjA5OC4xMDkuMjA4LjI0NGwuMzQ4LjQyNmMuMTEuMTM1LjI4LjM2Mi4zOC41MDRsLjIzNy4zNDRjLjA5OS4xNDIuMjUzLjQwMi4yNjMuNDYxLjAxLjA1OS4wMTYuMTYuMDE0LjIyNXptLTQuMTQzIDMuNDQ0Yy4wMTYgMCAuMTYxLjA1NC4zMjQuMTJsLjE1LjA2MWMuMTYzLjA2Ni40MjUuMTg0LjU4Mi4yNjJsLjQ0NC4yMjFjLjE1Ny4wNzguMTY5LjIyNC4wMjYuMzI0bC0uMzguMjY2Yy0uMTQzLjEtLjM2OC4yNzQtLjUuMzg3bC0uNDc5LjQxYS4zNzUuMzc1IDAgMCAxLS40NzMgMCA2NS4zNDcgNjUuMzQ3IDAgMCAwLS40NzQtLjQwNSA3LjcyOCA3LjcyOCAwIDAgMC0uNTAyLS4zODRsLS4zNzgtLjI2MWMtLjE0NC0uMS0uMTMzLS4yNDYuMDIzLS4zMjZsLjQ0Ny0uMjI4YTguODYgOC44NiAwIDAgMSAuNTgtLjI2NWwuMTUtLjA2MmEzLjI1IDMuMjUgMCAwIDEgLjMyMy0uMTJoLjEzN3oiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYSIgeDE9IjkuOTU3IiB4Mj0iMTMuODk4IiB5MT0iMTYuNjc0IiB5Mj0iMTYuNjc0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI2ZmZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0Y0RjRGNCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjwvc3ZnPg=="
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@b",
+      "loadPathHash": "0FeUntgvw5kDHo+1XRpjJDyz5sWx/8Tf3dvdAr4hEvA=",
+      "order": 34
+    },
+    "_name": "Brave",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.brave.com/search?q={searchTerms}"
+      },
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://search.brave.com/api/suggest?q={searchTerms}",
+        "type": "application/x-suggestions+json"
+      }
+    ],
+    "id": "1f3e5258-8aa5-4592-9f8d-96c843c31a7c"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "512": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjY0IiBmaWxsPSIjMGEwYTBhIi8+CiAgPHJlY3QgeD0iMTEwIiB5PSIzMTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iIzUyNTI1MiIvPgogIDx0ZXh0CiAgICB4PSIzMjAiCiAgICB5PSIzNzAiCiAgICBmb250LWZhbWlseT0iJ0dlaXN0IE1vbm8nLCB1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCAnU0YgTW9ubycsIE1lbmxvLCBDb25zb2xhcywgbW9ub3NwYWNlIgogICAgZm9udC1zaXplPSI0MjAiCiAgICBmb250LXdlaWdodD0iNTAwIgogICAgdGV4dC1hbmNob3I9Im1pZGRsZSIKICAgIGZpbGw9IiNmYWZhZmEiCiAgPjx0c3Bhbj4vPC90c3Bhbj48L3RleHQ+Cjwvc3ZnPgo="
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@npm",
+      "order": 35
+    },
+    "_name": "npmx",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://npmx.dev/search?q={searchTerms}"
+      }
+    ],
+    "id": "ea96f8b8-2395-47ef-a214-ebfed8aafd86"
+  },
+  {
+    "_definedAliases": [],
+    "_filePath": null,
+    "_iconMapObj": {
+      "16": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACZElEQVQ4T31TXUgUURT+7szurJPhBiVSVCboBkXtqmCkEpU96BYYSCwWBfagSVCLPUQURJhBPpSwpavQQw+9RRZB2I9mGz4UmBKGWVpaSGiErVS7zs5P5067Om7LDlyG+93vfN85557LkPQZhlGk63qDIAh76Sg3fjxJWB9hQcbYsDWEJTYUuIJIASIdTxa17onTRRw/CUU4bgrwYPo9plVuKAqiD+8i2tsDbeozDE2HLXcTHBWVkA/6wCSJh4RoVXIRU0DTtFvcWf8+g/A5P9TJiZRJSMU74LwaMM8ok05RFE8wXjPtB7nzXONR05W7yDWHIZWUAoIA5dUAFl48g7PlOsT1G63ihYzcO8m9Xh0OINx8B/ovhlXXgrBvdS/PQtdNsaR+dPAMPhKYr70ugTbzDtp8HeQjN9L10Xo2xgUUQuzq85VUmALR8wBsddUiqeLK7//EdhaIuHwog+PKkkBfJl1HDKL7Ptgab1qB4jwRrbVLAh+IXTA/sA1qdBovsy+gentTyhKauxfQP6piv8eGJq+Dc97zJgapiQ1vRltxfiSEn8hE++6LKMzeskxk7JuOU7cjUKmXl2oyUL5Z5Fd5k5fgIeaQosVw7OlZTIS/QBLs8Lm8KFtbBIEJGJwdQffQHCJffXDlSOiok8H+zbA7MUjmVc7++YHToRaMk0iqL99RhrY9fuQ4GXdvp0E6mRhlmQJ6aO1S9BjujT/Bo6mQmQ0MelFZ67BvQylqXQcg28za+2lV0ShHrY9JJtU2nkm6IeDOxDnDgzlvUSARxHtCpPr4c86L458I6yWsiwLfWg3+ArI8BSVU3dXZAAAAAElFTkSuQmCC"
+    },
+    "_loadPath": "[user]",
+    "_metaData": {
+      "alias": "@ai",
+      "order": 36
+    },
+    "_name": "Google AI mode",
+    "_urls": [
+      {
+        "params": [],
+        "rels": [],
+        "template": "https://www.google.com/search?aep=11&udm=50&q={searchTerms}"
+      }
+    ],
+    "id": "eb43524f-e9af-4c55-b220-cc9e410cb002"
+  }
+]
