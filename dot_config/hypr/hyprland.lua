@@ -76,8 +76,10 @@ end)
 -- hl.monitor({ output = "eDP-1", mode = "1366x768@60", position = "0x0", scale = 1 })
 
 -- dual monitor home setup
+-- eDP-1 is 312px shorter than HDMI-A-1; y=156 centers it so cursor dead
+-- zone splits 156px top/bottom instead of one 312px zone at the bottom.
 hl.monitor({ output = "HDMI-A-1", mode = "preferred",     position = "1366x0",    scale = 1 })
-hl.monitor({ output = "eDP-1",    mode = "1366x768@60",   position = "0x0", scale = 1 })
+hl.monitor({ output = "eDP-1",    mode = "1366x768@60",   position = "0x156", scale = 1 })
 
 -- screen mirroring setup
 -- hl.monitor({ output = "eDP-1",    mode = "preferred", position = "0x0",  scale = 1 })
