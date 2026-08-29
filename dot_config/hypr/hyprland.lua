@@ -396,6 +396,11 @@ hl.config({
 
     binds = {
         workspace_back_and_forth = true,
+        -- lets a pinned window (PiP: firefox/ff2mpv, mainMod+P ad-hoc) go
+        -- properly fullscreen -- e.g. mpv's own "f" key. Off by default in
+        -- Hyprland, which is why pressing f in a PiP mpv window silently did
+        -- nothing before this.
+        allow_pin_fullscreen = true,
     },
 
     debug = {
