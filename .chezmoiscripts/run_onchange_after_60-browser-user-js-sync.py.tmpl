@@ -6,7 +6,7 @@
 # they touch a file the browser itself rewrites on exit; user.js is only read
 # at startup, so it's safe to keep in sync automatically here).
 #
-# user.js hash: {{ include "dot_config/firefox-tweaks/user.js" | sha256sum }}
+# user.js hash: {{ include ".chezmoitemplates/firefox-performance.js.tmpl" | sha256sum }}-{{ include ".chezmoitemplates/firefox-preferences.js.tmpl" | sha256sum }}
 
 import sys
 SKIP = {{ if or (eq .chezmoi.os "windows") (eq .machine_kind "vps") }}True{{ else }}False{{ end }}

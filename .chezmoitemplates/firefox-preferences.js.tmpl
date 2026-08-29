@@ -1,0 +1,54 @@
+// Personal about:preferences / about:config choices, pulled out of a live
+// prefs.js by hand (prefs.js mixes real settings in with hundreds of lines of
+// internal state -- sync tokens, telemetry IDs, session/UI bookkeeping -- so
+// this is a curated subset, not a full dump). Kept separate from
+// firefox-performance.js.tmpl so the two purposes (speed vs. personal taste)
+// don't get tangled; both get concatenated into dot_config/firefox-tweaks/user.js.tmpl.
+//
+// Waterfox compatibility: everything below is a long-standing, general
+// Firefox pref except the browser.ml.chat.* block, which controls Mozilla's
+// built-in AI sidebar/link-preview features. Waterfox strips Mozilla's AI
+// and telemetry integrations from its build, so those three prefs are
+// expected to be inert no-ops there (harmless, just pointless) rather than
+// something to debug if the AI sidebar doesn't show up disabled the same way.
+// extensions.activeThemeID and sidebar.visibility are newer Firefox features
+// too -- if Waterfox's release lags upstream, worst case these silently do
+// nothing until it catches up. Everything else applies identically.
+
+/** TABS / UI ***/
+user_pref("browser.tabs.closeWindowWithLastTab", false);
+user_pref("browser.tabs.inTitlebar", 1);
+user_pref("browser.tabs.groups.smart.enabled", false);
+user_pref("browser.ctrlTab.sortByRecentlyUsed", true);
+user_pref("browser.toolbars.bookmarks.visibility", "never");
+user_pref("browser.compactmode.show", true);
+user_pref("extensions.activeThemeID", "firefox-compact-dark@mozilla.org");
+user_pref("sidebar.visibility", "hide-on-close");
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enables userChrome.css
+user_pref("browser.backspace_action", 0); // 0 = Backspace navigates back, like the old Back button behavior
+user_pref("browser.urlbar.showSearchSuggestionsFirst", false);
+
+/** PRIVACY ***/
+user_pref("browser.contentblocking.category", "standard");
+user_pref("privacy.donottrackheader.enabled", true);
+user_pref("privacy.history.custom", true);
+user_pref("privacy.clearOnShutdown_v2.formdata", true);
+user_pref("signon.rememberSignons", false);
+user_pref("browser.discovery.enabled", false);
+
+/** FONTS / READING ***/
+user_pref("font.name.monospace.x-western", "JetBrains Mono");
+user_pref("font.size.monospace.x-western", 14);
+user_pref("reader.font_size", 6);
+user_pref("layout.css.prefers-color-scheme.content-override", 0);
+
+/** AI FEATURES (disabled) -- Firefox-only, no-op on Waterfox, see note above ***/
+user_pref("browser.ml.chat.provider", "https://gemini.google.com");
+user_pref("browser.ml.chat.shortcuts", false);
+user_pref("browser.ml.chat.menu", false);
+user_pref("browser.ml.linkPreview.enabled", false);
+
+/** MISC ***/
+user_pref("media.av1.enabled", false);
+user_pref("print_printer", "Mozilla Save to PDF");
+user_pref("browser.aboutConfig.showWarning", false);
