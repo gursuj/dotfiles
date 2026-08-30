@@ -47,7 +47,9 @@ unsetopt beep
 zstyle :compinstall filename '/home/sujal/.zshrc'
 
 # Prompts
-PS1='%B%n@%m %2~ %#%b'
+# Main prompt (PS1) is now starship (see below, gated to interactive shells) —
+# dot_config/starship.toml replicates user@host + 2-dir path, plus git status.
+# PS1='%B%n@%m %2~ %#%b'
 PS2='%_>'
 
 
@@ -59,6 +61,13 @@ autoload -Uz compinit
 compinit
 autoload -Uz promptinit
 promptinit
+
+# starship: sets PROMPT via its own precmd hook. Placed before the
+# zle-keymap-select redefinition below so our cursor-shape widget (not
+# starship's own vi-mode hook) wins that binding.
+if type starship &> /dev/null; then
+    eval "$(starship init zsh)"
+fi
 
 zstyle ':completion:*' menu select
 # case-insensitive, then fuzzy (partial/substring) if exact case-insensitive fails

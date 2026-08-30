@@ -1,0 +1,43 @@
+# Minimal prompt: user@host + path (last 2 dirs) + git branch + git status.
+# No Nerd Font glyphs used anywhere below — avoids tofu/missing-icon boxes
+# on Windows Terminal profiles without a Nerd Font installed.
+format = """$username$hostname$directory$git_branch$git_status$character"""
+
+[username]
+show_always = true
+style_user = "bold"
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = false
+format = "[@$hostname]($style) "
+style = "bold"
+
+[directory]
+truncation_length = 2
+style = "bold cyan"
+
+[git_branch]
+symbol = ""
+format = "[$symbol$branch]($style) "
+style = "bold purple"
+
+# All the pieces below only show up if that condition is true (e.g. no
+# "?1" shown unless there's actually 1 untracked file).
+[git_status]
+format = '([$all_status$ahead_behind]($style)) '
+style = "bold red"
+staged = "A${count}"
+modified = "M${count}"
+untracked = "??${count}"
+deleted = "D${count}"
+renamed = "R${count}"
+stashed = "S${count}"
+conflicted = "U${count}"
+ahead = ">${count}"
+behind = "<${count}"
+diverged = "<>"
+
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
