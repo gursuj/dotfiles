@@ -6,23 +6,40 @@
 # they touch a file the browser itself rewrites on exit; user.js is only read
 # at startup, so it's safe to keep in sync automatically here).
 #
+# Windows: symlinks need admin rights or Developer Mode enabled, which isn't
+# guaranteed on a fresh box, so this falls back to a plain copy when the
+# symlink attempt fails. A copy re-syncs on the next chezmoi apply that
+# changes the hash below (same trigger as everywhere else), it just isn't
+# live-linked in between. First run on a new Windows install: check the
+# printed output rather than assuming it worked -- untested across the range
+# of real Windows/Firefox/Waterfox installs.
+#
 # user.js hash: {{ include ".chezmoitemplates/firefox-performance.js.tmpl" | sha256sum }}-{{ include ".chezmoitemplates/firefox-preferences.js.tmpl" | sha256sum }}
 
 import sys
-SKIP = {{ if or (eq .chezmoi.os "windows") (eq .machine_kind "vps") }}True{{ else }}False{{ end }}
+SKIP = {{ if eq .machine_kind "vps" }}True{{ else }}False{{ end }}
 if SKIP:
     sys.exit(0)
 
 import os
+import shutil
 from configparser import ConfigParser
 from pathlib import Path
 
 SOURCE = Path.home() / ".config/firefox-tweaks/user.js"
 
+{{ if eq .chezmoi.os "windows" -}}
+_APPDATA = Path(os.environ["APPDATA"])
+BROWSERS = {
+    "firefox": _APPDATA / "Mozilla" / "Firefox",
+    "waterfox": _APPDATA / "Waterfox",
+}
+{{- else -}}
 BROWSERS = {
     "firefox": Path.home() / ".mozilla/firefox",
     "waterfox": Path.home() / ".waterfox",
 }
+{{- end }}
 
 
 def active_profile_dir(install_dir):
@@ -62,13 +79,24 @@ def main():
             print(f"{name}: already linked")
             continue
 
+        # a plain-copy target (symlink fallback, likely Windows) counts as
+        # synced if its bytes already match -- no point re-copying every run.
+        if target.is_file() and not target.is_symlink() and target.read_bytes() == SOURCE.read_bytes():
+            print(f"{name}: already synced (copy)")
+            continue
+
         if target.exists() or target.is_symlink():
             backup = target.with_suffix(f".js.bak-{os.getpid()}")
             target.rename(backup)
             print(f"{name}: backed up existing user.js to {backup}")
 
-        target.symlink_to(SOURCE)
-        print(f"{name}: linked {target} -> {SOURCE}")
+        try:
+            target.symlink_to(SOURCE)
+            print(f"{name}: linked {target} -> {SOURCE}")
+        except OSError as e:
+            shutil.copyfile(SOURCE, target)
+            print(f"{name}: symlink failed ({e}) -- copied {SOURCE} -> {target} instead "
+                  f"(enable Developer Mode or run as admin for a real symlink)")
 
 
 if __name__ == "__main__":

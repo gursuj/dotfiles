@@ -9,17 +9,16 @@
 - ~~firefox profile configs for performance~~ done 2026-08-29: `dot_config/firefox-tweaks/user.js`
     + `run_onchange_after_60-browser-user-js-sync.py.tmpl` symlinks it into Firefox/Waterfox
     profiles automatically, arch-only for now. css, sideberry still TODO.
-- switch wpc (windows) to Waterfox too, and extend the firefox-tweaks auto-apply script to
-    cover it -- currently gated to arch only in the sync script. Windows quirks to handle:
-    - profile dirs live under `%APPDATA%\Mozilla\Firefox\` / `%APPDATA%\Waterfox\` instead of
-      `~/.mozilla/firefox` / `~/.waterfox`, but same `profiles.ini` format, so detection logic
-      carries over
-    - `.chezmoi.toml.tmpl` only maps a `sh` interpreter for windows (git-bash) -- the sync
-      script is Python (`.py.tmpl`), needs a `[interpreters.py]` entry added or a rewrite in sh
-    - `os.symlink` on Windows needs admin/Developer Mode -- may need a copy fallback instead of
-      a symlink when that's unavailable
-    - untested: no Windows box available when this was built, so treat first run there as a
-      dry run before trusting it
+- ~~switch wpc (windows) to Waterfox too, extend firefox-tweaks auto-apply script to cover
+    it~~ done 2026-08-31: `run_onchange_after_60-browser-user-js-sync.py.tmpl` now handles
+    Windows -- `%APPDATA%\Mozilla\Firefox\` / `%APPDATA%\Waterfox\` profile dirs, a
+    `[interpreters.py]` entry in `.chezmoi.toml.tmpl`, and a copy fallback when
+    `os.symlink` fails (no admin/Developer Mode). **Untested on a real Windows box** --
+    treat the first run there as a dry run, check the printed output before trusting it.
+    `scripts/sync-search-engines.py` also got Windows paths + `tasklist`-based process
+    detection, but stays manual-only by design (see its own docstring) -- run it yourself
+    after `chezmoi apply` on a new device, don't expect chezmoi to do it. css, sideberry
+    still TODO.
 - replace bash w/ zsh on vps.
     - compare if anything useful from bashrc should be inherited
     - will prob need separate zsh configs for laptop and vps?

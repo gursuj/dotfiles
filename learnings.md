@@ -169,3 +169,33 @@ On a fresh machine, re-run `herdr integration install claude` / `herdr integrati
 opencode` instead of restoring these from a backup — that also re-wires whatever hook/plugin
 registration the target tool's own config needs (already tracked: the Claude Code
 `SessionStart` hook entry in `dot_claude/settings.json.tmpl`, and OpenCode's `tui.jsonc`).
+
+## Firefox/Waterfox Windows support added; `extensions.activeThemeID` removed (2026-08-31)
+
+`run_onchange_after_60-browser-user-js-sync.py.tmpl` now runs on Windows too (was
+arch-only): `%APPDATA%\Mozilla\Firefox\` / `%APPDATA%\Waterfox\` profile dirs, a
+`[interpreters.py]` entry in `.chezmoi.toml.tmpl`, and a copy fallback when `os.symlink`
+fails without admin/Developer Mode. Confirmed working on this machine — Waterfox landed
+as a copy (Dev Mode not enabled here by choice), same script handles re-copying on future
+hash changes automatically. `scripts/sync-search-engines.py` got matching Windows
+path/process detection (`tasklist` instead of `pgrep`), but stays manual-only by design —
+never auto-run by chezmoi apply, since the browser rewrites that file on exit and would
+clobber a merge mid-session.
+
+Also removed `user_pref("extensions.activeThemeID", "firefox-compact-dark@mozilla.org")`
+from `firefox-preferences.js.tmpl` — confirmed on a real profile it doesn't switch the
+theme; browser chrome stayed on the OS "System" setting. Built-in Firefox themes are
+toggled through the Addon Manager's own state (`extensions.json` / `addonStartup.json.lz4`),
+not read from `user.js` at startup the way a normal pref is, so writing it there was a
+silent no-op. If dark mode is wanted again, it needs picking manually in `about:addons` →
+Themes — there's no user.js pref that reliably forces it.
+
+Also checked `layout.css.prefers-color-scheme.content-override` (was tracked, value `0`)
+while debugging this — confirmed it's a *different* bug, not unrelated as first assumed:
+this pref pins Firefox's "Website Appearance" setting (`about:preferences` → Language and
+Appearance), which controls what web content sees for `prefers-color-scheme`, not the
+browser's own chrome theme. Value mapping is 0=Dark, 1=Light, 2=System, 3=Browser/Auto —
+initially misread `0` as Light, it's actually Dark. Since user.js re-pins it on every
+restart, any UI change back to Light/Auto silently reverted to Dark on next launch.
+Removed the pref entirely so the setting behaves like a normal toggle and persists
+whatever's picked in the UI, instead of being locked.

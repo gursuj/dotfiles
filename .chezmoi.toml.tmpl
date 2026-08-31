@@ -3,6 +3,11 @@
 [interpreters.sh]
     command = "sh"
 
+# Same problem for the .py.tmpl script (browser user.js sync) -- needs python3
+# on PATH. See README "Dependencies" for what to install if this errors.
+[interpreters.py]
+    command = "python"
+
 [data]
     machine_kind = "wpc"
     sandbox_dir = 'D:\claude-sandbox'

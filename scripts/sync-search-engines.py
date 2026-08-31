@@ -18,6 +18,11 @@ install) needs it merged in by hand.
 
 Active profile dir is auto-detected from profiles.ini -- not hardcoded
 per machine, since profiles.ini already has the answer.
+
+Requires python3 + `pip install lz4` on every machine this runs on, Windows
+included -- see README "Dependencies". Never auto-run by chezmoi (see the
+module docstring above) -- always a manual step, so re-run this yourself
+after `chezmoi apply` on a new device.
 """
 import json
 import os
@@ -32,10 +37,17 @@ try:
 except ImportError:
     sys.exit("error: python3 lz4 module required -- pip install lz4")
 
-BROWSERS = {
-    "firefox": {"dir": Path.home() / ".mozilla/firefox", "proc": "firefox"},
-    "waterfox": {"dir": Path.home() / ".waterfox", "proc": "waterfox-bin"},
-}
+if sys.platform == "win32":
+    _APPDATA = Path(os.environ["APPDATA"])
+    BROWSERS = {
+        "firefox": {"dir": _APPDATA / "Mozilla" / "Firefox", "proc": "firefox.exe"},
+        "waterfox": {"dir": _APPDATA / "Waterfox", "proc": "waterfox.exe"},
+    }
+else:
+    BROWSERS = {
+        "firefox": {"dir": Path.home() / ".mozilla/firefox", "proc": "firefox"},
+        "waterfox": {"dir": Path.home() / ".waterfox", "proc": "waterfox-bin"},
+    }
 
 TRACKED_JSON = Path.home() / ".config/search-engines/custom-engines.json"
 
@@ -70,6 +82,11 @@ def active_profile_dir(browser):
 
 def is_running(browser):
     proc = BROWSERS[browser]["proc"]
+    if sys.platform == "win32":
+        out = subprocess.run(
+            ["tasklist", "/FI", f"IMAGENAME eq {proc}"], capture_output=True, text=True
+        ).stdout
+        return proc.lower() in out.lower()
     return subprocess.run(["pgrep", "-x", proc], stdout=subprocess.DEVNULL).returncode == 0
 
 

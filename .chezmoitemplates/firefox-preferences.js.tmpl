@@ -11,9 +11,9 @@
 // and telemetry integrations from its build, so those three prefs are
 // expected to be inert no-ops there (harmless, just pointless) rather than
 // something to debug if the AI sidebar doesn't show up disabled the same way.
-// extensions.activeThemeID and sidebar.visibility are newer Firefox features
-// too -- if Waterfox's release lags upstream, worst case these silently do
-// nothing until it catches up. Everything else applies identically.
+// sidebar.visibility is a newer Firefox feature too -- if Waterfox's release
+// lags upstream, worst case it silently does nothing until it catches up.
+// Everything else applies identically.
 
 /** TABS / UI ***/
 user_pref("browser.tabs.closeWindowWithLastTab", false);
@@ -22,7 +22,6 @@ user_pref("browser.tabs.groups.smart.enabled", false);
 user_pref("browser.ctrlTab.sortByRecentlyUsed", true);
 user_pref("browser.toolbars.bookmarks.visibility", "never");
 user_pref("browser.compactmode.show", true);
-user_pref("extensions.activeThemeID", "firefox-compact-dark@mozilla.org");
 user_pref("sidebar.visibility", "hide-on-close");
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enables userChrome.css
 user_pref("browser.backspace_action", 0); // 0 = Backspace navigates back, like the old Back button behavior
@@ -40,7 +39,6 @@ user_pref("browser.discovery.enabled", false);
 user_pref("font.name.monospace.x-western", "JetBrains Mono");
 user_pref("font.size.monospace.x-western", 14);
 user_pref("reader.font_size", 6);
-user_pref("layout.css.prefers-color-scheme.content-override", 0);
 
 /** AI FEATURES (disabled) -- Firefox-only, no-op on Waterfox, see note above ***/
 user_pref("browser.ml.chat.provider", "https://gemini.google.com");
