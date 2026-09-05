@@ -102,7 +102,7 @@ hl.monitor({ output = "eDP-1",    mode = "1366x768@60",   position = "1920x156",
 
 -- Set programs that you use
 local terminal    = "ghostty"
-local browser     = "waterfox"
+local browser     = "firefox"
 local fileManager = "nautilus"
 -- make uwsm run apps launched through wofi as separate units
 -- otherwise, issue may arise when running apps in same systemd unit as compositor
