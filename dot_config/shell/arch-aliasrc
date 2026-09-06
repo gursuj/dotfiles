@@ -1,0 +1,115 @@
+#!/bin/bash
+# Arch laptop specific aliases (desktop/Wayland/pacman/etc) -- sourced only
+# when machine_kind == arch (see dot_zshrc.tmpl). Shared, cross-machine
+# aliases (nvim, grep color, opencode, ...) live directly in dot_zshrc.tmpl
+# instead -- add new ones there, not here, unless they're genuinely arch-only.
+
+alias djournal='cd ~/Documents/obsidian; nvim Journal.md'
+alias wpc='cd ~/Documents/obsidian-wpc-notes; nvim gtd.md'
+alias anydesk="GDK_BACKEND=x11 XWAYLAND_NO_GLAMOR=1 XWAYLAND_SCREEN_SCALE_FACTOR=1 anydesk"
+# ccc is now a function (dot_zshrc.tmpl) — sandbox-prompt wrapper around claude, not a plain alias
+alias youtui="~/programming/git-cloned/youtui/target/release/youtui"
+alias ytm=youtui
+alias lg=lazygit
+alias waybar-reload='killall -SIGUSR2 waybar'
+
+alias zed=zeditor
+# scratchpad file for writing down current thoughts, rubber ducking, journalling, shouting into void
+alias sc='nvim $HOME/scratchpad.md'
+alias everdo='$HOME/.local/bin/Everdo-1.11.15.AppImage'
+
+# function oracle-start {
+#     sudo systemctl start docker.service;
+#     docker start oracle;
+#     docker ps;
+# }
+# function oracle-stop {
+#     docker stop oracle;
+#     sudo systemctl start docker.socket;
+# }
+
+# windows explorer. for use w/ WSL
+# alias wex='/mnt/c/Windows/explorer.exe'
+
+# fix tlmgr as seen here https://wiki.archlinux.org/title/TeX_Live
+# alias tlmgr='/usr/share/texmf-dist/scripts/texlive/tlmgr.pl --usermode'
+alias yt='yt-dlp -f "bestvideo[ext=mp4][height<=?720][vcodec!=?vp9]+bestaudio[ext=m4a]/best[ext=mp4]"'
+# Download YouTube playlist videos in separate directory indexed by video order in a playlist
+alias ytp='yt -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"'
+
+# cd to git root directory
+alias gcd='cd "$(git rev-parse --show-toplevel)"'
+alias si='swayimg'
+alias emc='emacsclient -c --socket-name=/run/user/1000/emacs/server'
+alias xmp='sudo xampp-manager'
+alias ls='ls --color=auto'
+# open new terminal window. used in old dwm+st setup. no need with ghostty
+# alias termnew="$TERMINAL >/dev/null 2>&1 & disown"
+
+alias yeet='yay -Rns'
+alias pac-rm='sudo pacman -Rns'
+alias pac-why='pacman -Qi'
+pac-update() {
+    local pacman_failed=0 yay_failed=0 answer
+
+        sudo pacman -Syu || pacman_failed=1
+        yay -Syu || yay_failed=1
+
+        # Works when sourced or executed in Bash, zsh, or sh
+        # Clear any leftover input in stdin to prevent auto-confirmation
+        # while read -t 0 2>/dev/null; do
+        #     read -r _
+        # done
+
+				# printf "○ Do you want to check for AppImage updates (Krita nightly)? [Y/n] "
+        # read -r answer
+
+        # # Convert to lowercase safely. zsh and sh both support `tr`
+        # answer=$(printf "%s" "$answer" | tr '[:upper:]' '[:lower:]')
+        # if [[ -z "$answer" || "$answer" == "y" ]]; then
+        #     # based on https://raghukamath.com/automatically-updating-nightly-builds-of-krita-on-linux
+        #     appimageupdatetool -rO ~/.local/bin/krita6-next.AppImage
+				# 		# everdo appimage doesn't have update info so need to download manually
+        #     # appimageupdatetool -rO ~/.local/bin/everdo.AppImage
+        # fi
+
+        # echo '\n'
+        # [[ $pacman_failed -eq 1 ]] && echo '⚠️  Pacman update failed.'
+        # [[ $yay_failed -eq 1 ]] && echo '⚠️  Yay (AUR) update failed.'
+}
+
+alias wifitui='impala'
+alias pac-check='yay -Qu'
+# remove orphans
+alias pac-orphan='pacman -Qqdt'
+# alias pac-orphan='sudo pacman -Rsn $(pacman -Qqdt)'
+alias pac-mirror-update='sudo systemctl start reflector.service'
+
+# escape pwd output to be shell safe
+alias qwd='printf "%q\n" "$(pwd)"'
+# copy to clipboard
+alias cwd='qwd | wl-copy'
+
+#Search and open
+so() {
+	xdg-open "$(fzf)"
+}
+
+alias routine='xdg-open ~/programming/college-files/assets/routine.*'
+function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+alias gcloned='git clone --depth 1 --single-branch'
+function wlan-scan() {
+	iwctl station wlan0 scan
+	# scan is async - poll until it's done (or timeout) before returning,
+	# else a connect right after this can fail with "invalid network name"
+	for _ in $(seq 1 20); do
+		iwctl station wlan0 show | grep -q "Scanning.*no" && return
+		sleep 0.5
+	done
+}
+alias iw2g="wlan-scan; iwctl station wlan0 connect sujal1058_2"
+alias iw5g="wlan-scan; iwctl station wlan0 connect sujal1058_5"
+alias iwcg="wlan-scan; iwctl station wlan0 connect 'CG net5'"
+alias iwhot="wlan-scan; iwctl station wlan0 connect POCO" # mobile hotspot
+alias cz=chezmoi
+alias gss='git status'

@@ -48,6 +48,9 @@ scripts/wpc-push.ps1
 # Linux box -- no hardware keyboard to remap on the VPS, and Windows
 # autostarts kanata a different way (not systemd).
 .config/systemd/user/kanata.service
+# Desktop/Wayland/pacman-specific aliases -- only sourced when
+# machine_kind == arch (dot_zshrc.tmpl), no point deploying elsewhere.
+.config/shell/arch-aliasrc
 {{ end }}
 AppData/Roaming/herdr/config.toml
 README.md

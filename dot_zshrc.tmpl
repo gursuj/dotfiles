@@ -208,14 +208,13 @@ export QT_STYLE_OVERRIDE='Fusion'
 # of being sourced unconditionally below. Skipped when CLAUDECODE=1 (Claude
 # Code's shells never need them, and paying the cost there was causing
 # session-start slowdowns) but still loaded in normal interactive terminals.
-_expensive_sources=(
-    "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zoxide-zsh"
-    "${XDG_CONFIG_HOME:-$HOME/.config}/shell/herdr-completions-zsh"
-)
 if [[ -z "$CLAUDECODE" ]]; then
-    for _f in "${_expensive_sources[@]}"; do
-        [ -f "$_f" ] && source "$_f"
-    done
+    # zoxide/herdr completions are generated output (zoxide init zsh / herdr
+    # completion zsh), not hand-written -- eval'd live instead of tracking a
+    # static file in chezmoi, so they auto-update with the installed binary
+    # and no-op cleanly on machines without that binary.
+    type zoxide &> /dev/null && eval "$(zoxide init zsh)"
+    type herdr &> /dev/null && eval "$(herdr completion zsh)"
 
     # nvm's init-nvm.sh eagerly sources all of nvm.sh + bash_completion (~1.3s)
     # on every shell start. Stub nvm/node/npm/npx/corepack so that cost is only
@@ -230,14 +229,24 @@ if [[ -z "$CLAUDECODE" ]]; then
     npx()      { _nvm_lazy_load; npx "$@"; }
     corepack() { _nvm_lazy_load; corepack "$@"; }
 fi
-unset _f
 
 {{- if eq .machine_kind "arch" }}
 # hyprshot
 export HYPRSHOT_DIR='$HOME/Pictures/screenshots/'
 {{- end }}
+
+# Shared aliases -- usable on any machine_kind. Machine-specific alias files
+# (e.g. arch-aliasrc: desktop/Wayland/pacman stuff, useless on the VPS) live
+# under ~/.config/shell and get sourced below; put anything cross-machine
+# here instead of in one of those, so it isn't silently skipped elsewhere.
+alias nv=nvim
+alias grep='grep --color=auto'
+alias oc=opencode
+
+{{- if eq .machine_kind "arch" }}
 # Load aliases and shortcuts if existent.
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc"
+{{- end }}
 
 # ccc — run Claude Code in $PWD or a scratch sandbox repo. -y forces $PWD, -n
 # forces sandbox, no flag prompts. Zsh port of pwsh profile's ccc — same
