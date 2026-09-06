@@ -27,8 +27,8 @@ hl.on("hyprland.start", function()
 
     -- setup everdo API host 1st, then launch
     -- if changing everdo path / filename here, also change in .config/shell/aliasrc & desktop file (/usr/share/applications/everdo.desktop)
-    -- hl.exec_cmd("/home/sujal/.config/shell/evrd-addr && /home/sujal/.local/bin/Everdo-1.11.15.AppImage", { workspace = "1" })
-    -- hl.exec_cmd("/home/sujal/.config/shell/evrd-addr && /home/sujal/.local/bin/everdo-1.11.6-early-access.AppImage", { workspace = "1" })
+    -- hl.exec_cmd("$HOME/.config/shell/evrd-addr && $HOME/.local/bin/Everdo-1.11.15.AppImage", { workspace = "1" })
+    -- hl.exec_cmd("$HOME/.config/shell/evrd-addr && $HOME/.local/bin/everdo-1.11.6-early-access.AppImage", { workspace = "1" })
     hl.exec_cmd("mindwtr", { workspace = "1" })
     -- hl.exec_cmd([[emacs --eval "(progn (org-agenda nil \"d\") (delete-other-windows))"]], { workspace = "1" })
     -- this requires emacs user service to be enabled

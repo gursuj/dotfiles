@@ -44,7 +44,7 @@ HISTSIZE=1000
 SAVEHIST=5000
 setopt extendedglob notify
 unsetopt beep
-zstyle :compinstall filename '/home/sujal/.zshrc'
+zstyle :compinstall filename '$HOME/.zshrc'
 
 # Prompts
 # Main prompt (PS1) is now starship (see below, gated to interactive shells) —
@@ -171,20 +171,18 @@ fi
 export MANPAGER='nvim +Man!'
 
 # pnpm
-export PNPM_HOME="/home/sujal/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
 
-# Created by `pipx` on 2025-01-24 02:34:22
-export PATH="$PATH:/home/sujal/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
-export PATH="$PATH:/home/sujal/.config/composer/vendor/bin"
-export PATH="$PATH:/home/sujal/go/bin"
+export PATH="$PATH:$HOME/.config/composer/vendor/bin"
+export PATH="$PATH:$HOME/go/bin"
 {{- if eq .machine_kind "arch" }}
-export CHROME_EXECUTABLE='/usr/bin/brave'
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
 {{- end }}
@@ -236,7 +234,7 @@ unset _f
 
 {{- if eq .machine_kind "arch" }}
 # hyprshot
-export HYPRSHOT_DIR='/home/sujal/Pictures/screenshots/'
+export HYPRSHOT_DIR='$HOME/Pictures/screenshots/'
 {{- end }}
 # Load aliases and shortcuts if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
