@@ -49,7 +49,16 @@ If Tampermonkey or the script isn't set up on their machine, fall back to this c
 
 Have them copy the resulting output (via the userscript's copy button, `copy(...)` wrapped around the console expression, or right-click → Copy object) and paste it back.
 
-**Multiple sites via ManageWP** — ManageWP's dashboard already shows available plugin/theme/core updates across every managed site in one place, so there's no need for the console snippet per site. Ask the user to pull the plugin + current + available version list straight from that dashboard view for the sites in scope. If they want a per-site breakdown outside ManageWP (e.g. a site not yet added to it), fall back to the single-site snippet above for that one. Note: ManageWP, like WordPress core's own update check, can also be behind — Step 1's cross-check still applies.
+**Multiple sites via ManageWP** — the same `wp-plugin-update-extractor.user.js` script also works on ManageWP itself (as of v3.0), so there's no need for the console snippet per site. It works on two ManageWP pages per site:
+
+- The site's **Dashboard** tab (e.g. `https://orion.managewp.com/dashboard/site/9887429/dashboard`) — reads whatever ManageWP is already showing as due for an update.
+- The site's **Plugins > Manage** tab (e.g. `https://orion.managewp.com/dashboard/site/22046915/component/plugins/manage`) — the script clicks the "Updates" sub-tab itself before extracting, so the user doesn't need to click it manually.
+
+Either page, same two menu commands as wp-admin (copy to clipboard / export as file). If they're on some other ManageWP page, the script alerts them with both example URLs above rather than silently doing nothing.
+
+Note: this ManageWP extraction only captures plugins ManageWP is already flagging with an update — same limitation as the wp-admin fallback console snippet, so it can't feed Step 1's unreported-update cross-check on its own. Also note `active` comes through as `true`/`false` from the Dashboard tab (parsed off a tooltip) but as `null` from the Plugins > Manage tab, since that page's markup doesn't expose activation state — don't treat a `null` there as "inactive."
+
+If they want a per-site breakdown outside ManageWP (e.g. a site not yet added to it), fall back to the single-site userscript or console snippet for that one. Note: ManageWP, like WordPress core's own update check, can also be behind — Step 1's cross-check still applies.
 
 Either way, end this step with a list of `{ plugin name, current version, latest version, update flagged by WP? }` per site.
 
