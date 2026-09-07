@@ -24,9 +24,13 @@ user_pref("browser.ctrlTab.sortByRecentlyUsed", true);
 user_pref("browser.toolbars.bookmarks.visibility", "never");
 user_pref("browser.compactmode.show", true);
 // user_pref("sidebar.visibility", "hide-on-close");
+{{- if eq .machine_kind "arch" }}
 user_pref("sidebar.visibility", "hide-launcher");
+{{- end }}
 // user_pref("sidebar.expandOnHover", true);
+{{- if eq .machine_kind "arch" }}
 user_pref("sidebar.verticalTabs", false);
+{{- end }}
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enables userChrome.css
 user_pref("browser.backspace_action", 0); // 0 = Backspace navigates back, like the old Back button behavior
 user_pref("browser.urlbar.showSearchSuggestionsFirst", false);
