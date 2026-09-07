@@ -24,13 +24,15 @@ Ask the user which situation applies, since it changes how they pull the list:
 It extracts **every installed plugin**, not just the ones flagged for update — reading each plugin row's own `.plugin-version-author-uri` element rather than only rows with an update notice. This matters for Step 1 below. They hand you back JSON shaped like:
 
 ```json
-[{ "name": "...", "slug": "aryo-activity-log", "current": "6.8.7", "updateAvailable": true, "new": "6.8.8" },
- { "name": "...", "slug": "...", "current": "6.3.1", "updateAvailable": false, "new": null }]
+[{ "name": "...", "slug": "aryo-activity-log", "active": true, "current": "6.8.7", "updateAvailable": true, "new": "6.8.8" },
+ { "name": "...", "slug": "...", "active": false, "current": "6.3.1", "updateAvailable": false, "new": null }]
 ```
 
 When reading it in, treat `current` as `currentVersion` and `new` as `latestVersion` for the rest of this skill — same data, different key names. `updateAvailable: false` means WordPress itself isn't flagging an update for that plugin (not that none exists — see Step 1). If they paste a downloaded file's contents instead of clipboard text, that's the same format, just read it directly.
 
 `slug` is the plugin's actual wp.org/vendor slug, read straight from the row's `data-slug` attribute — use it (not the display name) for every lookup in this skill. Display names are unreliable for matching against wp.org/vendor/CVE data (e.g. "Activity Log" as shown in wp-admin is really `aryo-activity-log`, not the differently-named plugin the display name suggests) — a slug mismatch is exactly how a plugin gets misidentified and researched against the wrong changelog/CVE history.
+
+`active` is read straight from the row's own active/inactive class — always check it before assigning urgency. An inactive plugin isn't running, so a CVE on its current version isn't a live attack surface on this site right now; don't tier it as "update now" on vuln grounds alone (see Step 6). On network/plugins.php specifically, `active` means *network-activated*, not "active on every subsite" — a plugin can show inactive there while still being active on individual subsites, so say so rather than assuming inactive-everywhere.
 
 If Tampermonkey or the script isn't set up on their machine, fall back to this console snippet pasted into the wp-admin Plugins page's browser console (note: this fallback only captures plugins that already have an update flagged, so it can't feed Step 1's cross-check):
 
@@ -129,14 +131,18 @@ Cross-reference known conflicts from Step 4's search results against this specif
 
 For each plugin, give one of:
 
-- **Update now** — active exploit or critical CVE on the current version
+- **Update now** — active exploit or critical CVE on the current version, **and the plugin is active** (or network-active/active-on-a-subsite)
 - **Update this week** — patched vulnerability exists, not yet seen exploited, or a high-severity issue with no urgency signal
 - **Update, but test on staging first** — breaking changes or regressions surfaced in Steps 3–4 that could hit this site's specific stack
 - **Hold** — known regression in the target version with no fix yet, or the update requires a PHP/WP core bump the site can't currently support
 
+If a plugin is **inactive**, downgrade whatever tier the vulnerability alone would suggest — a CVE on dormant code isn't an active risk. Say so plainly (e.g. "Critical CVE on current version, but plugin is inactive — no live exposure; update before reactivating, not urgent otherwise") rather than flagging it at the same severity as an active plugin with the same CVE. Breaking-change/regression findings (Steps 3–4) still apply as normal if the plugin ever gets reactivated or updated, though — inactive only changes urgency, not the underlying research.
+
 If Step 1 caught an unreported update, say so plainly in that plugin's entry (e.g. "WordPress shows this as up to date, but vendor has actually shipped 3.94 — flagged separately") so the recommendation isn't mistaken for a dashboard-reported one.
 
 If the user only wants the bare minimum (security-only) update pass, filter the output to plugins in the "update now" / "update this week" tiers and explicitly list which plugins were left out and why (e.g. "no known vulnerability, feature update only") — never silently drop plugins from the list without saying so.
+
+After delivering the recommendation, ask whether they also want a **post-update QA checklist** — a per-plugin list of specific pages/actions to click through after pushing each update (e.g. "submit a test form entry", "load an Elementor page", "check the consent banner still appears"), scoped to whichever plugins they're actually planning to update. Don't produce this unasked — it's a distinct, sometimes lengthy deliverable, not an automatic part of the severity-tiered output.
 
 ---
 
