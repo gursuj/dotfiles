@@ -24,11 +24,13 @@ Ask the user which situation applies, since it changes how they pull the list:
 It extracts **every installed plugin**, not just the ones flagged for update — reading each plugin row's own `.plugin-version-author-uri` element rather than only rows with an update notice. This matters for Step 1 below. They hand you back JSON shaped like:
 
 ```json
-[{ "name": "...", "current": "6.8.7", "updateAvailable": true, "new": "6.8.8" },
- { "name": "...", "current": "6.3.1", "updateAvailable": false, "new": null }]
+[{ "name": "...", "slug": "aryo-activity-log", "current": "6.8.7", "updateAvailable": true, "new": "6.8.8" },
+ { "name": "...", "slug": "...", "current": "6.3.1", "updateAvailable": false, "new": null }]
 ```
 
 When reading it in, treat `current` as `currentVersion` and `new` as `latestVersion` for the rest of this skill — same data, different key names. `updateAvailable: false` means WordPress itself isn't flagging an update for that plugin (not that none exists — see Step 1). If they paste a downloaded file's contents instead of clipboard text, that's the same format, just read it directly.
+
+`slug` is the plugin's actual wp.org/vendor slug, read straight from the row's `data-slug` attribute — use it (not the display name) for every lookup in this skill. Display names are unreliable for matching against wp.org/vendor/CVE data (e.g. "Activity Log" as shown in wp-admin is really `aryo-activity-log`, not the differently-named plugin the display name suggests) — a slug mismatch is exactly how a plugin gets misidentified and researched against the wrong changelog/CVE history.
 
 If Tampermonkey or the script isn't set up on their machine, fall back to this console snippet pasted into the wp-admin Plugins page's browser console (note: this fallback only captures plugins that already have an update flagged, so it can't feed Step 1's cross-check):
 
@@ -55,17 +57,20 @@ Either way, end this step with a list of `{ plugin name, current version, latest
 
 WordPress's own update check (and ManageWP's) can be wrong — stale transients, a premium/self-hosted plugin that doesn't hook into the wp.org update API, or a vendor who released a fix out of band. Don't just trust `updateAvailable` from Step 0.
 
-For **every** plugin in the list — including ones WordPress says are already up to date — check the plugin's actual current release:
+**On a large plugin list, do this in two passes to avoid burning research budget on plugins that are almost certainly fine:**
 
-- wordpress.org-hosted plugins: `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=[slug]` or the plugin's page
-- premium/vendor-hosted plugins: the vendor's own changelog or pricing/download page
+**Pass A — full research, no need to ask first.** Every plugin where `updateAvailable: true`. These already have a known update to investigate, so run the full Step 1 check plus Steps 2–5 against them straight away.
 
-If the real latest release is newer than what the site reports as current, and WordPress didn't flag it (`updateAvailable: false` but a newer version genuinely exists):
+**Pass B — lightweight check first, deep-dive only on request.** Every plugin where `updateAvailable: false`. For these, do a *cheap* version-only lookup — no vuln scan, no changelog read, no regression search, just: "what does wp.org (or the vendor page) say the actual latest release is, right now, using `slug`?"
 
-- **Flag this explicitly** in the output — call out that WordPress isn't surfacing this update and say why if you can tell (e.g. "premium plugin, not registered with wp.org update API" or "update check appears stale")
-- Treat that newer, unreported version as the real target and run Steps 2–5 against it, same as any flagged update
+- `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=[slug]` for wp.org-hosted plugins
+- the vendor's own changelog/pricing/download page for premium/self-hosted plugins
 
-Don't silently skip this check for plugins that look current — the whole point is catching the ones a lazy trust-the-dashboard pass would miss.
+If that lightweight check turns up a newer version than the site's `current` (an unreported update), flag it and promote that plugin into full Steps 2–5 research, same as Pass A.
+
+If the lightweight check confirms the plugin is genuinely current, stop there for that plugin — **don't** run the full vuln/changelog/regression research on it. Once all lightweight checks are done, tell the user how many `updateAvailable: false` plugins came back genuinely current vs. flagged as unreported, and ask whether they want full Steps 2–5 research run on the "genuinely current" ones anyway (there's still a small chance of an unpatched 0-day even on the latest version) or whether the lightweight version check is enough for those. Don't run the deeper research on them without asking — that's the expensive step this two-pass split exists to gate.
+
+Don't silently skip the lightweight check itself for plugins that look current — the whole point is catching the ones a lazy trust-the-dashboard pass would miss. It's only the *expensive* follow-up research that's gated behind asking.
 
 ---
 
