@@ -16,7 +16,7 @@ Output a per-plugin, severity-tiered recommendation with reasoning, not a flat y
 
 Ask the user which situation applies, since it changes how they pull the list:
 
-**Single site** — have them open the site's wp-admin **Plugins** page and use the `wp-plugin-update-extractor.user.js` Tampermonkey script (lives at `~/userscripts/`, chezmoi-tracked). It adds two Tampermonkey menu commands:
+**Single site** — have them open the site's wp-admin **Plugins** page and use the `wp-plugin-update-extractor.user.js` Tampermonkey script (Tampermonkey installs it directly from `~/.local/share/chezmoi/userscripts/wp-plugin-update-extractor.user.js` — that's the chezmoi repo itself, tracked there for version history, never deployed elsewhere by `chezmoi apply`). It adds two Tampermonkey menu commands:
 
 - **📋 Copy plugin list (JSON)** — copies the extracted list straight to clipboard
 - **💾 Export plugin list (JSON file)** — downloads it as `[sitename]-plugin-updates-[date].json`

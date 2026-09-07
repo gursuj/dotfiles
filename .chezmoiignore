@@ -53,6 +53,10 @@ scripts/wpc-push.ps1
 .config/shell/arch-aliasrc
 {{ end }}
 AppData/Roaming/herdr/config.toml
+# Tampermonkey userscripts: tracked here for version history only, never deployed
+# anywhere by chezmoi apply. Tampermonkey installs directly from this repo path
+# (~/.local/share/chezmoi/userscripts/*.user.js) -- edit in place, commit, done.
+userscripts
 README.md
 AGENTS.md
 CLAUDE.md
