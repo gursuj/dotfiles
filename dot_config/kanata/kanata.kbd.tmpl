@@ -61,6 +61,7 @@
   grv
   2 3 4 5 6 7 8 9 0 - =
   w a s d
+  lmet bksl lbrc rbrc bspc
 )
 
 (deflayer base
@@ -68,6 +69,7 @@
   _
   2    3    4    5    6    7    8    9    0    -    =
   w    a    s    d
+  (layer-while-held media) _    _    _    _
 )
 
 (deflayer fn
@@ -75,6 +77,21 @@
   (on-press tap-vkey rls-mods)
   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   up   left down right
+  _    _    _    _    _
+)
+
+;; Win-held media/volume controls, mirroring the hyprland binds on Linux
+;; (Win+| play/pause, Win+[ / Win+] prev/next, Win+- / Win+= vol down/up,
+;; Win+Backspace mute). pp/prev/next emit the same VK_MEDIA_* virtual keys
+;; cliamp's mediactl/service_windows.go registers as global hotkeys; vold/
+;; volu/mute hit Windows' system volume directly (not cliamp-specific --
+;; same as pressing a physical volume key).
+(deflayer media
+  _
+  _
+  _    _    _    _    _    _    _    _    _    vold volu
+  _    _    _    _
+  _    pp   prev next mute
 )
 {{- else }}
 (defsrc
