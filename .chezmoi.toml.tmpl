@@ -1,3 +1,29 @@
+{{- /* Hoisted above everything else: machine_kind needs to be known before the
+   age block below (to decide whether to skip it on the vps) and is reused
+   again later for the non-Windows [data] table, so it's only prompted once. */ -}}
+{{- $machineKind := "wpc" -}}
+{{- if ne .chezmoi.os "windows" -}}
+{{- $machineKind = promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps" "wpc") -}}
+{{- end -}}
+
+{{- if ne $machineKind "vps" }}
+# age encryption for secrets tracked in the (public) repo, e.g. cliamp's
+# config.toml. Ciphertext lives in the repo; the private key never does --
+# it stays local-only at the path below (outside the chezmoi source dir).
+# Must stay above every [table] header in this file -- TOML has no way to
+# "exit" a table once one is opened, so a bare key placed after any table
+# header silently becomes nested under that table instead of the top-level
+# key chezmoi expects. Skipped entirely on the vps: no cliamp there, so no
+# reason for the private key to exist on that box.
+encryption = "age"
+[age]
+    identity = {{ if eq .chezmoi.os "windows" -}}
+    'C:\Users\User\.config\chezmoi\key.txt'
+    {{- else -}}
+    {{ printf "%s/.config/chezmoi/key.txt" .chezmoi.homeDir | quote }}
+    {{- end }}
+    recipient = "age1tjanpx59mlslph4tewx3ckydpf7766kmgf7x9nl3p30pvca72uksd607wz"
+{{ end }}
 {{- if eq .chezmoi.os "windows" -}}
 # Windows: no shebang support. Map .sh -> sh (git-bash) or chezmoi execs it raw and fails.
 [interpreters.sh]
@@ -41,7 +67,6 @@
    it produces at ~/.config/chezmoi/chezmoi.toml is per-machine and never
    committed). */ -}}
 {{- if ne .chezmoi.os "windows" }}
-{{- $machineKind := promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps" "wpc") }}
 [data]
     machine_kind = {{ $machineKind | quote }}
     sandbox_dir = {{ printf "%s/programming/claude-sandbox" .chezmoi.homeDir | quote }}

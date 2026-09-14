@@ -67,3 +67,15 @@ AppData/Roaming/wtq/wtq.schema.json
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/state.json
 AppData/Roaming/SaneBreak/SaneBreak.ini
 AppData/Roaming/SaneBreak/sane-break.db
+
+# cliamp: only config.toml (encrypted) is tracked. Everything else here is a
+# runtime/log/cache file that regenerates on its own -- no reason to track it,
+# and ytmusic_credentials.json in particular holds a live OAuth token (separate
+# secret from the client_id/client_secret in config.toml), never commit it.
+.config/cliamp/cliamp.log
+.config/cliamp/cliamp.sock.pid
+.config/cliamp/history.toml
+.config/cliamp/favorites.toml.lock
+.config/cliamp/ytmusic_cache.json
+.config/cliamp/ytmusic_classification.json
+.config/cliamp/ytmusic_credentials.json
