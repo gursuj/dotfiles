@@ -69,7 +69,7 @@
   _
   2    3    4    5    6    7    8    9    0    -    =
   w    a    s    d
-  (layer-while-held media) _    _    _    _
+  (tap-hold-release 200 200 lmet (multi lmet (layer-while-held media))) _    _    _    _
 )
 
 (deflayer fn
@@ -86,6 +86,14 @@
 ;; cliamp's mediactl/service_windows.go registers as global hotkeys; vold/
 ;; volu/mute hit Windows' system volume directly (not cliamp-specific --
 ;; same as pressing a physical volume key).
+;; lmet uses tap-hold-release so a quick tap still sends the real Windows
+;; key -- otherwise Start menu stops working since layer-while-held has no
+;; tap action. Hold-action is (multi lmet (layer-while-held media)), not a
+;; bare layer switch -- a bare layer switch never emits the real lmet
+;; keydown, so any Win+key combo using a key NOT remapped in this layer
+;; (e.g. Win+V for clipboard history) would reach Windows as just "key",
+;; missing the Win modifier entirely. Pressing real lmet alongside the
+;; layer switch keeps those passthrough combos working.
 (deflayer media
   _
   _
