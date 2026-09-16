@@ -7,16 +7,20 @@
 input=$(cat)
 
 if command -v jq >/dev/null 2>&1; then
-  read -r model used input_tokens output_tokens effort thinking five_hour <<< "$(jq -r '
+  read -r model used input_tokens output_tokens effort thinking five_hour cache_warm cache_hit_ratio cache_expires_at <<< "$(jq -r '
     (.model.display_name // .model.id // "Claude" | gsub(" "; "_")) as $model
     | (.context_window // {}) as $cw
     | (.effort.level // "none") as $effort
     | (if .thinking.enabled then "on" else "off" end) as $thinking
     | (.rate_limits.five_hour.used_percentage // "none") as $fiveHour
-    | "\($model) \($cw.used_percentage // 0) \($cw.total_input_tokens // 0) \($cw.total_output_tokens // 0) \($effort) \($thinking) \($fiveHour)"
+    | (.prompt_cache // {}) as $pc
+    | (if $pc.warm then "warm" else "cold" end) as $cacheWarm
+    | (if ($pc.hit_ratio != null) then ($pc.hit_ratio * 100 | round) else "none" end) as $cacheHitRatio
+    | ($pc.expires_at // "none") as $cacheExpiresAt
+    | "\($model) \($cw.used_percentage // 0) \($cw.total_input_tokens // 0) \($cw.total_output_tokens // 0) \($effort) \($thinking) \($fiveHour) \($cacheWarm) \($cacheHitRatio) \($cacheExpiresAt)"
   ' <<< "$input")"
 else
-  read -r model used input_tokens output_tokens effort thinking five_hour <<< "$(node -e '
+  read -r model used input_tokens output_tokens effort thinking five_hour cache_warm cache_hit_ratio cache_expires_at <<< "$(node -e '
     let data = "";
     process.stdin.on("data", d => data += d);
     process.stdin.on("end", () => {
@@ -32,7 +36,11 @@ else
       const fiveHour = (j.rate_limits && j.rate_limits.five_hour && j.rate_limits.five_hour.used_percentage != null)
         ? j.rate_limits.five_hour.used_percentage
         : "none";
-      console.log(`${model.replace(/ /g, "_")} ${used} ${inTok} ${outTok} ${effort} ${thinking} ${fiveHour}`);
+      const pc = j.prompt_cache || {};
+      const cacheWarm = pc.warm ? "warm" : "cold";
+      const cacheHitRatio = (pc.hit_ratio != null) ? Math.round(pc.hit_ratio * 100) : "none";
+      const cacheExpiresAt = pc.expires_at || "none";
+      console.log(`${model.replace(/ /g, "_")} ${used} ${inTok} ${outTok} ${effort} ${thinking} ${fiveHour} ${cacheWarm} ${cacheHitRatio} ${cacheExpiresAt}`);
     });
   ' <<< "$input")"
 fi
@@ -102,4 +110,29 @@ if [ "$five_hour" != "none" ]; then
   five_hour_display=" ${dim}·${reset} ${dim}5h:${reset}${fh_colour}${five_hour_int}%${reset}"
 fi
 
-printf "${dim}%s${reset}  ${colour}[%s]${reset} ${dim}%s%%${reset} ${dim}(%s tok)${reset}${extra}%b\n" "$model" "$bar" "$used_int" "$tokens_display" "$five_hour_display"
+# Prompt cache: hit ratio + warm/cold + local expiry time (h:mm am/pm).
+cache_display=""
+if [ "$cache_hit_ratio" != "none" ]; then
+  if [ "$cache_hit_ratio" -ge 70 ]; then
+    cache_colour="\033[32m"   # green
+  elif [ "$cache_hit_ratio" -ge 40 ]; then
+    cache_colour="\033[33m"   # yellow
+  else
+    cache_colour="\033[31m"   # red
+  fi
+  if [ "$cache_warm" = "warm" ]; then
+    cache_icon=""
+  else
+    cache_icon="cold "
+  fi
+  cache_expiry=""
+  if [ "$cache_expires_at" != "none" ]; then
+    cache_expiry_time=$(date -d "@${cache_expires_at}" '+%-I:%M%p' 2>/dev/null | tr '[:upper:]' '[:lower:]')
+    if [ -n "$cache_expiry_time" ]; then
+      cache_expiry="(exp ${cache_expiry_time})"
+    fi
+  fi
+  cache_display=" ${dim}·${reset} ${dim}${cache_icon}cache:${reset}${cache_colour}${cache_hit_ratio}%${reset}${dim}${cache_expiry}${reset}"
+fi
+
+printf "${dim}%s${reset}  ${colour}[%s]${reset} ${dim}%s%%${reset} ${dim}(%s tok)${reset}${extra}%b%b\n" "$model" "$bar" "$used_int" "$tokens_display" "$five_hour_display" "$cache_display"
