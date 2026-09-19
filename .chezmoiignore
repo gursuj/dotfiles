@@ -51,6 +51,10 @@ scripts/wpc-push.ps1
 # Desktop/Wayland/pacman-specific aliases -- only sourced when
 # machine_kind == arch (dot_zshrc.tmpl), no point deploying elsewhere.
 .config/shell/arch-aliasrc
+# Only tracked for the arch box's Local by Flywheel wp-cli fix so far (see
+# TODO.md's bash-on-vps note) -- not a general bashrc consolidation yet, so
+# don't deploy it to the vps or elsewhere.
+.bashrc
 {{ end }}
 AppData/Roaming/herdr/config.toml
 # Tampermonkey userscripts: tracked here for version history only, never deployed

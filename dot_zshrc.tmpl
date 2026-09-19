@@ -18,6 +18,13 @@ export OZONE_PLATFORM=wayland
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 {{- end }}
 
+# Auto-fix `wp` inside Local by Flywheel site directories (DB socket mismatch).
+# Deliberately placed before the CLAUDECODE skip-block below: Claude Code's
+# own shells run `wp` inside these site dirs too and need this fix same as
+# any interactive terminal, unlike the keybind/completion/plugin setup that
+# follows (which only interactive use needs).
+[ -f "$HOME/programming/local-wpcli/wp-shell-integration.zsh" ] && source "$HOME/programming/local-wpcli/wp-shell-integration.zsh"
+
 # Interactive-editing customizations (keybinds, zle widgets) — pointless for
 # Claude Code's non-interactive shells (CLAUDECODE=1), skipped there.
 if [[ -z "$CLAUDECODE" ]]; then
