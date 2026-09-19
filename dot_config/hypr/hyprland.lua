@@ -351,6 +351,9 @@ hl.config({
         -- add other programs to regex with | separator
         swallow_regex             = "^(com\\.mitchellh\\.ghostty)$",
 
+        -- Zed launched from the terminal (e.g. `zed .`) shouldn't hide the
+        -- terminal behind it -- exclude its window class from swallowing.
+        swallow_exception_regex   = "^(dev\\.zed\\.Zed)$",
         -- swallow_exception_regex = "^(.*wev.*|.*xkbcli.*|)$",
         -- swallow_exception_regex = "^(wev.*|swayimg.*)$",
         focus_on_activate           = true,
