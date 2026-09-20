@@ -55,6 +55,9 @@ scripts/wpc-push.ps1
 # TODO.md's bash-on-vps note) -- not a general bashrc consolidation yet, so
 # don't deploy it to the vps or elsewhere.
 .bashrc
+# tidemail is only set up on the arch box so far -- don't deploy its
+# (encrypted) config elsewhere until it's actually used there.
+.config/tidemail
 {{ end }}
 AppData/Roaming/herdr/config.toml
 # Tampermonkey userscripts: tracked here for version history only, never deployed
