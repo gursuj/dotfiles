@@ -79,6 +79,8 @@ pac-update() {
 }
 
 alias wifitui='impala'
+alias mailtui='tidemail'
+
 alias pac-check='yay -Qu'
 # remove orphans
 alias pac-orphan='pacman -Qqdt'
