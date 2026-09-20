@@ -83,3 +83,11 @@ AppData/Roaming/SaneBreak/sane-break.db
 .config/cliamp/ytmusic_cache.json
 .config/cliamp/ytmusic_classification.json
 .config/cliamp/ytmusic_credentials.json
+
+# webclaw: plaintext API key lives here, never tracked -- live credential, not config.
+.config/webclaw
+
+# tidemail: fetch.log is a runtime log, regenerates on its own -- no reason to
+# track it. config.toml is tracked encrypted instead (secrets live in the OS
+# keyring, not this file, but tracking encrypted anyway as defense in depth).
+.config/tidemail/fetch.log

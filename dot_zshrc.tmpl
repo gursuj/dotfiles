@@ -255,6 +255,9 @@ alias oc=opencode
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc"
 {{- end }}
 
+# webclaw: plaintext API key, never tracked by chezmoi (see .chezmoiignore).
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/webclaw/env" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/webclaw/env"
+
 # ccc — run Claude Code in $PWD or a scratch sandbox repo. -y forces $PWD, -n
 # forces sandbox, no flag prompts. Zsh port of pwsh profile's ccc — same
 # sandbox_dir var (chezmoi data, .chezmoi.toml.tmpl), logic duplicated per-shell.
