@@ -18,6 +18,7 @@
 			"Resize": "Never",
 			"HorizontalScreenCoverage": 100,
 			"VerticalScreenCoverage": 95
+			// "HorizontalAlign": "None" — was for the custom build only, not in regular wtq
 		}
 	],
 	"ShowUiOnStart": false,
