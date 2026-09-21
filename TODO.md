@@ -29,3 +29,8 @@
     The other half (auto-running `npx skills add` for CLI-only skills) is moot -- those
     skills were removed from the repo/machines.
 - fd ignorefile isn't being used in linux currently. should fix
+- merge `dot_claude/writing-preferences.md` (personal, drafted 2026-09-22 from a trac
+    comment edit) with WPC's writing-voice prefs (wpc-os repo) into one doc. Then make
+    sure it's actually referenced by agents, not just sitting in the repo — CLAUDE.md
+    (untracked, personal) for Claude, and whatever opencode reads (AGENTS.md? separate
+    config?) for opencode. Currently nothing points to it.
