@@ -8,9 +8,6 @@ AppData
 scripts/Find-ClaudeSession.ps1
 scripts/herdr-new-cc-tab.ps1
 scripts/wpc-push.ps1
-# Handy's actual config dir on Windows is AppData/Roaming/com.pais.handy
-# (see that dir's .tmpl, which includes this file) -- this path is Linux-only.
-.local/share/com.pais.handy
 {{ end }}
 
 {{ if eq .chezmoi.os "windows" }}
@@ -26,6 +23,9 @@ scripts/wpc-push.ps1
 .config/swayimg
 .config/hypr
 .config/waybar
+# Handy's actual config dir on Windows is AppData/Roaming/com.pais.handy
+# (see that dir's .tmpl, which includes this file) -- this path is Linux-only.
+.local/share/com.pais.handy
 {{ end }}
 
 {{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
