@@ -190,6 +190,20 @@ not read from `user.js` at startup the way a normal pref is, so writing it there
 silent no-op. If dark mode is wanted again, it needs picking manually in `about:addons` →
 Themes — there's no user.js pref that reliably forces it.
 
+## `~/.local/share` on Windows holds real, unmanaged app dirs -- don't assume chezmoi made them (2026-09-22)
+
+While chasing a stray `.local/share/com.pais.handy` dir that chezmoi kept recreating on
+Windows (see the Handy config entry above and the `.chezmoiignore` block-placement fix),
+also checked the rest of `~/.local/share` on this machine in case anything else needed the
+same ignore treatment. Found `chezmoi/`, `claude/`, `opencode/`, `opentui/` alongside it --
+none of these are chezmoi-managed (`chezmoi managed` doesn't list any file under them).
+They're each tool's own data dir, created by the tool itself (chezmoi's own cache/lock
+state, Claude Code's session data, OpenCode's data dir, OpenTUI's data dir), following the
+XDG `~/.local/share` convention even on Windows where `AppData` is the native spot. Nothing
+to ignore or fix here -- only add a `.chezmoiignore` entry under `.local/share` for a path
+if chezmoi itself is shown to be the one (re)creating it (check with `chezmoi managed`
+first), not just because the path lives there.
+
 Also checked `layout.css.prefers-color-scheme.content-override` (was tracked, value `0`)
 while debugging this — confirmed it's a *different* bug, not unrelated as first assumed:
 this pref pins Firefox's "Website Appearance" setting (`about:preferences` → Language and
