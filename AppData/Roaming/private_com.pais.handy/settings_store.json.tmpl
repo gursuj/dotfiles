@@ -1,0 +1,8 @@
+{{/* Windows target for Handy's config. Kept as a single-source include so
+   there's only one copy of this file to edit (the Linux one at
+   private_dot_local/private_share/com.pais.handy/settings_store.json).
+   See learnings.md for why this differs from the usual edit-source-first
+   pattern -- Handy stores config in an OS-specific app-data dir, so the
+   two target paths are unavoidably different even though the content
+   should stay identical. */ -}}
+{{- include "private_dot_local/private_share/com.pais.handy/settings_store.json" -}}
