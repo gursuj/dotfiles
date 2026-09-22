@@ -53,7 +53,7 @@ encryption = "age"
    never equal "NUL:" there. */}}
 [diff]
     command = "sh"
-    args = ["-c", "a=$1; b=$2; [ \"$a\" = 'NUL:' ] && a=/dev/null; [ \"$b\" = 'NUL:' ] && b=/dev/null; exec {{ $diffCmd }} --color=always --strip-trailing-cr \"$a\" \"$b\"", "diffwrap", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+    args = ["-c", "a=$1; b=$2; label=$a; [ \"$label\" = 'NUL:' ] && label=$b; printf '\\n\\033[1m%s\\033[0m\\n' \"$label\"; [ \"$a\" = 'NUL:' ] && a=/dev/null; [ \"$b\" = 'NUL:' ] && b=/dev/null; exec {{ $diffCmd }} --color=always --strip-trailing-cr \"$a\" \"$b\"", "diffwrap", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
     exclude = ["scripts"]
 {{- else }}
 [diff]
