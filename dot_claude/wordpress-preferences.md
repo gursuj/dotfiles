@@ -19,3 +19,16 @@ cd "D:\wp-sites\example-site\app\public"
 ```
 
 For a different site, read its `.bat` from the ssh-entry folder to get the correct run ID and service versions.
+
+## Accessing *.local sites via CLI (curl, agent-browser, etc.)
+
+Local writes both `::1` (IPv6) and `127.0.0.1` (IPv4) entries to the Windows hosts file for every site, in a `## Local - Start ##` / `## Local - End ##` block. Local's router usually only binds IPv4, so the `::1` entry connects (TCP handshake succeeds) but never responds — this hangs curl/Chrome/agent-browser until timeout instead of failing fast, since it looks like a live connection, not a dead one.
+
+Local rewrites this whole block on every site start/stop, so removing the `::1` lines from the hosts file is a temporary fix at best — they come back on next restart. Don't bother editing the hosts file for this; use one of these instead when a `*.local` site hangs on connect:
+
+- **curl:** force IPv4 resolution, bypassing the `::1` entry: `curl --resolve sitename.local:80:127.0.0.1 http://sitename.local/`
+- **curl (simpler):** `curl -4 http://sitename.local/` forces IPv4 globally for the request
+- **Host header via IP directly:** `curl -H "Host: sitename.local" http://127.0.0.1/` — skips hostname resolution entirely
+- **agent-browser:** same idea — hit `http://127.0.0.1/` with a `--headers '{"Host":"sitename.local"}'` flag, or use curl's `--resolve` trick if the tool being driven shells out to curl
+
+Symptom to recognize: `curl -v` shows `Established connection to X.local (::1 port 80)` followed by a long hang and eventual timeout with 0 bytes received — that's this issue, not a genuinely down site. Confirm Local is actually running before assuming site is broken.
