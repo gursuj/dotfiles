@@ -213,3 +213,13 @@ initially misread `0` as Light, it's actually Dark. Since user.js re-pins it on 
 restart, any UI change back to Light/Auto silently reverted to Dark on next launch.
 Removed the pref entirely so the setting behaves like a normal toggle and persists
 whatever's picked in the UI, instead of being locked.
+
+## cch (`ch`) install on Arch: sudo step, run by hand (2026-09-28)
+
+`run_onchange_after_35-cch-install.sh.tmpl` clones/builds `gursuj/cch` into
+`~/.cache/cch-src` but can't finish `npm install -g` itself on Arch — npm's global prefix
+is `/usr`, root-owned. Script prints the command; ran manually once:
+
+```
+sudo npm install -g --prefix "/usr" "/home/sujal/.cache/cch-src"
+```
