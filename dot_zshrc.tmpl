@@ -250,6 +250,13 @@ alias nv=nvim
 alias grep='grep --color=auto'
 alias oc=opencode
 
+# ch — Claude Code History (gursuj/cch fork of https://github.com/halooojustin/cch)
+# use ch help for available commands. zsh port of the pwsh profile's aliases.
+function cl  { ch ls "$@" }       # Browse history
+function cps { ch ps "$@" }       # Active multiplexer sessions
+function cs  { ch search "$@" }   # Keyword search
+# alternatively, run ch <search-term> to search with AI
+
 {{- if eq .machine_kind "arch" }}
 # Load aliases and shortcuts if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc"

@@ -1,0 +1,60 @@
+#!/bin/sh
+# Installs/updates `ch` (Claude Code History) globally via npm from our fork
+# (gursuj/cch) instead of upstream halooojustin/cch -- same package name
+# (@halooojustin/cch) and `ch` binary, so it's a drop-in for the pwsh/zsh
+# aliases in the profile/dot_zshrc.
+#
+# Needs a terminal multiplexer (zellij or tmux) on PATH for session resume --
+# not installed by this script, see README.
+#
+# Uses the system default npm prefix (e.g. /usr on Arch), which is
+# root-owned -- `npm install -g` needs sudo here. This script runs as the
+# regular user (chezmoi apply isn't run as root), so it can't do that
+# unattended: it builds the package and prints the install command for you
+# to run yourself with sudo, rather than silently failing with EACCES or
+# guessing at passwordless-sudo.
+#
+# fork ref: https://github.com/gursuj/cch (main) -- bump this comment to
+# force a reinstall/update after pulling new fork commits, since npm install
+# from a git ref doesn't re-fetch on every apply otherwise.
+# fork commit: 4 ahead of upstream as of 2026-09-28 (path-separator fix,
+# resume permissions default, translated picker hints)
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm not found on PATH, skipping ch install" >&2
+  exit 0
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "git not found on PATH, skipping ch install" >&2
+  exit 0
+fi
+
+# npm's own git-protocol installer (`npm install -g gursuj/cch`) is blocked
+# in some sandboxed environments (e.g. Claude Code's, with EALLOWGIT) -- a
+# plain `git clone` + local `npm install -g <dir>` sidesteps that and works
+# everywhere else too, so it's the only path here rather than branching.
+#
+# Cloned into a persistent cache dir (not mktemp -- would vanish before the
+# sudo install command below can be run against it).
+clone_dir="${XDG_CACHE_HOME:-$HOME/.cache}/cch-src"
+rm -rf "$clone_dir"
+
+if ! git clone --depth 1 https://github.com/gursuj/cch "$clone_dir" >&2; then
+  echo "git clone of gursuj/cch failed, skipping ch install" >&2
+  exit 0
+fi
+
+# Full install (not --omit=dev) -- `build` needs esbuild, a devDependency.
+if ! (cd "$clone_dir" && npm install && npm run build); then
+  echo "npm install/build failed in $clone_dir, skipping ch install" >&2
+  exit 0
+fi
+
+if [ -w "$(npm root -g)" ]; then
+  (cd "$clone_dir" && npm install -g .)
+else
+  echo "npm's global prefix ($(npm config get prefix)) isn't user-writable." >&2
+  echo "Run this yourself to finish installing ch:" >&2
+  echo "  sudo npm install -g --prefix \"$(npm config get prefix)\" \"$clone_dir\"" >&2
+fi
