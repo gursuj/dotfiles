@@ -673,6 +673,9 @@ hl.bind(mainMod .. " + SHIFT + Print", hl.dsp.exec_cmd("uwsm app -- hyprshot -m 
 hl.layer_rule({ name = "no-anim-hyprpicker", match = { namespace = "hyprpicker" },  no_anim = true })
 hl.layer_rule({ name = "no-anim-selection",  match = { namespace = "selection" },   no_anim = true })
 
+-- mindwtr quick-add: app disables its own global shortcut on Wayland, so bind at compositor level
+hl.bind("CTRL + SHIFT + A", hl.dsp.exec_cmd("mindwtr --quick-add"))
+
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
