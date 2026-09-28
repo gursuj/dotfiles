@@ -64,6 +64,17 @@ before assuming something changed), `chezmoi status` (quick out-of-sync check), 
 merge` / `merge-all` (three-way merge when both source and live have drifted — safer than
 `re-add` for that case).
 
+`cz` is a shorthand alias for `chezmoi` (e.g. `cz status` / `cz diff` / `cz apply`) — `alias
+cz=chezmoi` in `dot_config/shell/arch-aliasrc` on Linux, `function cz` in the PowerShell
+profile on Windows.
+
+`chezmoi status` can flag a *directory* as modified (`MM`) while `chezmoi diff` on that same
+path shows nothing — that's not the CRLF/LF noise above, it's directory metadata (perms/mtime)
+drift, which `status` picks up but `diff` doesn't render since it only diffs file content.
+Confirm with `chezmoi diff -- <dir>`: empty output means it's metadata-only and safe to
+`chezmoi apply --force <dir>` past the "changed since chezmoi last wrote it" prompt that
+plain `apply` hits for these (no TTY-safe way to answer that prompt otherwise).
+
 `chezmoi apply` can hang on an interactive prompt (e.g. asking to confirm an overwrite)
 instead of erroring out — if an agent session appears stuck on `apply`, just kill it rather
 than waiting it out. Always run `chezmoi diff` and have the user manually review the diff
