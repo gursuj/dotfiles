@@ -650,12 +650,14 @@ end
 -- `monitor` mode ({ monitor = "DP-1"|"+"|"-", follow? }), used here with the
 -- same "l"/"r" shorthand already relied on below for workspace.move -- verify
 -- "l"/"r" resolve the way "+"/"-" would if this doesn't behave.
-hl.bind(mainMod .. " + SHIFT + A", hl.dsp.window.move({ monitor = "l", follow = false }))
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.window.move({ monitor = "r", follow = false }))
+-- "u"/"d" (not "l"/"r") since HDMI-A-1 sits above eDP-1, not beside it.
+-- Swap back to l/r if reverting to the side-by-side layout above.
+hl.bind(mainMod .. " + SHIFT + A", hl.dsp.window.move({ monitor = "u", follow = false }))
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.window.move({ monitor = "d", follow = false }))
 
 -- move workspace to monitor (no silent option)
-hl.bind(mainMod .. " + A", hl.dsp.workspace.move({ monitor = "l" }))
-hl.bind(mainMod .. " + D", hl.dsp.workspace.move({ monitor = "r" }))
+hl.bind(mainMod .. " + A", hl.dsp.workspace.move({ monitor = "u" }))
+hl.bind(mainMod .. " + D", hl.dsp.workspace.move({ monitor = "d" }))
 
 -- DWM style swap master
 hl.bind(mainMod .. " + Return", hl.dsp.layout("swapwithmaster auto"))
