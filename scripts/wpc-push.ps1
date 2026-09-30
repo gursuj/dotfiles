@@ -1,8 +1,8 @@
 # wpc-push — post-feature build and push workflow
 #
 # Run this after manually committing source changes. Steps:
-#   1. Abort if any dirty/untracked files exist outside build/ (uncommitted source work)
-#   2. Discard build/ changes via stash+drop (atomic), then verify tree is actually clean
+#   1. Abort if any dirty/untracked files exist outside build/ or dist/ (uncommitted source work)
+#   2. Discard build/ and dist/ changes via stash+drop (atomic), then verify tree is actually clean
 #   3. Fetch remote; abort if fetch fails; pull --rebase if remote has new commits (aborts on conflict)
 #   4. Rebuild — auto-detects whether source maps are tracked and sets WP_DEVTOOL accordingly
 #   5. Commit build output (skipped if nothing changed)
@@ -11,20 +11,20 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# --- 1. Safety check: only build/ files should be dirty/untracked ---
+# --- 1. Safety check: only build/ or dist/ files should be dirty/untracked ---
 $trackedDirty   = @(git diff --name-only --relative HEAD)
 $untrackedFiles = @(git ls-files --others --exclude-standard)
 $allDirty       = $trackedDirty + $untrackedFiles
 
-$nonBuild = @($allDirty | Where-Object { $_ -notmatch '(?:^|/)build/[^/]+$' })
+$nonBuild = @($allDirty | Where-Object { $_ -notmatch '(?:^|/)(?:build|dist)/[^/]+$' })
 if ($nonBuild.Count -gt 0) {
-    Write-Warning "Aborting: uncommitted files found outside build/:"
+    Write-Warning "Aborting: uncommitted files found outside build/ or dist/:"
     $nonBuild | ForEach-Object { Write-Host "  $_" }
     exit 1
 }
 
-# --- 2. Discard build/ changes atomically (stash + drop), then verify clean ---
-$buildDirty = @($allDirty | Where-Object { $_ -match '(?:^|/)build/[^/]+$' })
+# --- 2. Discard build/ and dist/ changes atomically (stash + drop), then verify clean ---
+$buildDirty = @($allDirty | Where-Object { $_ -match '(?:^|/)(?:build|dist)/[^/]+$' })
 if ($buildDirty.Count -gt 0) {
     git stash push -u -- @($buildDirty) | Out-Null
     git stash drop | Out-Null
@@ -32,7 +32,7 @@ if ($buildDirty.Count -gt 0) {
 
 $stillDirty = @(git status --porcelain)
 if ($stillDirty.Count -gt 0) {
-    Write-Warning "Aborting: working tree still dirty after discarding build/ — discard didn't fully apply:"
+    Write-Warning "Aborting: working tree still dirty after discarding build/ or dist/ — discard didn't fully apply:"
     $stillDirty | ForEach-Object { Write-Host "  $_" }
     exit 1
 }
