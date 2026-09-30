@@ -16,7 +16,7 @@ $trackedDirty   = @(git diff --name-only --relative HEAD)
 $untrackedFiles = @(git ls-files --others --exclude-standard)
 $allDirty       = $trackedDirty + $untrackedFiles
 
-$nonBuild = @($allDirty | Where-Object { $_ -notmatch '(?:^|/)(?:build|dist)/[^/]+$' })
+$nonBuild = @($allDirty | Where-Object { $_ -notmatch '(?:^|/)(?:build|dist)/.+$' })
 if ($nonBuild.Count -gt 0) {
     Write-Warning "Aborting: uncommitted files found outside build/ or dist/:"
     $nonBuild | ForEach-Object { Write-Host "  $_" }
@@ -24,7 +24,7 @@ if ($nonBuild.Count -gt 0) {
 }
 
 # --- 2. Discard build/ and dist/ changes atomically (stash + drop), then verify clean ---
-$buildDirty = @($allDirty | Where-Object { $_ -match '(?:^|/)(?:build|dist)/[^/]+$' })
+$buildDirty = @($allDirty | Where-Object { $_ -match '(?:^|/)(?:build|dist)/.+$' })
 if ($buildDirty.Count -gt 0) {
     git stash push -u -- @($buildDirty) | Out-Null
     git stash drop | Out-Null
