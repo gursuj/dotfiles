@@ -20,6 +20,10 @@ cd "D:\wp-sites\example-site\app\public"
 
 For a different site, read its `.bat` from the ssh-entry folder to get the correct run ID and service versions.
 
+## DB queries: never assume the `wp_` prefix
+
+Sites can use a custom table prefix. When giving SQL or `wp` commands that touch the DB, resolve the prefix automatically instead of hardcoding `wp_`. Use `$(wp db prefix)` (PowerShell: `$p = wp db prefix`), or `$wpdb->prefix` / `$wpdb->options` etc. via `wp eval`. If the SQL has to be pasted somewhere with no shell (phpMyAdmin), use a `{prefix}` placeholder and say so.
+
 ## Accessing *.local sites via CLI (curl, agent-browser, etc.)
 
 Local writes both `::1` (IPv6) and `127.0.0.1` (IPv4) entries to the Windows hosts file for every site, in a `## Local - Start ##` / `## Local - End ##` block. Local's router usually only binds IPv4, so the `::1` entry connects (TCP handshake succeeds) but never responds — this hangs curl/Chrome/agent-browser until timeout instead of failing fast, since it looks like a live connection, not a dead one.
