@@ -24,6 +24,9 @@ nvim = [
 
 [open]
 rules = [
+    # 0. CSV/TSV by extension, since the detected mime varies (often not text/*)
+    { url = "*.{csv,tsv}", use = ["nvim", "win-open", "reveal"] },
+
     # 1. Specific rules first (Text & Markdown)
     { mime = "text/*", use = ["nvim", "win-open", "reveal"] },
     { mime = "*/txt", use = ["nvim", "win-open", "reveal"] },
