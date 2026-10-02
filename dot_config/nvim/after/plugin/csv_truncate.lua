@@ -85,10 +85,13 @@ local function enable(buf, width, auto)
   for _, m in ipairs(marks) do
     vim.api.nvim_buf_set_extmark(buf, ns, m[1], m[2], { end_col = m[3], conceal = m[4] })
   end
-  if auto then
+  -- Broken-quote files already got their own warning from rainbow_csv.lua.
+  if auto and not vim.b[buf].csv_view_only then
     vim.notify(
-      "CSV has long cells: shown shortened and read-only. :CsvTruncate (or <leader>cw) to turn off and edit.",
-      vim.log.levels.INFO
+      ("CSV has cells over %d characters: shown shortened, buffer is read-only.\n"):format(width)
+        .. "To edit: run :CsvTruncate (or press <leader>cw) to show full text and unlock,\n"
+        .. "make your changes, then :w. Run it again to shorten the view.",
+      vim.log.levels.WARN
     )
   end
 end
