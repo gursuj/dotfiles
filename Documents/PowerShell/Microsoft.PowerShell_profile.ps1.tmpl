@@ -106,6 +106,10 @@ function pwsh-hist {
 		nvim  (Get-PSReadLineOption).HistorySavePath
 }
 
+# Firefox isn't on PATH (installer doesn't add it), so call it by full path.
+# Args pass through, e.g. `ff https://example.com` or `ff -P` for the profile picker.
+function ff { & 'C:\Program Files\Mozilla Firefox\firefox.exe' @args }
+
 # Vi keybindings and prediction/list UI only matter for a human typing at a
 # prompt. Setting them forces PowerShell to autoload the PSReadLine module
 # right here (it's not imported yet), which is the single biggest chunk of
