@@ -81,6 +81,14 @@ people, not just devs.
 - Precise plain nouns over vague ones ("that subdomain" not "that link").
 - Say a point once. Don't restate it at the end of the same paragraph.
 
+## Formatting for copy-paste output
+
+- No hard line-wrap width (don't wrap at ~80 chars) for content meant to be
+  copied elsewhere: emails, comments, GitHub issue/PR descriptions, etc. Write
+  paragraphs as a single line and let the destination (email client, GitHub)
+  wrap it. Hard-wrapping breaks once it's pasted somewhere with different
+  width, and shows up as ragged line breaks mid-sentence.
+
 ## A distinct axis worth keeping separate
 
 "No fluff, direct" (terseness) and "doesn't read AI-generated" are related but
