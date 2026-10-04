@@ -52,14 +52,15 @@ alias pac-why='pacman -Qi'
 pac-update() {
     local pacman_failed=0 yay_failed=0 answer
 
+				pac-mirror-update
         sudo pacman -Syu || pacman_failed=1
         yay -Syu || yay_failed=1
 
         # Works when sourced or executed in Bash, zsh, or sh
         # Clear any leftover input in stdin to prevent auto-confirmation
-        # while read -t 0 2>/dev/null; do
-        #     read -r _
-        # done
+        while read -t 0 2>/dev/null; do
+            read -r _
+        done
 
 				# printf "○ Do you want to check for AppImage updates (Krita nightly)? [Y/n] "
         # read -r answer
@@ -73,9 +74,17 @@ pac-update() {
         #     # appimageupdatetool -rO ~/.local/bin/everdo.AppImage
         # fi
 
-        # echo '\n'
-        # [[ $pacman_failed -eq 1 ]] && echo '⚠️  Pacman update failed.'
-        # [[ $yay_failed -eq 1 ]] && echo '⚠️  Yay (AUR) update failed.'
+        echo '\n'
+        [[ $pacman_failed -eq 1 ]] && echo '⚠️  Pacman update failed.'
+        [[ $yay_failed -eq 1 ]] && echo '⚠️  Yay (AUR) update failed.'
+
+				# clean up
+				yay -Sc && yay -Yc
+
+				# leftover partial/interrupted downloads pacman fails to clean itself
+				echo '○ Leftover pacman download-* files to remove:'
+				sudo find /var/cache/pacman/pkg -maxdepth 1 -type f -name 'download-*'
+				sudo find /var/cache/pacman/pkg -maxdepth 1 -type f -name 'download-*' -delete
 }
 
 alias wifitui='impala'
