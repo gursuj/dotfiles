@@ -18,6 +18,18 @@ Referenced from `~/.claude/CLAUDE.md` (Claude) and opencode's global
   readers: "wp-cli and database queries" not "wp-cli/DB"; "works as expected"
   not "happy path"; "no change to the normal case" not "idiomatic".
 
+## Baseline: simplify the language
+
+For anything meant to be pasted somewhere, use the `/i-have-adhd:i-have-adhd`
+skill's techniques as the baseline for simplifying language. Short, plain,
+concrete: specific nouns, numbers over vague estimates, numbered steps for
+multi-step tasks, one idea per sentence, no preamble or closing pleasantries.
+
+Everything else in this file takes priority where they conflict (e.g. lead with
+the problem or verdict rather than the next action, British/Australian
+spelling, no em-dashes). One pass is enough: write in this style from the
+start, don't draft and then rewrite.
+
 ## Cut
 
 - Throat-clearing preambles. No "Quick note before the results:" — start with
