@@ -66,11 +66,27 @@ type = "plugin_action"
 command = "drovr.move-tab"
 description = "move tab to workspace"
 
+{{- if eq .machine_kind "arch" }}
+# drovr's move-pane replaced here (this machine only) by a local test of
+# herdr-pane-tools (JordanBelfort1/herdr-pane-tools), linked from
+# ~/programming/herdr-plugins/herdr-pane-tools. That repo's herdr-plugin.toml
+# declares `platforms = ["windows"]`; the clone here has a LOCAL-ONLY patch
+# adding "linux" to test it, since the code is plain Node + herdr-CLI calls
+# with nothing Windows-specific. Confirmed working 2026-10-06. Not yet
+# upstreamed (no PR filed) and not in desired-plugins.txt since it's a link,
+# not a github install -- don't expect this plugin to exist on other machines.
 [[keys.command]]
 key = "prefix+m"
 type = "plugin_action"
-command = "drovr.move-pane"
-description = "move pane to tab"
+command = "jordanbelfort1.pane-tools.open"
+description = "move pane (pane-tools, local linux test)"
+{{- else }}
+#[[keys.command]]
+#key = "prefix+m"
+#type = "plugin_action"
+#command = "drovr.move-pane"
+#description = "move pane to tab"
+{{- end }}
 
 [ui]
 agent_panel_sort = "priority"
