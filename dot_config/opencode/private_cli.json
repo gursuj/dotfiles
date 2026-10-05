@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "keybinds": {
+    "leader": "space",
+    "app.exit": "ctrl+c,<leader>q",
+    "session.page.up": "pageup,ctrl+k",
+    "session.page.down": "pagedown,ctrl+j"
+  },
+  "diffs": {
+    "wrap": "word"
+  },
+  "session": {
+    "sidebar": "hide",
+    "scrollbar": true,
+    "thinking": "show"
+  },
+  "animations": true,
+  "plugins": [
+    "./herdr-opencode",
+    {
+      "package": "vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1",
+      "options": { "experimentalV2Leader": "space" }
+    }
+  ]
+}
