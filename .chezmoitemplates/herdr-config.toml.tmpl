@@ -68,18 +68,22 @@ description = "move tab to workspace"
 
 {{- if eq .machine_kind "arch" }}
 # drovr's move-pane replaced here (this machine only) by a local test of
-# herdr-pane-tools (JordanBelfort1/herdr-pane-tools), linked from
-# ~/programming/herdr-plugins/herdr-pane-tools. That repo's herdr-plugin.toml
-# declares `platforms = ["windows"]`; the clone here has a LOCAL-ONLY patch
-# adding "linux" to test it, since the code is plain Node + herdr-CLI calls
-# with nothing Windows-specific. Confirmed working 2026-10-06. Not yet
-# upstreamed (no PR filed) and not in desired-plugins.txt since it's a link,
-# not a github install -- don't expect this plugin to exist on other machines.
+# herdr-pane-mover (osamahbeig/herdr-pane-mover, 13 stars on GitHub), linked
+# from ~/programming/herdr-plugins/herdr-pane-mover. Tried herdr-pane-tools
+# first (JordanBelfort1/herdr-pane-tools, platform-patched to add linux) but
+# it only moved a pane to an EXISTING tab; pane-mover has full drovr parity
+# (move to existing/new tab, existing/new workspace) plus re-split and swap,
+# and its own manifest already declares platforms = ["macos","linux"] --
+# no patch needed for this machine. Confirmed working on Linux 2026-10-06.
+# Windows untested so far (not linked there yet, and its manifest would need
+# "windows" added to platforms first). Not in desired-plugins.txt since it's
+# a link, not a github install -- don't expect this plugin to exist on other
+# machines until that's done.
 [[keys.command]]
 key = "prefix+m"
 type = "plugin_action"
-command = "jordanbelfort1.pane-tools.open"
-description = "move pane (pane-tools, local linux test)"
+command = "osamahbeig.pane-mover.open"
+description = "move pane (pane-mover, local linux test)"
 {{- else }}
 #[[keys.command]]
 #key = "prefix+m"
