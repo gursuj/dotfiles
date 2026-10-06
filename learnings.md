@@ -226,34 +226,23 @@ sudo npm install -g --prefix "/usr" "/home/sujal/.cache/cch-src"
 
 ## OpenCode v2 vim plugin: wrong config file, not a host bug (2026-10-05)
 
-Spent a while chasing `context.storage`/`context.ui.slot` undefined errors trying to get a
-vim-mode plugin working on OpenCode v2 (2.0.22). Two community forks of
-`leohenon/opencode-vim-plugin` (cameronr's and xFabriicio's v2 ports) both crashed with the
-identical error, even after confirming one of them pinned the objectively correct package
-scope (`@opencode/plugin`, versioned in lockstep with the CLI, vs. the other's abandoned
-`@opencode-ai/plugin@0.0.0-beta-*` preview scope). That ruled out "wrong package" as the
-cause.
+Two v2-port forks of `leohenon/opencode-vim-plugin` (cameronr's, xFabriicio's) both crashed
+with `context.storage`/`context.ui.slot` undefined, even on the fork pinning the correct
+package scope (`@opencode/plugin`, not the abandoned `@opencode-ai/plugin@0.0.0-beta-*`).
+Not a package-version issue.
 
-Real cause: both forks' `package.json` export a root `"."` entry alongside `"./tui"`. A
-plugin with a root export gets routed by OpenCode to **server-side** activation (eager, at
-boot, before any TUI client/renderer attaches) instead of TUI-side activation — and the
-`Context` passed to a server-activated plugin genuinely lacks `storage`/`ui`, regardless of
-what the type declarations promise. This is documented behavior of a different, working
-plugin (`oribarilan/vimcode`'s own `docs/opencode-v2-poc.md`): "the `./tui`-only manifest is
-retained; do not add a root export, which redirects v2 plugin installation to the server
-target." Neither fork's author seems to have hit this, since it only surfaces once an
-actual TUI client loads the plugin, not in a quick smoke test.
+Real cause: both forks export a root `"."` alongside `"./tui"` in `package.json`. A root
+export routes OpenCode to **server-side** activation (eager, at boot, no TUI client
+attached yet), and that `Context` lacks `storage`/`ui` regardless of type declarations.
+Confirmed via `oribarilan/vimcode`'s own docs: "do not add a root export, which redirects v2
+plugin installation to the server target."
 
-Also: OpenCode v2 TUI plugins register in `cli.json` (schema `opencode.ai/v2/cli.json`),
-**not** `opencode.jsonc`'s `plugin` array (that's for server-side/generic plugins — dcp
-lives there) and not `tui.jsonc` either (that key doesn't do what the name suggests; herdr's
-own TUI integration is in `cli.json` too, which is what tipped this off). This isn't
-documented anywhere obvious — found it by noticing where herdr's own working TUI plugin
-entry actually lived.
+Also: v2 TUI plugins register in `cli.json` (schema `opencode.ai/v2/cli.json`), not
+`opencode.jsonc`'s `plugin` array (server/generic plugins — dcp lives there) and not
+`tui.jsonc` (that key is a red herring). Found this from herdr's own TUI entry living in
+`cli.json`.
 
-Ended up using `oribarilan/vimcode` instead (`vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1`
-in `cli.json`'s `plugins` array) — actively maintained, has real dual-host (v1/v2) compat
-testing with receipts, works. If changing the leader key (ctrl+x was taken by herdr, moved
-to space): both `cli.json`'s top-level `keybinds.leader` *and* the plugin's own
-`experimentalV2Leader` option must be set to match, or leader shortcuts/printable input get
-swallowed — confirmed via the plugin's own README, not guessed.
+Switched to `oribarilan/vimcode` (`vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1`
+in `cli.json`'s `plugins`) — maintained, tested, works. Leader key: `cli.json`'s
+`keybinds.leader` and the plugin's `experimentalV2Leader` option must match, or leader
+shortcuts/printable input get swallowed.
