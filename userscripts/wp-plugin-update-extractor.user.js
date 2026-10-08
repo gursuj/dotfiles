@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WP Plugin Update Extractor
 // @namespace    wpc-tools
-// @version      3.0
+// @version      3.3
 // @description  Extract all plugin names + current versions + available update versions to clipboard or file, from wp-admin or ManageWP
 // @match        *://*/wp-admin/plugins.php*
 // @match        *://*/wp-admin/network/plugins.php*
@@ -105,54 +105,94 @@
 
   // --- ManageWP: site's Plugins > Manage tab (needs the "Updates" sub-tab clicked first) ---
 
-  function clickUpdatesTabAndWait() {
-    return new Promise((resolve, reject) => {
-      const tabs = document.querySelectorAll('.tab-button');
-      let target = null;
-      tabs.forEach(t => {
-        if ((t.getAttribute('uib-tooltip') || '').trim() === 'Updates') target = t;
-      });
-      if (!target) {
-        reject(new Error('Could not find the "Updates" tab on this page. Make sure you\'re on the site\'s Plugins > Manage page in ManageWP.'));
-        return;
-      }
-      target.click();
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-      let tries = 0;
-      const maxTries = 40; // ~4s
-      const check = () => {
-        tries++;
-        if (document.querySelector('.list-item-content a[slug][from-version][to-version]') || tries >= maxTries) {
-          resolve();
-          return;
-        }
-        setTimeout(check, 100);
-      };
-      setTimeout(check, 150);
-    });
+  // Find a sub-tab by tooltip text. startsWith so "Active" never matches "Inactive".
+  function findManageWPTab(label) {
+    const tabs = Array.from(document.querySelectorAll('.tab-button'));
+    return tabs.find(t => (t.getAttribute('uib-tooltip') || '').trim().toLowerCase().startsWith(label.toLowerCase())) || null;
   }
 
-  function extractManageWPManage() {
-    const results = [];
-    document.querySelectorAll('.list-item-content').forEach(item => {
-      const link = item.querySelector('a[slug][from-version][to-version]');
-      if (!link) return; // no update flagged for this plugin on the Updates tab
+  // Click a tab, then wait until the list stops changing (Angular re-renders async).
+  // An empty tab (e.g. no inactive plugins) just times out with 0 items, which is fine.
+  async function openTabAndWait(tab) {
+    tab.click();
+    await sleep(300);
+    let last = -1;
+    let stable = 0;
+    for (let i = 0; i < 40 && stable < 3; i++) { // ~4s max
+      const n = document.querySelectorAll('.list-item-content').length;
+      if (n === last && n > 0) stable++;
+      else stable = 0;
+      last = n;
+      await sleep(100);
+    }
+  }
 
-      const nameEl = item.querySelector('.component-name');
-      if (!nameEl) return;
-      // .component-name's first text node is the plugin name; later child elements are icons (vulnerability/favorite)
-      const nameNode = nameEl.childNodes[0];
-      const name = nameNode ? nameNode.textContent.trim() : nameEl.textContent.trim();
-      if (!name) return;
+  function readManageWPItem(item) {
+    const nameEl = item.querySelector('.component-name');
+    if (!nameEl) return null;
+    // First text node is the plugin name; later child elements are icons (vulnerability/favorite).
+    const nameNode = Array.from(nameEl.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+    const name = (nameNode ? nameNode.textContent : nameEl.textContent).trim();
+    if (!name) return null;
 
-      const slug = link.getAttribute('slug');
-      const current = link.getAttribute('from-version');
-      const next = link.getAttribute('to-version');
+    const link = item.querySelector('a[slug][from-version][to-version]');
+    if (link) {
+      return {
+        name,
+        slug: link.getAttribute('slug'),
+        current: link.getAttribute('from-version'),
+        next: link.getAttribute('to-version'),
+      };
+    }
 
-      // active/inactive isn't exposed on this tab's markup — leave null rather than guess
-      results.push({ name, slug, active: null, current, updateAvailable: true, new: next });
-    });
-    return results;
+    // No update link: version is plain text. Markup unknown, so try likely spots then regex.
+    const slugEl = item.querySelector('[slug]');
+    const verEl = item.querySelector('[class*="version"]');
+    const src = verEl ? verEl.textContent : item.textContent.replace(nameEl.textContent, '');
+    const m = src.match(/\d+(?:\.\d+)+[\w.\-+]*/);
+    if (!m) console.warn('[WP Plugin Extractor] no version found, item HTML:', item.outerHTML);
+    return {
+      name,
+      slug: slugEl ? slugEl.getAttribute('slug') : null,
+      current: m ? m[0] : null,
+      next: null,
+    };
+  }
+
+  function readManageWPList() {
+    return Array.from(document.querySelectorAll('.list-item-content')).map(readManageWPItem).filter(Boolean);
+  }
+
+  // Walk Active, Inactive, Updates tabs and merge. Updates tab wins for version info.
+  async function extractManageWPManage() {
+    const byKey = new Map();
+    // Key by name only: Active/Inactive rows have no slug but Updates rows do,
+    // so keying by slug would treat the same plugin as two entries.
+    const keyOf = p => p.name.trim().toLowerCase();
+    const missing = [];
+
+    for (const [label, active] of [['Active', true], ['Inactive', false], ['Updates', null]]) {
+      const tab = findManageWPTab(label);
+      if (!tab) { missing.push(label); continue; }
+      await openTabAndWait(tab);
+
+      for (const p of readManageWPList()) {
+        const prev = byKey.get(keyOf(p)) || {};
+        byKey.set(keyOf(p), {
+          name: p.name,
+          slug: p.slug || prev.slug || null,
+          active: active !== null ? active : (prev.active ?? null),
+          current: p.current || prev.current || null,
+          updateAvailable: label === 'Updates' ? !!p.next : !!prev.updateAvailable,
+          new: p.next || prev.new || null,
+        });
+      }
+    }
+
+    if (missing.length) console.warn('[WP Plugin Extractor] tabs not found:', missing.join(', '));
+    return Array.from(byKey.values());
   }
 
   // --- dispatch ---
@@ -166,13 +206,7 @@
     } else if (ctx === 'managewp-dashboard') {
       data = extractManageWPDashboard();
     } else if (ctx === 'managewp-manage') {
-      try {
-        await clickUpdatesTabAndWait();
-      } catch (e) {
-        alert(e.message);
-        return null;
-      }
-      data = extractManageWPManage();
+      data = await extractManageWPManage();
     } else {
       alert(
         "This isn't a page this script can read.\n\n" +
@@ -192,16 +226,41 @@
     return JSON.stringify(data, null, 2);
   }
 
-  GM_registerMenuCommand('📋 Copy plugin list (JSON)', async () => {
+  // Log full stack so "undefined is not a function" shows the real line.
+  // Callback itself returns nothing: Violentmonkey on Firefox chokes if a menu
+  // callback returns a Promise ("undefined is not a function" in injected.js).
+  function guarded(fn) {
+    return () => {
+      (async () => {
+        try {
+          await fn();
+        } catch (e) {
+          console.error('[WP Plugin Extractor]', e);
+          alert('Extractor failed: ' + e.message + '\n(see console for stack)');
+        }
+      })();
+    };
+  }
+
+  // GM_setClipboard can be missing depending on the userscript manager; fall back to the web API.
+  async function copyText(text) {
+    if (typeof GM_setClipboard === 'function') {
+      GM_setClipboard(text, 'text');
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+  }
+
+  GM_registerMenuCommand('📋 Copy plugin list (JSON)', guarded(async () => {
     const json = await getJson();
     if (!json) return;
-    GM_setClipboard(json, 'text');
+    await copyText(json);
     const data = JSON.parse(json);
     const updates = data.filter(p => p.updateAvailable).length;
     alert(`Copied ${data.length} plugin(s) to clipboard (${updates} with updates available).`);
-  });
+  }));
 
-  GM_registerMenuCommand('💾 Export plugin list (JSON file)', async () => {
+  GM_registerMenuCommand('💾 Export plugin list (JSON file)', guarded(async () => {
     const json = await getJson();
     if (!json) return;
     const blob = new Blob([json], { type: 'application/json' });
@@ -213,5 +272,5 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  });
+  }));
 })();
