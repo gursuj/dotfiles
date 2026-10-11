@@ -1,0 +1,3 @@
+# disable GTK client side decorations
+export GTK_CSD=0
+# env = GTK_THEME,Nord

@@ -1,0 +1,10 @@
+# theme = Nvim Light
+# theme = Belafonte Day
+
+# dark themes
+theme = Adventure
+# theme = Kanagawabones
+
+copy-on-select = "clipboard"
+# This stops Ghostty from processing Ctrl+Z as a terminal action
+# keybind = ctrl+z=ignore

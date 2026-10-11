@@ -1,7 +1,8 @@
 [mgr]
-# empty so the terminal handles mouse events (click-drag text selection, scroll)
-# instead of yazi capturing them for its own UI
-# mouse_events = []
+# only react to scroll; ignore click/touch/move/drag so a stray click doesn't
+# open or select anything. Note: yazi still enables terminal mouse reporting, so
+# click-drag text selection in the terminal needs Shift held.
+mouse_events = ["scroll"]
 
 [preview]
 # Windows Terminal doesn't report pixel dimensions to yazi, so it falls back
