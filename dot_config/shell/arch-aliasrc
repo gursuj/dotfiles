@@ -49,10 +49,12 @@ alias ls='ls --color=auto'
 alias yeet='yay -Rns'
 alias pac-rm='sudo pacman -Rns'
 alias pac-why='pacman -Qi'
+# must be defined before pac-update: zsh expands aliases at function parse time
+alias pac-mirror-update='sudo systemctl start reflector.service'
 pac-update() {
     local pacman_failed=0 yay_failed=0 answer
 
-				pac-mirror-update
+        pac-mirror-update
         sudo pacman -Syu || pacman_failed=1
         yay -Syu || yay_failed=1
 
@@ -94,8 +96,6 @@ alias pac-check='yay -Qu'
 # remove orphans
 alias pac-orphan='pacman -Qqdt'
 # alias pac-orphan='sudo pacman -Rsn $(pacman -Qqdt)'
-alias pac-mirror-update='sudo systemctl start reflector.service'
-
 # escape pwd output to be shell safe
 alias qwd='printf "%q\n" "$(pwd)"'
 # copy to clipboard
