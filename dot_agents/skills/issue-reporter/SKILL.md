@@ -316,6 +316,13 @@ Present it plainly at the end of the draft, e.g. "**Open issue:** [github.com/ow
 
 **Adapt to the user's writing style.** Before drafting, check your memory system for the user's writing-style / voice preferences (e.g. a `user_writing_style` memory) and apply them — tone, sentence length, framing. Do this lookup every time, even if the user hasn't mentioned it — don't wait for a reason to check. A draft that sounds like them will need less editing before they post it.
 
+**Simplifying language never changes the template's structure.** If a simplifying skill or instruction is active (`/i-have-adhd`, a plain-language or terse-mode rule, a writing-preferences file), apply it to the wording only. When a template was found (GitHub issue form, `.md` template, forum post format), the draft must still follow it exactly:
+- Use the template's field labels as headings, in the template's order (e.g. Platform, Affected area, App version, Install channel, OS version, Impact, Description, Steps to reproduce, Expected behavior, Last version where this worked, Screenshots/recordings/logs, Additional context).
+- Fill every required field. For dropdown fields, pick from the template's own options verbatim and list them beside the label.
+- Keep the template's own scaffolding, such as numbered `1. 2. 3.` steps in a Steps field. Leave optional fields blank or write "n/a" rather than dropping them.
+- Don't invent, merge, rename or reorder fields, and don't replace them with the generic "Describe the bug / Expected / Environment" layout. That layout is only the fallback when no template exists.
+- A simplified sentence inside each field is fine. A restructured report is not. Re-check the draft against the template field list before presenting it.
+
 **Match formatting to the platform.** GitHub issues expect markdown (headers, bullets, code blocks). Forum posts (WPMU DEV, WordPress.org, Discourse) are prose — use inline labels ("Auto-publish toggle: ...") not bold headers, and let ideas flow as short paragraphs rather than structured sections.
 
 ### For other platforms (forums, Discourse, Discord)
