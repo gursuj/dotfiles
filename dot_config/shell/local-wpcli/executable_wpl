@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Generic WP-CLI wrapper for any Local (by Flywheel) site.
+# Usage: wpl <site-name> <wp-cli-args...>
+#   e.g. wpl wp-core-dev user list
+#
+# Local doesn't put its per-site php/mysql on a socket wp-cli's host php.ini
+# can find, so this runs wp-cli through THAT site's own bundled PHP binary
+# and php.ini, with LD_LIBRARY_PATH pointed at its bundled shared libs.
+
+set -euo pipefail
+
+SITE_NAME="${1:?Usage: wpl <site-name> <wp-cli-args...>}"
+shift
+
+SITES_JSON="$HOME/.config/Local/sites.json"
+RUN_ID=$(python3 -c "
+import json, sys
+d = json.load(open('$SITES_JSON'))
+for k, v in d.items():
+    if v.get('name') == '$SITE_NAME':
+        print(k)
+        break
+")
+
+if [ -z "$RUN_ID" ]; then
+    echo "No Local site named '$SITE_NAME' found in $SITES_JSON" >&2
+    exit 1
+fi
+
+RUN_DIR="$HOME/.config/Local/run/$RUN_ID"
+PHP_INI="$RUN_DIR/conf/php/php.ini"
+
+# Resolve docroot via sites.json path + /app/public
+SITE_PATH=$(python3 -c "
+import json, os
+d = json.load(open('$SITES_JSON'))
+for k, v in d.items():
+    if v.get('name') == '$SITE_NAME':
+        print(os.path.expanduser(v['path']))
+        break
+")
+DOCROOT="$SITE_PATH/app/public"
+
+if [ ! -f "$PHP_INI" ]; then
+    echo "Site '$SITE_NAME' doesn't look like it's running (no $PHP_INI). Start it in Local first." >&2
+    exit 1
+fi
+
+# Figure out which PHP version this site's php-fpm is actually using
+PHP_FPM_CONF="$RUN_DIR/conf/php/php-fpm.conf"
+PHP_FPM_PID=$(pgrep -f "php-fpm: master process.*$(basename "$RUN_DIR")" | head -1 || true)
+if [ -z "$PHP_FPM_PID" ]; then
+    echo "Site '$SITE_NAME' php-fpm not running. Start the site in Local first." >&2
+    exit 1
+fi
+PHP_FPM_EXE=$(readlink -f "/proc/$PHP_FPM_PID/exe")
+PHP_VERSION_DIR=$(dirname "$(dirname "$(dirname "$(dirname "$PHP_FPM_EXE")")")")
+PHP_BIN="$PHP_VERSION_DIR/bin/linux/bin/php"
+LIBS="$PHP_VERSION_DIR/bin/linux/shared-libs:$PHP_VERSION_DIR/bin/linux/lib"
+
+# Same idea for MySQL: find which mysqld binary this site's DB is actually
+# running, so `wp db *` commands (which shell out to mysqlcheck/mysqldump/
+# mysql) use the matching client tools instead of whatever's on host PATH
+# (often nothing at all).
+MYSQL_BIN=""
+MYSQL_SOCK="$RUN_DIR/mysql/mysqld.sock"
+MYSQLD_PID=$(pgrep -f "mysqld.*$(basename "$RUN_DIR")" | head -1 || true)
+if [ -n "$MYSQLD_PID" ]; then
+    MYSQLD_EXE=$(readlink -f "/proc/$MYSQLD_PID/exe")
+    MYSQL_VERSION_DIR=$(dirname "$(dirname "$(dirname "$(dirname "$MYSQLD_EXE")")")")
+    MYSQL_BIN="$MYSQL_VERSION_DIR/bin/linux/bin"
+fi
+
+WP_CLI_PATH="$(command -v wp)"
+PREPEND="$(dirname "$(readlink -f "$0")")/unset-ld-library-path.php"
+
+cd "$DOCROOT"
+# auto_prepend_file unsets LD_LIBRARY_PATH once PHP's own libs are loaded, so
+# it doesn't leak into child processes wp-cli shells out to (e.g. `db check`
+# -> mysqlcheck via sh -c), which breaks under Local's bundled libreadline.
+# PATH picks up this site's own mysql client binaries (mysqlcheck/mysqldump/
+# mysql aren't on host PATH at all). MYSQL_UNIX_PORT points those tools at
+# the site's actual socket — DB_HOST is 'localhost' so they'd otherwise fall
+# back to the compiled-in default /tmp/mysql.sock and fail to connect.
+PATH="$MYSQL_BIN:$PATH" MYSQL_UNIX_PORT="$MYSQL_SOCK" LD_LIBRARY_PATH="$LIBS" "$PHP_BIN" -d auto_prepend_file="$PREPEND" -c "$PHP_INI" "$WP_CLI_PATH" --path=. "$@"

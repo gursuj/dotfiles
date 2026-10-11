@@ -1,0 +1,8 @@
+#!/bin/sh
+# Get the size of gradle caches, wrappers and daemons in human readable format
+# Depends on: du, awk
+# Use as: gradleCacheWrapperDaemonsSize
+DIR_TO_CHECK=("caches"  "wrapper"  "daemon")
+for dir in ${DIR_TO_CHECK[*]}; do
+    printf "  👉 ~/.gradle/$dir: $(du -sh ~/.gradle/$dir | awk '{ print $1 }')\n"        
+done

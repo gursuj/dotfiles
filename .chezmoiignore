@@ -58,6 +58,12 @@ scripts/wpc-push.ps1
 # TODO.md's bash-on-vps note) -- not a general bashrc consolidation yet, so
 # don't deploy it to the vps or elsewhere.
 .bashrc
+# local-wpcli (Local by Flywheel wp-cli fix) and its ~/.local/bin/wpl symlink,
+# plus cleanGradle (gradle cache cleanup) -- laptop-only tools, not needed on the
+# vps or windows.
+.config/shell/local-wpcli
+.config/shell/cleanGradle
+.local/bin/wpl
 # tidemail is only set up on the arch box so far -- don't deploy its
 # (encrypted) config elsewhere until it's actually used there.
 .config/tidemail
