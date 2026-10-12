@@ -1,0 +1,10 @@
+{
+  "plugin": [
+    "./herdr-tui-session.js"
+{{- /* Windows runs opencode v1 (winget only ships 1.x), which reads vimcode from
+   this file. v2 (arch) registers it in cli.json instead. v0.19.1 supports both. */}}
+{{- if eq .chezmoi.os "windows" }},
+    "vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1"
+{{- end }}
+  ]
+}
