@@ -1,10 +1,10 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": 
+    "actions":
     [
         {
-            "command": 
+            "command":
             {
                 "action": "splitPane",
                 "split": "right"
@@ -12,7 +12,7 @@
             "id": "User.splitPane.864CD510"
         },
         {
-            "command": 
+            "command":
             {
                 "action": "globalSummon",
                 "name": "_quake"
@@ -25,11 +25,11 @@
     "copyFormatting": "none",
     "copyOnSelect": true,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-    "firstWindowPreference": "persistedWindowLayout",
+    "firstWindowPreference": "persistedLayoutAndContent",
     "initialCols": 176,
     "initialPosition": ",",
     "initialRows": 50,
-    "keybindings": 
+    "keybindings":
     [
         {
             "id": "Terminal.DuplicatePaneAuto",
@@ -41,18 +41,18 @@
         }
     ],
     "launchMode": "maximizedFocus",
-    "newTabMenu": 
+    "newTabMenu":
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": 
+        "defaults":
         {
             "colorScheme": "Zenwritten Light",
-            "font": 
+            "font":
             {
                 "face": "CaskaydiaCove NFM",
                 "size": 13
@@ -61,7 +61,7 @@
             "showMarksOnScrollbar": true,
             "startingDirectory": null
         },
-        "list": 
+        "list":
         [
             {
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
@@ -108,7 +108,7 @@
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
         {
             "background": "#F9F9F9",
