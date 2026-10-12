@@ -246,3 +246,22 @@ Switched to `oribarilan/vimcode` (`vimcode@git+https://github.com/oribarilan/vim
 in `cli.json`'s `plugins`) — maintained, tested, works. Leader key: `cli.json`'s
 `keybinds.leader` and the plugin's `experimentalV2Leader` option must match, or leader
 shortcuts/printable input get swallowed.
+
+## herdr pane-mover: installed from a fork, same plugin id (2026-10-12)
+
+`prefix+m` runs `osamahbeig.pane-mover.open` on every machine. The plugin is installed
+from `gursuj/herdr-pane-mover` (in `desired-plugins.txt`), a fork that only adds
+`"windows"` to `platforms` in `herdr-plugin.toml`. The upstream PR is
+`osamahbeig/herdr-pane-mover#1`.
+
+herdr takes the plugin id from the manifest, not the GitHub slug, so the fork still
+installs as `osamahbeig.pane-mover` and the bind needs no change. The catch: the fork and
+upstream share that id, so they can't be installed together.
+
+When the upstream PR merges, on each machine:
+1. Change the slug in `desired-plugins.txt` to `osamahbeig/herdr-pane-mover`.
+2. Run `herdr plugin uninstall osamahbeig.pane-mover` once.
+3. The next `chezmoi apply` reinstalls it from upstream.
+
+If upstream declines the PR, the fork stays. Pull upstream changes into the fork's `main`
+and re-check that the `platforms` line survived.

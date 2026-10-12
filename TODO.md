@@ -29,13 +29,11 @@
     The other half (auto-running `npx skills add` for CLI-only skills) is moot -- those
     skills were removed from the repo/machines.
 - fd ignorefile isn't being used in linux currently. should fix
-- herdr pane-mover (osamahbeig/herdr-pane-mover) on windows: confirmed working on
-    linux 2026-10-06, replacing drovr's move-pane bind (prefix+m) there, local link
-    from `~/programming/herdr-plugins/herdr-pane-mover` (see
-    `.chezmoitemplates/herdr-config.toml.tmpl`, machine_kind == "arch" gate). needs
-    "windows" added to its herdr-plugin.toml `platforms` (currently
-    `["macos","linux"]`, same patch pane-tools needed) + `herdr plugin link` +
-    actual test on the windows machine before extending the bind there.
+- ~~herdr pane-mover on windows~~ done 2026-10-07: cloned to
+    `~/programming/herdr-plugins/herdr-pane-mover`, "windows" added to its
+    `platforms`, linked, bind set. Now installed from the `gursuj/herdr-pane-mover` fork
+    (desired-plugins.txt). Switch the slug back to `osamahbeig/herdr-pane-mover` once the
+    upstream platforms PR/issue is merged.
 - ~~merge `dot_claude/writing-preferences.md` (personal, drafted 2026-09-22 from a trac
     comment edit) with WPC's writing-voice prefs (wpc-os repo) into one doc. Then make
     sure it's actually referenced by agents, not just sitting in the repo~~ done

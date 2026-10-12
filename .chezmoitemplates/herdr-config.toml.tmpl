@@ -66,31 +66,18 @@ type = "plugin_action"
 command = "drovr.move-tab"
 description = "move tab to workspace"
 
-{{- if eq .machine_kind "arch" }}
-# drovr's move-pane replaced here (this machine only) by a local test of
-# herdr-pane-mover (osamahbeig/herdr-pane-mover, 13 stars on GitHub), linked
-# from ~/programming/herdr-plugins/herdr-pane-mover. Tried herdr-pane-tools
-# first (JordanBelfort1/herdr-pane-tools, platform-patched to add linux) but
-# it only moved a pane to an EXISTING tab; pane-mover has full drovr parity
-# (move to existing/new tab, existing/new workspace) plus re-split and swap,
-# and its own manifest already declares platforms = ["macos","linux"] --
-# no patch needed for this machine. Confirmed working on Linux 2026-10-06.
-# Windows untested so far (not linked there yet, and its manifest would need
-# "windows" added to platforms first). Not in desired-plugins.txt since it's
-# a link, not a github install -- don't expect this plugin to exist on other
-# machines until that's done.
+# drovr's move-pane is replaced by herdr-pane-mover (osamahbeig/herdr-pane-mover).
+# It does the same as drovr (move to an existing/new tab or workspace) plus
+# re-split and swap. It is installed from gursuj/herdr-pane-mover (see
+# desired-plugins.txt), a fork that only adds "windows" to the plugin's
+# `platforms` list. The plugin id is still osamahbeig.pane-mover. Switch the
+# slug back to osamahbeig/herdr-pane-mover once the upstream PR is merged.
+# Confirmed working on linux 2026-10-06 and windows 2026-10-07.
 [[keys.command]]
 key = "prefix+m"
 type = "plugin_action"
 command = "osamahbeig.pane-mover.open"
-description = "move pane (pane-mover, local linux test)"
-{{- else }}
-#[[keys.command]]
-#key = "prefix+m"
-#type = "plugin_action"
-#command = "drovr.move-pane"
-#description = "move pane to tab"
-{{- end }}
+description = "move pane (pane-mover)"
 
 [ui]
 agent_panel_sort = "priority"
