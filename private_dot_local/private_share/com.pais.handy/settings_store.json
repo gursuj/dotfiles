@@ -159,7 +159,7 @@
     "selected_model": "handy-computer/whisper-base-gguf/whisper-base-Q8_0.gguf",
     "selected_output_device": null,
     "settings_schema_version": 2,
-    "shortcut_activation": "toggle",
+    "shortcut_activation": "hold_or_toggle",
     "show_tray_icon": true,
     "show_whats_new_on_update": true,
     "sound_theme": "marimba",
