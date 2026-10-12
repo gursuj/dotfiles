@@ -45,6 +45,12 @@
         "h": "modelPicker:decreaseEffort",
         "l": "modelPicker:increaseEffort"
       }
+    },
+    {
+      "context": "Chat",
+      "bindings": {
+        "alt+v": "chat:imagePaste"
+      }
     }
   ]
 }
