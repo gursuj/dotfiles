@@ -1,0 +1,5 @@
+{{/* Windows target for Zed's settings. Zed reads %APPDATA%\Zed on Windows, not
+   ~/.config/zed, so this just includes the single shared source (the Linux one at
+   dot_config/zed/private_settings.json). Edit that file, not this one. Same
+   pattern as Handy's settings_store.json.tmpl. */ -}}
+{{- include "dot_config/zed/private_settings.json" -}}

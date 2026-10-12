@@ -8,7 +8,14 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
   // Decrease the horizontal indent size of files & folders in the project
-  "cli_default_open_behavior": "existing_window",
+  "cli_default_open_behavior": "new_window",
+  "diff_view_style": "unified",
+  "sticky_scroll": {
+    "enabled": true,
+  },
+  "session": {
+    "trust_all_worktrees": true,
+  },
   "agent_servers": {
     "claude-acp": {
       "type": "registry"
@@ -36,6 +43,11 @@
   "colorize_brackets": true,
   "agent": {
     "dock": "right",
+    "favorite_models": [],
+    "model_parameters": [],
+    "auto_compact": {
+      "threshold": "90%",
+    },
     "inline_assistant_model": {
       "provider": "copilot_chat",
       "model": "claude-haiku-4.5",
@@ -51,11 +63,11 @@
   },
   "relative_line_numbers": "enabled",
   "ui_font_size": 16,
-  "buffer_font_size": 16,
+  "buffer_font_size": 15,
   "theme": {
-    "mode": "dark",
-    "light": "Gruvbox Light Soft",
-    "dark": "Gruvbox Dark",
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark",
   },
   "tab_size": 4,
   "hard_tabs": false,

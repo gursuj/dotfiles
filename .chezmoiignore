@@ -26,6 +26,9 @@ scripts/wpc-push.ps1
 # Handy's actual config dir on Windows is AppData/Roaming/com.pais.handy
 # (see that dir's .tmpl, which includes this file) -- this path is Linux-only.
 .local/share/com.pais.handy
+# Zed's config dir on Windows is AppData/Roaming/Zed (see the .tmpl files there,
+# which include these sources) -- this path is Linux-only.
+.config/zed
 {{ end }}
 
 {{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
@@ -42,6 +45,8 @@ scripts/wpc-push.ps1
 .config/search-engines
 # No physical keyboard to remap on the VPS either.
 .config/kanata
+# Zed (GUI editor) isn't used on the VPS either.
+.config/zed
 {{ end }}
 
 {{ if ne .machine_kind "arch" }}
@@ -70,7 +75,6 @@ scripts/wpc-push.ps1
 # GUI/laptop-only apps and the ssh config (hosts only, encrypted; keys are never
 # tracked). Windows has different config paths for these, so not deployed there yet.
 .config/ghostty
-.config/zed
 .config/sioyek
 .config/yay
 .config/obs-studio
