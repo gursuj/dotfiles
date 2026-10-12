@@ -110,6 +110,37 @@ function pwsh-hist {
 # Args pass through, e.g. `ff https://example.com` or `ff -P` for the profile picker.
 function ff { & 'C:\Program Files\Mozilla Firefox\firefox.exe' @args }
 
+# Start kanata in the background. It normally runs from the elevated logon task, so
+# this is for restarting it by hand. A plain `&` call keeps kanata's log output
+# attached to this terminal and makes it unusable. A hidden window plus redirected
+# output frees the terminal, and the logs go to $env:TEMP\kanata.*.log instead.
+function kanata-start {
+    $exe = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\jtroo.kanata_gui_Microsoft.Winget.Source_8wekyb3d8bbwe\kanata_windows_gui_winIOv2_x64.exe'
+    $cfg = Join-Path $HOME '.config\kanata\kanata.kbd'
+    # Stop any running copy first so two instances never fight over the keyboard.
+    # An instance started elevated (the logon task) can only be stopped from an
+    # elevated shell, so bail out with a clear message instead of starting a second one.
+    $old = Get-Process -Name 'kanata*' -ErrorAction SilentlyContinue
+    if ($old) {
+        $old | Stop-Process -Force -ErrorAction SilentlyContinue
+        $old | Wait-Process -Timeout 5 -ErrorAction SilentlyContinue
+        if (Get-Process -Name 'kanata*' -ErrorAction SilentlyContinue) {
+            Write-Host 'could not stop the running kanata (it is probably elevated). Run this from an elevated shell.'
+            return
+        }
+        Write-Host 'stopped the old kanata'
+    }
+    $log = Join-Path $env:TEMP 'kanata'
+    $p = Start-Process $exe -ArgumentList '--cfg', "`"$cfg`"" -WindowStyle Hidden -PassThru `
+        -RedirectStandardOutput "$log.out.log" -RedirectStandardError "$log.err.log"
+    Start-Sleep -Seconds 1
+    if (Get-Process -Id $p.Id -ErrorAction SilentlyContinue) {
+        Write-Host "kanata is running (PID $($p.Id)), logs in $log.*.log"
+    } else {
+        Write-Host "kanata exited right after starting, check $log.err.log"
+    }
+}
+
 # Vi keybindings and prediction/list UI only matter for a human typing at a
 # prompt. Setting them forces PowerShell to autoload the PSReadLine module
 # right here (it's not imported yet), which is the single biggest chunk of

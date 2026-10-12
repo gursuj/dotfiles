@@ -265,3 +265,22 @@ When the upstream PR merges, on each machine:
 
 If upstream declines the PR, the fork stays. Pull upstream changes into the fork's `main`
 and re-check that the `platforms` line survived.
+
+## kanata-start on Windows: background start and elevation (2026-10-12)
+
+`kanata-start` in the PowerShell profile stops any running kanata and starts a fresh one
+with a hidden window. Three things to remember:
+
+- A plain `& "...kanata_windows_gui_winIOv2_x64.exe" --cfg ...` does not background it in
+  PowerShell. kanata's log output stays attached to the terminal and makes it unusable. The
+  function uses `Start-Process -WindowStyle Hidden` with stdout and stderr redirected to
+  `%TEMP%\kanata.out.log` and `%TEMP%\kanata.err.log`.
+- The normal instance runs elevated from the Task Scheduler logon task. A non-elevated shell
+  can't stop it, so the function prints a message and does not start a second copy. Run it
+  from an elevated pwsh to restart.
+- A restart from a normal shell leaves kanata non-elevated until the next logon. It may then
+  not remap keys inside admin windows. Log off and on, or restart it from an elevated shell,
+  to get the elevated instance back.
+
+Tested: the function parses and loads, and an earlier version's "already running" guard
+worked. The stop-and-restart path was run by hand, not by the agent.
