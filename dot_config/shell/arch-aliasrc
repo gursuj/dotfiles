@@ -56,7 +56,13 @@ pac-update() {
     local pacman_log yay_log
     pacman_log=$(mktemp) yay_log=$(mktemp)
 
-        pac-mirror-update
+        echo '○ Updating mirrors (reflector)...'
+        # oneshot unit: systemctl start blocks until reflector finishes, so the status is real
+        if pac-mirror-update; then
+            echo '✓ Mirrors updated.'
+        else
+            echo '⚠️  Mirror update failed. Continuing with the existing mirrorlist.'
+        fi
         # tee stderr to a log (still shown live) so failures can be summarised below
         sudo pacman -Syu 2> >(tee "$pacman_log" >&2) || pacman_failed=1
         yay -Syu 2> >(tee "$yay_log" >&2) || yay_failed=1
