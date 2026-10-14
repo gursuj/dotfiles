@@ -8,8 +8,6 @@ alias djournal='cd ~/Documents/obsidian; nvim Journal.md'
 alias wpc='cd ~/Documents/obsidian-wpc-notes; nvim gtd.md'
 alias anydesk="GDK_BACKEND=x11 XWAYLAND_NO_GLAMOR=1 XWAYLAND_SCREEN_SCALE_FACTOR=1 anydesk"
 # ccc is now a function (dot_zshrc.tmpl) — sandbox-prompt wrapper around claude, not a plain alias
-alias youtui="~/programming/git-cloned/youtui/target/release/youtui"
-alias ytm=youtui
 alias lg=lazygit
 alias waybar-reload='killall -SIGUSR2 waybar'
 
