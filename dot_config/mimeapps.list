@@ -70,3 +70,4 @@ x-scheme-handler/neeto-record=neeto-record.desktop
 x-scheme-handler/clickup=ClickUp.desktop
 x-scheme-handler/slack=slack.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+x-scheme-handler/mindwtr=mindwtr-handler.desktop
