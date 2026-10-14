@@ -59,16 +59,9 @@ type = "shell"
 command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
 {{- end }}
 
-# herdr-drovr plugin (AVGVSTVS96/herdr-drovr, see desired-plugins.txt) keybinds.
-[[keys.command]]
-key = "prefix+M"
-type = "plugin_action"
-command = "drovr.move-tab"
-description = "move tab to workspace"
-
-# drovr's move-pane is replaced by herdr-pane-mover (osamahbeig/herdr-pane-mover).
-# It does the same as drovr (move to an existing/new tab or workspace) plus
-# re-split and swap. It is installed from gursuj/herdr-pane-mover (see
+# herdr-pane-mover (osamahbeig/herdr-pane-mover) replaces drovr entirely —
+# move to an existing/new tab or workspace, plus re-split and swap. drovr
+# itself was uninstalled 2026-10-14. It is installed from gursuj/herdr-pane-mover (see
 # desired-plugins.txt), a fork that only adds "windows" to the plugin's
 # `platforms` list. The plugin id is still osamahbeig.pane-mover. Switch the
 # slug back to osamahbeig/herdr-pane-mover once the upstream PR is merged.

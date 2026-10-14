@@ -1,3 +1,2 @@
-AVGVSTVS96/herdr-drovr
 gursuj/herdr-auto-namer
 gursuj/herdr-pane-mover
