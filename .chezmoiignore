@@ -83,6 +83,14 @@ scripts/wpc-push.ps1
 .config/fontconfig
 .ssh
 {{ end }}
+
+{{ if ne .machine_kind "wpc" }}
+## wpc only
+
+# WinSCP "Compare Files" extension patched to find WinMerge's per-user install.
+# Only the WPC Windows box uses WinSCP + WinMerge this way.
+AppData/Roaming/WinSCP
+{{ end }}
 AppData/Roaming/herdr/config.toml
 # Tampermonkey userscripts: tracked here for version history only, never deployed
 # anywhere by chezmoi apply. Tampermonkey installs directly from this repo path
