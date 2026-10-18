@@ -287,3 +287,26 @@ function ccc {
     [[ $use_sandbox -eq 1 ]] && cd "$sandbox_dir"
     claude "${claude_args[@]}"
 }
+
+{{- if eq .machine_kind "vps" }}
+# mindwtr-cloud: run/stop/update via docker directly (no compose file yet).
+# Alternative: docker-compose.yml under ~/docker/mindwtr-cloud for declarative,
+# version-controlled management (same image, port 127.0.0.1:8787->80, volume ./data:/data).
+mindwtr_start() {
+    docker run -d \
+        --name mindwtr-cloud \
+        -p 127.0.0.1:8787:8787 \
+        -v /opt/mindwtr-cloud/data:/data \
+        ghcr.io/dongdongbh/mindwtr-cloud:latest
+}
+
+mindwtr_stop() {
+    docker stop mindwtr-cloud && docker rm mindwtr-cloud
+}
+
+mindwtr_update() {
+    docker pull ghcr.io/dongdongbh/mindwtr-cloud:latest
+    mindwtr_stop
+    mindwtr_start
+}
+{{- end }}
