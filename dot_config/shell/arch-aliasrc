@@ -140,3 +140,7 @@ alias iwcg="wlan-scan; iwctl station wlan0 connect 'CG net5'"
 alias iwhot="wlan-scan; iwctl station wlan0 connect POCO" # mobile hotspot
 alias cz=chezmoi
 alias gss='git status'
+# Mindwtr REST API token: lives in the GNOME keyring (secret-tool = libsecret), never in a file.
+# Run this in the shell BEFORE starting `claude`, so the /mindwtr skill sees $MINDWTR_API_TOKEN.
+# One-off store: secret-tool store --label='Mindwtr API' service mindwtr
+alias gtd-token='export MINDWTR_API_TOKEN=$(secret-tool lookup service mindwtr)'
