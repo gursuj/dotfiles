@@ -111,6 +111,10 @@ AppData/Roaming/SaneBreak/sane-break.db
 # runtime/log/cache file that regenerates on its own -- no reason to track it,
 # and ytmusic_credentials.json in particular holds a live OAuth token (separate
 # secret from the client_id/client_secret in config.toml), never commit it.
+{{ if eq .machine_kind "vps" }}
+# cliamp isn't used on the headless VPS at all -- arch and wpc only.
+.config/cliamp/config.toml
+{{ end }}
 .config/cliamp/cliamp.log
 .config/cliamp/cliamp.sock.pid
 .config/cliamp/history.toml
