@@ -18,6 +18,8 @@ Avoid typographic punctuation (`·`, `—`, smart quotes) in request bodies sent
 
 Every request needs `Authorization: Bearer <token>`. Store the token in the `MINDWTR_API_TOKEN` environment variable — never write it into a file. (VPS-side copy of the token lives at `/etc/mindwtr-cloud/token`, `640`, `root:mindwtr-secrets`.)
 
+**Arch machine only:** the token is in the GNOME keyring (`secret-tool`, service `mindwtr`). If the variable is unset in the Bash tool, requests fail. Only when you want to use this skill or do a Mindwtr API lookup: run the `gtd-token` alias (defined in `~/.config/shell/arch-aliasrc`) in the shell, then restart the terminal agent so it inherits the variable. Running it inside a session doesn't help, since the Bash tool doesn't keep shell state. No need to run it before every agent session. To check without printing the token: `secret-tool lookup service mindwtr | wc -c` (expect 65). Other machines set `MINDWTR_API_TOKEN` their own way.
+
 | Need | Request |
 |------|---------|
 | List next actions | `GET /tasks?status=next` |
@@ -31,6 +33,8 @@ Every request needs `Authorization: Bearer <token>`. Store the token in the `MIN
 | Complete | `POST /tasks/:id/complete` |
 | Archive | `POST /tasks/:id/archive` |
 | Create/update project or area | `POST`/`PATCH /projects[/:id]`, `/areas[/:id]` |
+
+`GET /tasks/:id` wraps the task under a `task` key, so use `jq '.task | {...}'`, not `.title`.
 
 There's no documented "restore" action — un-archiving a task likely goes through `PATCH /tasks/:id` (e.g. resetting `status`), not a dedicated endpoint. Check `GET /tasks/:id` on the archived task and confirm the field to flip before assuming a shape.
 
