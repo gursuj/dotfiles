@@ -8,3 +8,6 @@ theme = Adventure
 copy-on-select = "clipboard"
 # This stops Ghostty from processing Ctrl+Z as a terminal action
 # keybind = ctrl+z=ignore
+
+# default ctrl+enter = toggle_fullscreen; unbind
+keybind = ctrl+enter=unbind
