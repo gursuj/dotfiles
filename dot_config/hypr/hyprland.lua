@@ -83,7 +83,8 @@ end)
 
 -- vertical dual monitor: HDMI-A-1 above eDP-1, laptop centered horizontally
 -- eDP-1 is 554px narrower than HDMI-A-1; x=277 centers it under the monitor.
-hl.monitor({ output = "HDMI-A-1", mode = "preferred",     position = "0x0",     scale = 1 })
+-- HDMI-A-1 bottom 50px physically blocked; reserved = no windows/bars there.
+hl.monitor({ output = "HDMI-A-1", mode = "preferred",     position = "0x0",     scale = 1, reserved = { bottom = 80 } })
 hl.monitor({ output = "eDP-1",    mode = "1366x768@60",   position = "277x1080", scale = 1 })
 
 -- screen mirroring setup
