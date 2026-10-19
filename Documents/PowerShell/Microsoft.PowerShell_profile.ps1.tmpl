@@ -298,3 +298,23 @@ if ($env:ZELLIJ) {
     }
 }
 
+# herdr: report git repo name as $repo sidebar token, only when cwd changed.
+# --git-common-dir resolves worktrees to the main repo (not the worktree folder).
+if ($IsInteractiveShell -and $env:HERDR_ENV -and $env:HERDR_PANE_ID) {
+    $global:_herdrLastCwd = $null
+    $global:_herdrPromptBase = $Function:prompt
+    function prompt {
+        if ($PWD.Path -ne $global:_herdrLastCwd) {
+            $global:_herdrLastCwd = $PWD.Path
+            $common = git rev-parse --path-format=absolute --git-common-dir 2>$null
+            if ($LASTEXITCODE -eq 0 -and $common) {
+                $repo = Split-Path ($common -replace '[\\/]\.git$', '') -Leaf
+            } else {
+                $repo = Split-Path $PWD.Path -Leaf
+            }
+            herdr pane report-metadata $env:HERDR_PANE_ID --source shell-cwd --token "repo=$repo" *> $null
+        }
+        & $global:_herdrPromptBase
+    }
+}
+

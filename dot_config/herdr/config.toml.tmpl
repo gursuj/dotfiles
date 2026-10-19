@@ -1,5 +1,6 @@
 {{- template "herdr-config.toml.tmpl" . -}}
 
 [ui.sidebar.agents]
-# Default rows minus "machine" — hides the Local/remote label. Confirmed working 2026-10-18.
-rows = [["state_icon", "pane"], ["machine"]]
+# $repo = custom token set by shell chpwd/prompt hook (dot_zshrc.tmpl, PowerShell profile):
+# git repo name (worktree-safe), else cwd folder name.
+rows = [["state_icon", "pane"], ["$repo", "machine"]]

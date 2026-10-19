@@ -288,6 +288,24 @@ function ccc {
     claude "${claude_args[@]}"
 }
 
+# herdr: report git repo name as $repo sidebar token, on cwd change.
+# --git-common-dir resolves worktrees to the main repo (not the worktree folder).
+if [[ -n "$HERDR_ENV" && -n "$HERDR_PANE_ID" ]]; then
+    _herdr_report_repo() {
+        local common repo
+        common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+        if [[ -n "$common" ]]; then
+            repo=${${common%/.git}:t}
+        else
+            repo=${PWD:t}
+        fi
+        herdr pane report-metadata "$HERDR_PANE_ID" --source shell-cwd --token "repo=$repo" &>/dev/null &!
+    }
+    autoload -Uz add-zsh-hook
+    add-zsh-hook chpwd _herdr_report_repo
+    _herdr_report_repo
+fi
+
 {{- if eq .machine_kind "vps" }}
 # mindwtr-cloud: run/stop/update via docker directly (no compose file yet).
 # Alternative: docker-compose.yml under ~/docker/mindwtr-cloud for declarative,
