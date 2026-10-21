@@ -11,7 +11,8 @@
 # straight to its D:\code\gursuj clone for active development, and the
 # already-linked error here is swallowed instead of aborting the apply.
 #
-# desired plugins hash: {{ include "dot_config/herdr/desired-plugins.txt" | sha256sum }}
+# Runs every apply (run_after_, not run_onchange_) so the `herdr plugin update`
+# at the end picks up new upstream commits. Update skips linked/unchanged plugins.
 
 if ! command -v herdr >/dev/null 2>&1; then
   echo "herdr not found on PATH, skipping plugin install" >&2
@@ -43,3 +44,8 @@ while IFS= read -r plugin; do
     esac
   fi
 done < "$desired"
+
+# Non-fatal: a failed update shouldn't abort apply. Needs herdr with `plugin update`.
+if ! out="$(herdr plugin update -y 2>&1)"; then
+  echo "herdr plugin update failed: $out" >&2
+fi

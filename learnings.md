@@ -108,7 +108,7 @@ shape as yazi's `ya pkg add`, so it gets the same treatment: chezmoi doesn't tra
 plugin's code (that lives in its own GitHub repo, `herdr plugin install` fetches it), only a
 `desired-plugins.txt` declaration, same format as yazi's.
 
-`run_onchange_after_20-herdr-plugin-install.sh.tmpl` reads
+`run_after_20-herdr-plugin-install.sh.tmpl` reads
 `dot_config/herdr/desired-plugins.txt` and runs `herdr plugin install owner/repo -y` for
 each line. Plugin ids (from the plugin's own `herdr-plugin.toml`, e.g. `auto-namer`) don't
 necessarily match the repo name, so there's no reliable way to pre-check `herdr plugin
@@ -131,10 +131,10 @@ installed — if it found zero github-sourced plugins and wrote anyway, it'd era
 declaration every other machine relies on. Run the sync script from a machine where the
 plugin is actually github-installed.
 
-**To pick up new commits on `gursuj/herdr-auto-namer`** on a machine that installed it via
-GitHub (not linked locally): `herdr plugin uninstall auto-namer` then re-run
-`chezmoi apply` (or `herdr plugin install gursuj/herdr-auto-namer -y` directly) — the
-onchange script only installs what's missing, it doesn't update what's already there.
+**To pick up new commits on `gursuj/herdr-auto-namer`** (or any github plugin): nothing.
+The script is `run_after_` (every apply, not onchange) and ends with `herdr plugin update -y`
+(herdr PR #4245, merged 2026-10-05). Update skips linked and unchanged plugins, so the dev
+machine's local link is safe. Failure is non-fatal. Needs a herdr build with `plugin update`.
 
 ## ccc (Claude Code sandbox launcher): one var, per-shell scripts (2026-08-23)
 
