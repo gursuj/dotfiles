@@ -708,6 +708,13 @@ hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl s 8%+"), { locke
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl s 8%-"), { locked = true })
 hl.bind("SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl s 3%+"), { locked = true })
 hl.bind("SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl s 3%-"), { locked = true })
+-- external monitor (BenQ GW2270, DDC/CI) brightness: same keys + CTRL. needs ddcutil + i2c-dev
+-- --sn pins to this monitor. generic alt: --display 1 (eDP-1 is invalid, so 1 = first external; breaks w/ 2+ externals)
+-- ddcutil is slow (~0.5-1s/press, probes buses); --noverify helps
+hl.bind("CTRL + XF86MonBrightnessUp",   hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 + 8"), { locked = true })
+hl.bind("CTRL + XF86MonBrightnessDown", hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 - 8"), { locked = true })
+hl.bind("CTRL + SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 + 3"), { locked = true })
+hl.bind("CTRL + SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 - 3"), { locked = true })
 
 -- replicate above functionality using non-multimedia keys
 hl.bind(mainMod .. " + equal",     hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true })
@@ -715,6 +722,8 @@ hl.bind(mainMod .. " + minus",     hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AU
 hl.bind(mainMod .. " + backspace", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind(mainMod .. " + SHIFT + equal", hl.dsp.exec_cmd("brightnessctl s 8%+"), { locked = true })
 hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.exec_cmd("brightnessctl s 8%-"), { locked = true })
+hl.bind(mainMod .. " + CTRL + SHIFT + equal", hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 + 8"), { locked = true })
+hl.bind(mainMod .. " + CTRL + SHIFT + minus", hl.dsp.exec_cmd("ddcutil --sn 3BG00085019 --noverify setvcp 10 - 8"), { locked = true })
 hl.bind(mainMod .. " + bracketright", hl.dsp.exec_cmd("playerctl next"),       { locked = true })
 hl.bind(mainMod .. " + bracketleft",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 hl.bind(mainMod .. " + backslash",    hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
