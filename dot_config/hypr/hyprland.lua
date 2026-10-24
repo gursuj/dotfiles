@@ -790,6 +790,22 @@ hl.window_rule({
     float = false,
 })
 
+-- bitwarden firefox extension popout (login window): float
+-- title is set after map, so a static window_rule never matches; float from the title event
+-- once per window, so a manual re-tile isn't undone on the next title change
+local bitwarden_floated = {}
+hl.on("window.title", function(win)
+    if not win or win.class ~= "firefox" then return end
+    if not (win.title or ""):match("^Extension: %(Bitwarden Password Manager%)") then return end
+    local id = tostring(win.address)
+    if bitwarden_floated[id] then return end
+    bitwarden_floated[id] = true
+    if not win.floating then
+        hl.dispatch(hl.dsp.window.float({ action = "enable", window = win }))
+        hl.dispatch(hl.dsp.window.center({ window = win }))
+    end
+end)
+
 -- clipse clipboard manager
 -- TODO: need to fix size not being applied
 hl.window_rule({
