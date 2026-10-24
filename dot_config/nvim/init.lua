@@ -20,10 +20,12 @@ vim.o.termguicolors = true
 vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 vim.o.signcolumn = 'yes'
-vim.o.winborder = 'rounded'
+if vim.fn.has('nvim-0.11') == 1 then
+  vim.o.winborder = 'rounded'
+end
 
 -- Space as leader key
-vim.g.mapleader = vim.keycode('<Space>')
+vim.g.mapleader = ' '
 
 -- Basic clipboard interaction
 vim.keymap.set({'n', 'x'}, '<leader>y', '"+y', {desc = 'Copy to clipboard'})
@@ -39,6 +41,12 @@ vim.api.nvim_create_autocmd({'BufWinEnter'}, {
 -- ========================================================================== --
 -- ==                               PLUGINS                                == --
 -- ========================================================================== --
+
+-- Plugins need nvim >= 0.11 (nvim-treesitter main branch, current nvim-lspconfig).
+-- VPS (Ubuntu 24.04) apt ships 0.9.5, so stop here with just the editor settings above.
+if vim.fn.has('nvim-0.11') == 0 then
+  return
+end
 
 local mini = {}
 

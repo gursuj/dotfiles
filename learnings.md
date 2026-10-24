@@ -284,3 +284,22 @@ with a hidden window. Three things to remember:
 
 Tested: the function parses and loads, and an earlier version's "already running" guard
 worked. The stop-and-restart path was run by hand, not by the agent.
+
+## VPS is Ubuntu 24.04.5 LTS: apt nvim is 0.9.5, init.lua degrades instead (2026-10-24)
+
+The `vps` machine kind runs Ubuntu 24.04.5 LTS (noble). Its apt `neovim` is 0.9.5 and
+that's the newest apt offers there. Two things in `dot_config/nvim/init.lua` broke on it:
+`vim.keycode()` (needs 0.10) failed on first open, and `vim.o.winborder` needs 0.11. The
+plugin stack (nvim-treesitter `main`, current nvim-lspconfig) needs 0.11 or newer too, so
+making the whole config 0.9-compatible isn't realistic.
+
+Decision: no nvim install script (an earlier tarball-installer draft was dropped). Instead
+`init.lua` uses a plain `' '` leader, guards `winborder`, and returns before the PLUGINS
+section when `vim.fn.has('nvim-0.11') == 0`. On the VPS you get the editor settings only,
+no plugins, no error. On arch (0.12.x) nothing changes.
+
+If the VPS ever needs the full config: `sudo add-apt-repository ppa:neovim-ppa/unstable`
+or `sudo snap install nvim --classic`, by hand. Check the version it gives is 0.11 or newer.
+
+Same class of issue: Debian/Ubuntu fzf is 0.44, which has no `fzf --zsh` (added in 0.48).
+`dot_zshrc.tmpl` falls back to `/usr/share/doc/fzf/examples/key-bindings.zsh`.
