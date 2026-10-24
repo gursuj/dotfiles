@@ -777,6 +777,19 @@ hl.window_rule({
 })
 -- hl.window_rule({ name = "emacs-opacity", match = { class = "Emacs" }, opacity = "0.9" })
 
+-- sane-break: float all windows (postpone, meeting mode, break), tile settings
+-- settings title is exactly "Sane Break"; later rule overrides float
+hl.window_rule({
+    name  = "sane-break-float",
+    match = { class = "^sane-break$" },
+    float = true,
+})
+hl.window_rule({
+    name  = "sane-break-settings-tile",
+    match = { class = "^sane-break$", title = "^Sane Break$" },
+    float = false,
+})
+
 -- clipse clipboard manager
 -- TODO: need to fix size not being applied
 hl.window_rule({
