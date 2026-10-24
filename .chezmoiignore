@@ -29,6 +29,8 @@ scripts/wpc-push.ps1
 # Zed's config dir on Windows is AppData/Roaming/Zed (see the .tmpl files there,
 # which include these sources) -- this path is Linux-only.
 .config/zed
+# Shared zsh aliases -- Windows uses the PowerShell profile instead.
+.config/shell/aliasrc
 {{ end }}
 
 {{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}

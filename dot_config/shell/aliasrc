@@ -1,0 +1,8 @@
+#!/bin/bash
+# Shared aliases -- sourced on every machine_kind (see dot_zshrc.tmpl).
+# Arch-only stuff (desktop/Wayland/pacman) lives in arch-aliasrc instead.
+
+alias cz=chezmoi
+alias nv=nvim
+alias grep='grep --color=auto'
+alias oc=opencode

@@ -226,7 +226,14 @@ if [[ -z "$CLAUDECODE" ]]; then
     type zoxide &> /dev/null && eval "$(zoxide init zsh)"
     # fzf keybinds: C-r history popup (prefilled with typed text, C-n/C-p to move), C-t files, M-c cd
     # Search shell history with C-r (fzf popup).
-    type fzf &> /dev/null && source <(fzf --zsh)
+    # `fzf --zsh` needs fzf >= 0.48; Debian's 0.44 ships the scripts under /usr/share/doc instead.
+    if type fzf &> /dev/null; then
+        if fzf --zsh &> /dev/null; then
+            source <(fzf --zsh)
+        elif [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+            source /usr/share/doc/fzf/examples/key-bindings.zsh
+        fi
+    fi
     type herdr &> /dev/null && eval "$(herdr completion zsh)"
 
     # nvm's init-nvm.sh eagerly sources all of nvm.sh + bash_completion (~1.3s)
@@ -248,13 +255,11 @@ fi
 export HYPRSHOT_DIR='$HOME/Pictures/screenshots/'
 {{- end }}
 
-# Shared aliases -- usable on any machine_kind. Machine-specific alias files
-# (e.g. arch-aliasrc: desktop/Wayland/pacman stuff, useless on the VPS) live
-# under ~/.config/shell and get sourced below; put anything cross-machine
-# here instead of in one of those, so it isn't silently skipped elsewhere.
-alias nv=nvim
-alias grep='grep --color=auto'
-alias oc=opencode
+# Shared aliases (aliasrc) -- usable on any machine_kind. Machine-specific alias
+# files (e.g. arch-aliasrc: desktop/Wayland/pacman stuff, useless on the VPS)
+# are sourced below; put anything cross-machine in aliasrc instead, so it isn't
+# silently skipped elsewhere.
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
 
 # ch — Claude Code History (gursuj/cch fork of https://github.com/halooojustin/cch)
 # use ch help for available commands. zsh port of the pwsh profile's aliases.

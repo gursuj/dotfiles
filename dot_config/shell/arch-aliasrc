@@ -1,8 +1,8 @@
 #!/bin/bash
 # Arch laptop specific aliases (desktop/Wayland/pacman/etc) -- sourced only
 # when machine_kind == arch (see dot_zshrc.tmpl). Shared, cross-machine
-# aliases (nvim, grep color, opencode, ...) live directly in dot_zshrc.tmpl
-# instead -- add new ones there, not here, unless they're genuinely arch-only.
+# aliases live in aliasrc -- add new ones there, not here, unless they're
+# genuinely arch-only.
 
 alias djournal='cd ~/Documents/obsidian; nvim Journal.md'
 alias wpc='cd ~/Documents/obsidian-wpc-notes; nvim gtd.md'
@@ -138,7 +138,6 @@ alias iw2g="wlan-scan; iwctl station wlan0 connect sujal1058_2"
 alias iw5g="wlan-scan; iwctl station wlan0 connect sujal1058_5"
 alias iwcg="wlan-scan; iwctl station wlan0 connect 'CG net5'"
 alias iwhot="wlan-scan; iwctl station wlan0 connect POCO" # mobile hotspot
-alias cz=chezmoi
 alias gss='git status'
 # Mindwtr REST API token: lives in the GNOME keyring (secret-tool = libsecret), never in a file.
 # Only needed for the /mindwtr skill or ad-hoc Mindwtr API lookups: run it, then restart the

@@ -65,7 +65,7 @@ merge` / `merge-all` (three-way merge when both source and live have drifted —
 `re-add` for that case).
 
 `cz` is a shorthand alias for `chezmoi` (e.g. `cz status` / `cz diff` / `cz apply`) — `alias
-cz=chezmoi` in `dot_config/shell/arch-aliasrc` on Linux, `function cz` in the PowerShell
+cz=chezmoi` in `dot_config/shell/aliasrc` (all Linux machine kinds), `function cz` in the PowerShell
 profile on Windows.
 
 `chezmoi status` can flag a *directory* as modified (`MM`) while `chezmoi diff` on that same
