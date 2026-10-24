@@ -13,7 +13,7 @@ alias waybar-reload='killall -SIGUSR2 waybar'
 
 alias zed=zeditor
 # scratchpad file for writing down current thoughts, rubber ducking, journalling, shouting into void
-alias sc='nvim $HOME/scratchpad.md'
+alias sc='cd $HOME/Documents/obsidian && nvim scratchpad.md'
 alias everdo='$HOME/.local/bin/Everdo-1.11.15.AppImage'
 
 # function oracle-start {
