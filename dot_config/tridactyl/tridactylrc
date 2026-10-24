@@ -1,5 +1,6 @@
 " Tridactyl config. Loaded by native messenger from ~/.config/tridactyl/tridactylrc.
 " Reload: :source
+" TODO verify on windows: tridactyl finds this path (else ~/_tridactylrc), native messenger installed.
 
 " Ignore stale in-browser config, file is the source of truth.
 sanitise tridactyllocal tridactylsync

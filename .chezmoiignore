@@ -23,8 +23,6 @@ scripts/wpc-push.ps1
 .config/swayimg
 .config/hypr
 .config/waybar
-# Tridactyl: Windows rc path differs (~/_tridactylrc), not set up there yet.
-.config/tridactyl
 # Handy's actual config dir on Windows is AppData/Roaming/com.pais.handy
 # (see that dir's .tmpl, which includes this file) -- this path is Linux-only.
 .local/share/com.pais.handy

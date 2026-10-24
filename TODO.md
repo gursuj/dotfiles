@@ -11,7 +11,8 @@
           so aliases aren't maintained twice (maybe generate from it)
         - decide `set newtab about:blank` (tridactyl overrides new tab page by default?)
         - optional `guiset` UI hiding (needs native messenger, writes userChrome.css)
-        - windows: rc lives at `~/_tridactylrc`, needs its own tmpl + native messenger
+        - windows: rc now deploys to `~/.config/tridactyl/` there too (no longer ignored).
+          Verify tridactyl finds it (docs: also checks `~/_tridactylrc`), install native messenger
         - ~~verify tridactyl reads firefox search keywords~~ checked 2026-10-24: it doesn't
           (`open` only matches `searchurls` keys, else `searchengine`). Must define `searchurls`.
     - extension settings backups in `~/backups/firefox/` (untracked, outside repo): Dark Reader,
