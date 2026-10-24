@@ -165,6 +165,9 @@ if [[ -z "$CLAUDECODE" ]]; then
     fi
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down
+    # C-p/C-n cycle history matching what's typed (pwsh ListView equivalent, minus dropdown)
+    bindkey -M viins '^P' history-substring-search-up
+    bindkey -M viins '^N' history-substring-search-down
     bindkey -M vicmd 'k' history-substring-search-up
     bindkey -M vicmd 'j' history-substring-search-down
 fi
@@ -221,6 +224,9 @@ if [[ -z "$CLAUDECODE" ]]; then
     # static file in chezmoi, so they auto-update with the installed binary
     # and no-op cleanly on machines without that binary.
     type zoxide &> /dev/null && eval "$(zoxide init zsh)"
+    # fzf keybinds: C-r history popup (prefilled with typed text, C-n/C-p to move), C-t files, M-c cd
+    # Search shell history with C-r (fzf popup).
+    type fzf &> /dev/null && source <(fzf --zsh)
     type herdr &> /dev/null && eval "$(herdr completion zsh)"
 
     # nvm's init-nvm.sh eagerly sources all of nvm.sh + bash_completion (~1.3s)
