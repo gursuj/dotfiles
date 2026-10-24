@@ -1,0 +1,63 @@
+" Tridactyl config. Loaded by native messenger from ~/.config/tridactyl/tridactylrc.
+" Reload: :source
+
+" Ignore stale in-browser config, file is the source of truth.
+sanitise tridactyllocal tridactylsync
+
+" Tabs: J next, K prev (swapped vs Vimium default).
+bind J tabnext
+bind K tabprev
+
+" Stop pages stealing focus on load (vimium grabBackFocus).
+set allowautofocus false
+
+" Give C-e / C-y back to Firefox (vimium unmapped these too).
+unbind <C-e>
+unbind <C-y>
+
+" Smooth scroll, 60px steps (vimium defaults).
+set smoothscroll true
+bind j scrollpx 0 60
+bind k scrollpx 0 -60
+bind h scrollpx -60 0
+bind l scrollpx 60 0
+
+" Search engines (merged from vimium export + firefox custom-engines.json, firefox wins).
+" Tridactyl can't read firefox keywords, so these are defined here. Use: :open gh foo
+" Drop built-in engines I don't use.
+setnull searchurls.bing
+setnull searchurls.duckduckgo
+setnull searchurls.scholar
+set searchurls.ai https://www.google.com/search?aep=11&udm=50&q=%s
+set searchurls.alie http://www.aliexpress.com/wholesale?SearchText=%s&opensearch=true
+set searchurls.alt https://alternativeto.net/browse/search/?q=%s
+set searchurls.and https://developer.android.com/s/results?q=%s
+set searchurls.apt https://packages.debian.org/search?keywords=%s
+set searchurls.ar https://wiki.archlinux.org/index.php?search=%s
+set searchurls.aur https://aur.archlinux.org/packages?O=0&K=%s
+set searchurls.dev https://devdocs.io/#q=%s
+set searchurls.fb https://www.facebook.com/search/top/?q=%s
+set searchurls.g https://www.google.com/search?q=%s
+set searchurls.ge https://genius.com/search?q=%s
+set searchurls.gh https://github.com/search?q=%s
+set searchurls.ghme https://github.com/gursuj?tab=repositories&q=%s
+set searchurls.gi https://www.google.com/search?udm=2&q=%s
+set searchurls.glo https://glohmed.org/?s=%s
+set searchurls.hb https://hamrobazaar.com/search/product?q=%s
+set searchurls.ino https://www.inoreader.com/search/articles/%s
+set searchurls.lb https://letterboxd.com/search/%s
+set searchurls.map https://www.google.com/maps?q=%s
+set searchurls.mdn https://developer.mozilla.org/en-US/search?q=%s
+set searchurls.npm https://npmx.dev/search?q=%s
+set searchurls.pin https://www.pinterest.com/search/pins/?q=%s
+set searchurls.play https://play.google.com/store/search?q=%s
+set searchurls.red https://google.com/search?q=%s+site%3Areddit.com
+set searchurls.searx https://searx.cronyakatsuki.xyz/search?q=%s
+set searchurls.tra https://trakt.tv/search?query=%s
+set searchurls.way https://archive.org/search?query=%s&sin=WEB
+set searchurls.ways https://web.archive.org/save/%s
+set searchurls.wb https://wiby.me/?q=%s
+set searchurls.wiki https://en.wikipedia.org/w/index.php?fulltext=1&search=%s
+set searchurls.wp https://wordpress.org/search/%s
+set searchurls.yt https://www.youtube.com/results?search_query=%s
+set searchurls.ytm https://music.youtube.com/search?q=%s

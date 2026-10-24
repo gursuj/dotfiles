@@ -4,6 +4,24 @@
     - definitely add zed config
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
+    - tridactyl (replaces vimium): basic rc tracked in `dot_config/tridactyl/tridactylrc`
+      (2026-10-24, arch only). Migrate/add later:
+        - vimium custom key mappings -> `bind` lines
+        - search engines -> `set searchurls.*`; source from `dot_config/search-engines/custom-engines.json`
+          so aliases aren't maintained twice (maybe generate from it)
+        - decide `set newtab about:blank` (tridactyl overrides new tab page by default?)
+        - optional `guiset` UI hiding (needs native messenger, writes userChrome.css)
+        - windows: rc lives at `~/_tridactylrc`, needs its own tmpl + native messenger
+        - ~~verify tridactyl reads firefox search keywords~~ checked 2026-10-24: it doesn't
+          (`open` only matches `searchurls` keys, else `searchengine`). Must define `searchurls`.
+    - extension settings backups in `~/backups/firefox/` (untracked, outside repo): Dark Reader,
+      LeechBlock, uBlock static filters, Redirector, UltimaDark, Vimium (see its `readme.txt`).
+      Today restored by hand via each extension's import UI. Future: track them in the repo and
+      either (a) auto-apply on `chezmoi apply` (extension storage lives in profile
+      `browser-extension-data/` / `storage/default/moz-extension+++*/`, fragile, uuid per profile),
+      or (b) find alternatives with file-based config like tridactyl (e.g. uBlock via filter-list
+      URL / managed storage policy, Dark Reader and others via enterprise `policies.json` managed
+      storage where the extension supports it). Check which of them support managed storage first.
 - vet nvim plugins for security, if really necessary
     - need to slowly build nvim config. just ask AI to help
 - ~~firefox profile configs for performance~~ done 2026-08-29: `dot_config/firefox-tweaks/user.js`

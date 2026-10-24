@@ -23,6 +23,8 @@ scripts/wpc-push.ps1
 .config/swayimg
 .config/hypr
 .config/waybar
+# Tridactyl: Windows rc path differs (~/_tridactylrc), not set up there yet.
+.config/tridactyl
 # Handy's actual config dir on Windows is AppData/Roaming/com.pais.handy
 # (see that dir's .tmpl, which includes this file) -- this path is Linux-only.
 .local/share/com.pais.handy
@@ -45,6 +47,7 @@ scripts/wpc-push.ps1
 # No browser on a headless VPS either.
 .config/firefox-tweaks
 .config/search-engines
+.config/tridactyl
 # No physical keyboard to remap on the VPS either.
 .config/kanata
 # Zed (GUI editor) isn't used on the VPS either.
