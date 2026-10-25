@@ -74,3 +74,7 @@ bind --mode=ignore <Escape> mode normal
 " Defaults were b = tab, B = taball.
 bind b fillcmdline taball
 bind B fillcmdline bmarks
+
+" x closes tab, X stops page load. Defaults were x = stop, d = tabclose (d kept).
+bind x tabclose
+bind X stop
