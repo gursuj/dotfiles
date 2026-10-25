@@ -189,7 +189,7 @@ hl.config({
     },
 
     cursor = {
-        no_warps            = true,
+        no_warps            = false,
         no_hardware_cursors = 1,
     },
 })
