@@ -69,3 +69,8 @@ set searchurls.ytm https://music.youtube.com/search?q=%s
 " Ignore mode (enter: bind i above): Esc also exits. S-Esc (default) still works.
 " Cost: pages never receive Esc while in ignore mode.
 bind --mode=ignore <Escape> mode normal
+
+" Tab/bookmark pickers: b = tabs across all windows, B = bookmarks.
+" Defaults were b = tab, B = taball.
+bind b fillcmdline taball
+bind B fillcmdline bmarks
