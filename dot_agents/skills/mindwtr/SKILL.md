@@ -8,6 +8,36 @@ compatibility: "Requires the self-hosted Mindwtr Cloud instance (https://gtd.gur
 
 Mindwtr Cloud is self-hosted on the VPS (`gtd.gurungsujal.com.np`, Caddy reverse-proxying a Docker container bound to `127.0.0.1:8787`). All devices sync through it now.
 
+## Referring to tasks
+
+The user may point at a task two ways:
+
+- Bare task id: `785899ac-7232-413c-a8e0-e11ce1e53136`
+- Deep link: `mindwtr://open?task=785899ac-7232-413c-a8e0-e11ce1e53136`
+
+For a deep link, take the UUID after `task=` and use it as `:id` in `GET /tasks/:id`. Agents can't open `mindwtr://` links themselves, only parse them.
+
+When you create or update a task, end your reply with its deep link, `mindwtr://open?task=<id>` (id from the API response), so the user can tap straight into the app.
+
+## Writing tasks (GTD next actions)
+
+Every task is either a next action or a reference. Nothing vague, nothing project-sized.
+
+A next action is one concrete, visible step the user can start now. Test: could they begin it without deciding anything first?
+
+- Title starts with a verb: `Email`, `Call`, `Open`, `Edit`, `Run`, `Draft`, `Ask`.
+- Name the object and, if it helps, the file, tool or person: `Edit dot_zshrc.tmpl to add fzf keybind`.
+- No "figure out", "look into", "think about", "work on", "sort out". Replace with the first physical step, e.g. `Read the Caddy docs page on reverse_proxy and note options`.
+- One session, ideally under ~30 min. Longer means it's a project.
+- Too big or has several steps? Don't cram it in one task. Create a project, then one task per step. Make only the first step `next`; the rest `someday`/`waiting` or noted in the description.
+- Blocked on someone or something? Status `waiting`, title says on whom: `Waiting: Saba to send logo files`.
+- Not actionable, just info to keep? Status `reference`, title is the noun: `Mindwtr cloud API notes`.
+- Agent-doable? If an agent can finish it autonomously (no user decision or physical presence needed), add tag `#agent` via `props.tags`. If it's VPS work Hermes can do autonomously, use `#agent/hermes` instead. Don't tag tasks that need the user's judgement.
+- Put detail, links and "why" in `description`, not the title. Keep titles short enough to scan.
+- When unsure how to split it, make the title the clarifying first step and ask the user.
+
+Before creating several tasks, list the titles and statuses and get confirmation (see Security Rules).
+
 ## REST API
 
 Base URL: `https://gtd.gurungsujal.com.np/v1` — every route below needs the `/v1` prefix (`/tasks` alone 404s). `/health` is the one exception, served unprefixed and without auth.
@@ -70,7 +100,7 @@ Only when the user explicitly asks:
 curl -s -X POST 'https://gtd.gurungsujal.com.np/v1/tasks' \
   -H "Authorization: Bearer $MINDWTR_API_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"title":"Review Q3 budget +Finance /due:Friday #work @computer"}'
+  -d '{"title":"Email accountant the Q3 budget draft +Finance /due:Friday #work @computer"}'
 ```
 
 ### 3) Update task description with AI findings (write)
