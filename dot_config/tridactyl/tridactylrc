@@ -12,9 +12,10 @@ bind K tabprev
 " Stop pages stealing focus on load (vimium grabBackFocus).
 set allowautofocus false
 
-" Give C-e / C-y back to Firefox (vimium unmapped these too).
+" Give binds back to Firefox 
 unbind <C-e>
 unbind <C-y>
+unbind <C-d>
 
 " Smooth scroll, 60px steps (vimium defaults).
 set smoothscroll true
