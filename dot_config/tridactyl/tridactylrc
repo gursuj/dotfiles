@@ -18,10 +18,13 @@ unbind <C-y>
 
 " Smooth scroll, 60px steps (vimium defaults).
 set smoothscroll true
-bind j scrollpx 0 60
-bind k scrollpx 0 -60
+bind j scrollpx 0 90
+bind k scrollpx 0 -90
 bind h scrollpx -60 0
 bind l scrollpx 60 0
+
+" vimium like insert mode
+bind i mode ignore
 
 " Search engines (merged from vimium export + firefox custom-engines.json, firefox wins).
 " Tridactyl can't read firefox keywords, so these are defined here. Use: :open gh foo
@@ -62,3 +65,7 @@ set searchurls.wiki https://en.wikipedia.org/w/index.php?fulltext=1&search=%s
 set searchurls.wp https://wordpress.org/search/%s
 set searchurls.yt https://www.youtube.com/results?search_query=%s
 set searchurls.ytm https://music.youtube.com/search?q=%s
+
+" Ignore mode (enter: bind i above): Esc also exits. S-Esc (default) still works.
+" Cost: pages never receive Esc while in ignore mode.
+bind --mode=ignore <Escape> mode normal
