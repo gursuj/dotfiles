@@ -303,3 +303,21 @@ or `sudo snap install nvim --classic`, by hand. Check the version it gives is 0.
 
 Same class of issue: Debian/Ubuntu fzf is 0.44, which has no `fzf --zsh` (added in 0.48).
 `dot_zshrc.tmpl` falls back to `/usr/share/doc/fzf/examples/key-bindings.zsh`.
+
+## pwsh unix commands broke after a per-user Git reinstall (2026-10-26)
+
+A `winget upgrade` failed halfway on this machine (no admin: Git's installer hit `Error 5:
+Access is denied` on `C:\Program Files\Git`, and the GitHub CLI MSI hit 1625, "forbidden by
+system policy"). winget had already removed the old Git, so `git` disappeared. Reinstalling
+per-user with `winget install Git.Git --scope user` put Git in
+`%LOCALAPPDATA%\Programs\Git`.
+
+That broke `clear` (and `ls`, `cat`, `cp`, `mv`, `rm`, `sort`, `tee`, `diff`, `echo`,
+`sleep`, `ps`, `kill`). The profile deliberately removes pwsh's aliases for these so the
+real unix binaries in Git's `usr\bin` win, but it hardcoded `C:\Program Files\Git\usr\bin`.
+With Git elsewhere the aliases were gone and nothing replaced them, so `clear` reported "not
+recognized".
+
+Fix: the profile now derives `usr\bin` from wherever `git.exe` resolves (two levels up, then
+`usr\bin`), and falls back to the old path if git isn't on PATH. Any Git location now works,
+including a non-admin install. Existing terminals need a restart to pick it up.

@@ -172,7 +172,11 @@ function f {
 # that race; a PS alias wouldn't help either since it doesn't carry into child processes
 # (e.g. chezmoi spawning git-bash's own sh, which resolves `find` via inherited $env:PATH,
 # not this shell's aliases). Prepending wins PATH order for this shell and every subprocess.
-$gitUsrBin = 'C:\Program Files\Git\usr\bin'
+# Find Git from wherever git.exe actually lives, so a per-user install (no admin) works too.
+# Falls back to the machine-wide path if git isn't on PATH yet.
+$gitExe = Get-Command git -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+$gitUsrBin = if ($gitExe) { Join-Path (Split-Path (Split-Path $gitExe.Source)) 'usr\bin' } else { 'C:\Program Files\Git\usr\bin' }
+Remove-Variable gitExe -ErrorAction SilentlyContinue
 if (Test-Path $gitUsrBin) {
     # Always move to front, not just add-if-missing: it's often already on PATH further
     # back (via the Git installer), which is exactly the position that loses the find.exe
