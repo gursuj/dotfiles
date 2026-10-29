@@ -189,12 +189,22 @@ $unshadow = @(
     # file/text commands: real flags (ls -la, cp -r, rm -rf, diff -u). No downside.
     'ls','cat','cp','mv','rm','sort','tee','diff',
     # unix coreutils flavour over PS cmdlets. Trades object pipelines for unix output.
-    'echo','sleep','clear','ps','kill'
+    'echo','sleep','clear','ps','kill',
+    # Windows PS 5.1 aliases curl to Invoke-WebRequest. Drop it so the real curl wins.
+    'curl'
 )
 foreach ($a in $unshadow) {
     if (Test-Path "Alias:\$a") { Remove-Item "Alias:\$a" -Force -ErrorAction SilentlyContinue }
 }
 Remove-Variable a, unshadow -ErrorAction SilentlyContinue
+
+# Git's curl lives in ucrt64\bin, which isn't on PATH, so plain "curl" falls through to
+# System32's curl.exe. Point at Git's build instead (same one bash uses). Only defined
+# if the file exists, so the System32 one still works on a machine without it.
+$gitCurl = Join-Path (Split-Path (Split-Path $gitUsrBin)) 'ucrt64\bin\curl.exe'
+if (Test-Path $gitCurl) {
+    function curl { & $gitCurl @args }
+}
 
 # CommandNotFound: suggest winget packages for missing commands
 $ExecutionContext.InvokeCommand.CommandNotFoundAction = {
