@@ -91,4 +91,10 @@ unbind <C-f>
 command bla js -d~ (h => tri.excmds.blacklistadd(h).then(() => tri.excmds.unbindurl(h, "--mode=ignore", "<Escape>")).then(() => tri.excmds.mode("ignore")))(JS_ARGS[1] || location.hostname)~
 command blr js -d~ (h => tri.excmds.autocmddelete("DocStart", h).then(() => tri.excmds.reseturl(h, "--mode=ignore", "<Escape>")).then(() => tri.excmds.mode("normal")))(JS_ARGS[1] || location.hostname)~
 bind ,b current_url bla
+
+" cPanel terminal (host, port, cpsess number and theme all vary): ignore mode, no Esc exit,
+" and autofocus allowed so the terminal gets keyboard focus on load.
+blacklistadd /frontend/[^/]+/terminal/
+unbindurl /frontend/[^/]+/terminal/ --mode=ignore <Escape>
+seturl /frontend/[^/]+/terminal/ allowautofocus true
 unbind <C-d>
