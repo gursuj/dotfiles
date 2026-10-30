@@ -84,4 +84,11 @@ bind W tabdetach
 
 " Free Ctrl-F so it reaches the browser/page instead of Tridactyl.
 unbind <C-f>
+
+" :bla [host] blacklists a site (default: current hostname) and enters ignore mode now, no reload.
+" It also unbinds Esc in ignore mode for that site, so only S-Esc / S-Insert exit there.
+" :blr [host] undoes it. Esc is dead on a blacklisted page, so press S-Esc first to reach the cmdline.
+command bla js -d~ (h => tri.excmds.blacklistadd(h).then(() => tri.excmds.unbindurl(h, "--mode=ignore", "<Escape>")).then(() => tri.excmds.mode("ignore")))(JS_ARGS[1] || location.hostname)~
+command blr js -d~ (h => tri.excmds.autocmddelete("DocStart", h).then(() => tri.excmds.reseturl(h, "--mode=ignore", "<Escape>")).then(() => tri.excmds.mode("normal")))(JS_ARGS[1] || location.hostname)~
+bind ,b current_url bla
 unbind <C-d>
