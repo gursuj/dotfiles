@@ -81,3 +81,7 @@ bind X stop
 
 " W moves the current tab into its own new window.
 bind W tabdetach
+
+" Free Ctrl-F so it reaches the browser/page instead of Tridactyl.
+unbind <C-f>
+unbind <C-d>
