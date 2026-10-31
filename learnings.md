@@ -5,6 +5,51 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Laptop power tuning: governor mattered, TLP vs auto-cpufreq didn't (2026-10-29)
+
+Machine: Lenovo IdeaPad 81W0, Ryzen 3 3250U (2C/4T), `acpi-cpufreq` driver (no `amd_pstate`
+on Zen+), kernel 7.2.11. Bench: `battbench <label> 5` (`~/.local/bin/battbench`, arch-only,
+tracked here): 90 s warmup, 5 min idle, then 4 jobs x 12 GB sha256. Brightness fixed at
+20982/65535, AC unplugged, same open apps, one run per config (run-to-run noise not measured).
+
+| config | idle | task | task power | clock under load | temp under load | energy/task |
+|---|---|---|---|---|---|---|
+| auto-cpufreq default (`powersave`, boost 0) | 4.81 W (~4.7 h) | 52.7 s | 6.92 W | 1381 MHz | 43 C | 365 J |
+| auto-cpufreq, `schedutil` on battery | 4.88 W (~4.6 h) | 26.7 s | 10.82 W | 2784 MHz | 62 C | 289 J |
+| TLP, `schedutil` on battery, boost on | 4.84 W (~4.6 h) | 26.8 s | 10.51 W | 2714 MHz | 63 C | 282 J |
+
+- **Cause of the browser choke:** on `acpi-cpufreq`, the `powersave` governor just pins the
+  clock low (~1.4 GHz even at full load). auto-cpufreq's default battery profile uses it.
+  Switching to `schedutil` halved task time and cut energy per task by ~21%, idle unchanged.
+- **TLP vs auto-cpufreq:** same task time, idle within 0.04 W, energy 2.4% apart. Not
+  distinguishable from this data, and no measurable gain from TLP's device tuning (idle is
+  mostly the screen, ~4.8 W). Under load it's all governor + boost, whichever tool sets it.
+- Runtime estimates use `energy_full` (22.4 Wh), the pack is at 63% of design (35.3 Wh).
+  `cycle_count` reads 4274, which is bogus firmware data, trust capacity instead.
+- Charge limit: IdeaPad only has `conservation_mode` (on/off, ~55-60% cap) via
+  `/sys/bus/platform/drivers/ideapad_acpi/*/conservation_mode`. No percentage threshold
+  file. TLP's `recalibrate` is ThinkPad-only. Skipped both.
+- TLP defaults on this machine: doesn't disable bluetooth or wifi; wifi power save and USB
+  autosuspend on (btusb not excluded), audio/PCIe runtime PM on.
+  `DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE="bluetooth"` would turn bluetooth off when unused.
+- `/etc/auto-cpufreq.conf` and `/etc/tlp.d/10-bench.conf` are outside `$HOME`, not tracked.
+  auto-cpufreq conf used: `[battery] governor = schedutil, turbo = auto` and
+  `[charger] governor = performance, turbo = auto`. The TLP bench conf mirrored it
+  (`CPU_SCALING_GOVERNOR_ON_BAT=schedutil`, `_ON_AC=performance`, `CPU_BOOST_ON_*=1`).
+- **Reverting to auto-cpufreq** (TLP was left running after the bench):
+  1. `sudo systemctl disable --now tlp`
+  2. `sudo systemctl unmask systemd-rfkill.service systemd-rfkill.socket`
+  3. `sudo rm /etc/tlp.d/10-bench.conf` (or `sudo pacman -Rns tlp` to drop it entirely)
+  4. `sudo systemctl enable --now auto-cpufreq`
+  5. Check on battery: `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` says
+     `schedutil`, and `systemctl is-active tlp auto-cpufreq` says `inactive` then `active`.
+  Never run both, they fight over the governor.
+- **For the ThinkPad:** battbench needs edits first: temp reads AMD `Tctl` (Intel is
+  `Package id 0`); boost path differs on `intel_pstate` (`no_turbo`, inverted); also log
+  `energy_performance_preference` and `/sys/firmware/acpi/platform_profile`; confirm `BAT0`
+  has `energy_*` + `power_now`. First run there = stock profile, before installing TLP or
+  auto-cpufreq. Tracked as a Mindwtr task, not here.
+
 ## Syncthing config: deliberately not tracked (2026-08-17)
 
 `.config/syncthing/` (`config.xml`, `cert.pem`, `key.pem`, `https-cert.pem`, `https-key.pem`,

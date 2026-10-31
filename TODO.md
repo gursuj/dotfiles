@@ -47,19 +47,6 @@
     natively; hermes symlink still TODO in that script pending its install-method rework).
     The other half (auto-running `npx skills add` for CLI-only skills) is moot -- those
     skills were removed from the repo/machines.
-- `battbench` (`private_dot_local/bin/executable_battbench`, arch-only, added 2026-10-31):
-  A/B power configs by avg watts + joules per fixed task, not wall-clock. Usage:
-  `battbench <label> [idle_min]`, unplugged, same brightness/apps each run, order A-B-A.
-  Needs edits before it's trustworthy on the ThinkPad:
-    - temp: reads AMD `Tctl` via `sensors`; Intel shows `Package id 0` (match both)
-    - boost: `cpufreq/boost` is AMD/acpi-cpufreq; `intel_pstate` uses
-      `/sys/devices/system/cpu/intel_pstate/no_turbo` (inverted: 1 = off)
-    - also log EPP (`cpufreq/energy_performance_preference`) and
-      `/sys/firmware/acpi/platform_profile`, they matter under load on modern drivers
-    - battery: confirm `BAT0` has `energy_*` + `power_now` (some report `charge_*`/`current_*`)
-    - first run = stock profile baseline, before installing TLP or auto-cpufreq
-  Findings on the old IdeaPad (Ryzen 3250U, acpi-cpufreq): `powersave` pinned 1.4 GHz and
-  doubled task time; `schedutil` fixed it. TLP vs auto-cpufreq was a wash (within noise).
 - fd ignorefile isn't being used in linux currently. should fix
 - ~~herdr pane-mover on windows~~ done 2026-10-07: "windows" added to its
     `platforms` in a local clone, linked, bind set. Since 2026-10-15 it's installed from
