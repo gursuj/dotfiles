@@ -5,6 +5,32 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
+
+Symptom: external HDMI monitor often stayed dark after suspend/wake, and Hyprland shuffled
+windows up and down while re-laying out outputs. Predates the TLP experiment.
+
+- **Cause:** Hyprland 0.56 reads `hyprland.lua`, and `hyprctl dispatch dpms on|off` no longer
+  parses (`error: [string "return hl.dispatch(dpms on)"]:1: ')' expected near 'on'`).
+  `hypridle.conf`'s `after_sleep_cmd` and the dpms listener failed every time since the Lua
+  migration (21 Oct): 85 failures in the journal (64 `on`, 21 `off`), so the wake never ran.
+  The BenQ also re-enumerated as a new output after resume (output id 276 to 277, ~10-15 s),
+  which is what triggered the window jumping.
+- **Fix:** `hypridle.conf` now calls `hyprctl dispatch 'hl.dsp.dpms({ action = "on" })'`
+  (and `"off"`). Plain `on` with no `monitor` wakes every output (tested by forcing `eDP-1`
+  off first). Also set `misc.key_press_enables_dpms` and `misc.mouse_move_enables_dpms` to
+  `true` in `hyprland.lua` (both default `false`): after a *manual* dpms off nothing woke the
+  laptop panel, only HDMI. Side effect: a manual `hyprctl dispatch ... "off"` from a terminal
+  wakes again on the Enter key release, so use `sleep 2; hyprctl dispatch ...` to test.
+- Suspend wake confirmed working after the change.
+- `old-hyprland.conf` stays in the repo but is in `.chezmoiignore` and no longer deployed.
+- Separate, unresolved: `amdgpu 0000:03:00.0: failed to load ucode RLC_RESTORE_LIST_*` and
+  `psp gfx command LOAD_IP_FW failed` (0xFFFF300F / 0xFFFF000F) logged on every resume. GPU
+  still resumes and renders, so left alone for now. Web search (2026-10-31) found no report
+  with this exact string, only other PSP resume failures on Raven/Picasso parts (e.g.
+  freedesktop drm/amd issue 919, Ryzen 7 3700U display hang on resume) -- none conclusive.
+  Don't assume it's harmless or known-benign; if resume ever hangs, start here.
+
 ## Laptop power tuning: governor mattered, TLP vs auto-cpufreq didn't (2026-10-29)
 
 Machine: Lenovo IdeaPad 81W0, Ryzen 3 3250U (2C/4T), `acpi-cpufreq` driver (no `amd_pstate`
