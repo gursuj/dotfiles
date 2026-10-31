@@ -98,4 +98,3 @@ bind ,b current_url bla
 blacklistadd /frontend/[^/]+/terminal/
 unbindurl /frontend/[^/]+/terminal/ --mode=ignore <Escape>
 seturl /frontend/[^/]+/terminal/ allowautofocus true
-unbind <C-d>
