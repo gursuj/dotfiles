@@ -30,6 +30,14 @@ windows up and down while re-laying out outputs. Predates the TLP experiment.
   with this exact string, only other PSP resume failures on Raven/Picasso parts (e.g.
   freedesktop drm/amd issue 919, Ryzen 7 3700U display hang on resume) -- none conclusive.
   Don't assume it's harmless or known-benign; if resume ever hangs, start here.
+  A second search (kernel source / amd-gfx terms) also found no exact match; nearest are an
+  Omarchy report of PSP resume failing on a Picasso laptop (omacom/omarchy #16617) and a 2017
+  amd-gfx patch adding a PSP ring-stop on suspend for Raven. Neither mentions the RLC restore
+  list. Own log (resume at 19:05:30): `PSP is resuming...`, then the three `failed to load
+  ucode` lines, then the optional RAS/RAP/securedisplay "not available" lines (normal), then all
+  rings come up and the display works. No `PSP resume failed` line, so the kernel carries on and
+  the restore-list load looks non-fatal on this chip (inferred from the log, not confirmed in
+  source). Firmware current: linux-firmware 20260916, picasso_rlc*.bin present. Kernel 7.2.11.
 
 ## Laptop power tuning: governor mattered, TLP vs auto-cpufreq didn't (2026-10-29)
 
