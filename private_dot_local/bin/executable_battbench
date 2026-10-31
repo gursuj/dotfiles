@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# battbench: compare power configs by avg watts + joules per fixed task, not wall-clock.
+# Usage: battbench <label> [idle_minutes=5]   e.g. battbench baseline
+# Run unplugged, same brightness/wifi/apps every run. Order: A, B, A to catch drift.
+# Env: WORK_GB=12 (GB hashed per job, 4 jobs), WARMUP_S=90, INTERVAL=5
+set -u
+
+label=${1:?usage: battbench <label> [idle_minutes]}
+idle_min=${2:-5}
+work_gb=${WORK_GB:-12}
+warmup_s=${WARMUP_S:-90}
+interval=${INTERVAL:-5}
+
+# Block sleep/idle for the whole run (re-exec under the inhibitor once)
+if [ -z "${BATTBENCH_INHIBITED:-}" ]; then
+  exec systemd-inhibit --what=sleep:idle --who=battbench --why="battery benchmark" \
+    env BATTBENCH_INHIBITED=1 "$0" "$@"
+fi
+
+bat=/sys/class/power_supply/BAT0
+[ "$(cat $bat/status)" = Discharging ] || { echo "Not discharging. Unplug AC." >&2; exit 1; }
+
+out_dir=$HOME/battbench
+mkdir -p "$out_dir"
+csv=$out_dir/$label-$(date +%Y%m%d-%H%M%S).csv
+cpu=/sys/devices/system/cpu
+bl=$(cat /sys/class/backlight/*/brightness 2>/dev/null | head -1)
+
+echo "label=$label brightness=${bl:-?} gov=$(cat $cpu/cpu0/cpufreq/scaling_governor) boost=$(cat $cpu/cpufreq/boost 2>/dev/null)"
+echo "health=$(( $(cat $bat/energy_full) * 100 / $(cat $bat/energy_full_design) ))% csv=$csv"
+echo "t,phase,watts,avg_mhz,temp_c,gov,boost,pct" > "$csv"
+
+sample() { # $1 = phase
+  local w mhz temp
+  w=$(awk '{printf "%.3f", $1/1e6}' $bat/power_now)
+  mhz=$(awk '{s+=$1; n++} END {printf "%d", s/n/1000}' $cpu/cpu*/cpufreq/scaling_cur_freq)
+  temp=$(sensors 2>/dev/null | awk '/Tctl/ {gsub(/[+°C]/, "", $2); print $2; exit}')
+  echo "$(date +%s),$1,$w,$mhz,${temp:-},$(cat $cpu/cpu0/cpufreq/scaling_governor),$(cat $cpu/cpufreq/boost 2>/dev/null),$(cat $bat/capacity)" >> "$csv"
+}
+
+run_phase() { # $1 = phase, $2 = seconds
+  local end=$(( $(date +%s) + $2 ))
+  while [ "$(date +%s)" -lt "$end" ]; do sample "$1"; sleep "$interval"; done
+}
+
+echo "warmup ${warmup_s}s (settle, not counted)"
+run_phase warmup "$warmup_s"
+echo "idle ${idle_min}min: leave the machine alone"
+run_phase idle "$(awk -v m="$idle_min" 'BEGIN {printf "%d", m * 60}')"
+
+echo "fixed task: 4 jobs x ${work_gb}GB sha256"
+t0=$(date +%s.%N)
+for _ in 1 2 3 4; do head -c "${work_gb}G" /dev/zero | sha256sum >/dev/null & done
+sleep 1; sample task # ensure >=1 sample even if the task ends fast
+while [ -n "$(jobs -r)" ]; do sleep "$interval"; sample task; done
+wait
+task_s=$(awk -v a="$t0" -v b="$(date +%s.%N)" 'BEGIN {printf "%.1f", b - a}')
+
+echo "--- $label ---"
+awk -F, -v task_s="$task_s" -v full="$(cat $bat/energy_full)" '
+  NR > 1 { w[$2] += $3; n[$2]++; mhz[$2] += $4; t[$2] += $5 }
+  END {
+    if (!n["idle"] || !n["task"]) { print "no samples in a phase: raise idle minutes or WORK_GB"; exit 1 }
+    iw = w["idle"] / n["idle"]
+    tw = w["task"] / n["task"]
+    printf "idle: %.2f W, %d MHz, %.0f C  -> est %.1f h on full battery\n", iw, mhz["idle"]/n["idle"], t["idle"]/n["idle"], (full/1e6)/iw
+    printf "task: %.1f s, %.2f W, %d MHz, %.0f C -> %.0f J per task\n", task_s, tw, mhz["task"]/n["task"], t["task"]/n["task"], tw * task_s
+  }' "$csv"
