@@ -457,7 +457,6 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))
 
--- hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("hyprctl dispatch toggleswallow"))
 hl.bind(mainMod .. " + slash", hl.dsp.window.toggle_swallow())
 -- hl.bind(mainMod .. " + P", hl.dsp.window.pseudo()) -- dwindle
 -- PICTURE IN PICTURE (PiP), ad-hoc: turn any window into one, same treatment
