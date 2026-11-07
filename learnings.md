@@ -272,6 +272,20 @@ be ported by hand).
   after any sizable omarchy update, check `omarchy-shell lock status` still returns JSON and
   `journalctl --user | grep -i "failed for <id>"` is empty. Same applies to a cloned
   `omarchy.workspaces` (it reads `Hyprland.*` and `Util.*` from the same modules).
+- **A QML edit does nothing until the shell reloads the file, and bar-widget clones make that
+  easy to miss.** A removed scale preset stayed on screen after the file was already correct
+  because the running shell still held the old QML — the edit only became visible after a
+  restart. `omarchy-restart-shell` is the intended command but is unreliable here (it prints
+  "Omarchy shell did not become ready after restart" and leaves nothing running). Recovery:
+  `pgrep -x quickshell`, then
+  `hyprctl dispatch 'hl.dsp.exec_cmd("omarchy-launch-shell")'` — a compositor-side exec inherits
+  Hyprland's environment (`HYPRLAND_INSTANCE_SIGNATURE`, `WAYLAND_DISPLAY`), which a bare
+  `quickshell -n -p /usr/share/omarchy/shell` from an agent shell does not; that one logs
+  `Unable to connect to hyprland event socket` and paints a dead bar. Confirm with
+  `omarchy-shell shell ping` → `ok`.
+- **Verify widget changes against the rendered surface, not the source.** `grim -o eDP-1`, crop
+  the region, look at it. To open a bar panel without a mouse:
+  `omarchy-shell shell toggle <plugin-id> '{}'` (e.g. `sujal.monitor`).
 
 ## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
 
