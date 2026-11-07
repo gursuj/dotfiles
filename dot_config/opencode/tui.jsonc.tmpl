@@ -1,10 +1,14 @@
+{{- /* The Linux render deliberately matches what opencode itself writes back
+   (object expanded, plugin array inline). Tracking the fully expanded form
+   leaves a formatting diff after every opencode session. Windows runs
+   opencode v1 (winget only ships 1.x), which reads vimcode from this file;
+   v2 (arch) registers it in cli.json instead. v0.19.1 supports both. */ -}}
+{{- if eq .chezmoi.os "windows" -}}
 {
-  "plugin": [
-    "./herdr-tui-session.js"
-{{- /* Windows runs opencode v1 (winget only ships 1.x), which reads vimcode from
-   this file. v2 (arch) registers it in cli.json instead. v0.19.1 supports both. */}}
-{{- if eq .chezmoi.os "windows" }},
-    "vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1"
-{{- end }}
-  ]
+  "plugin": ["./herdr-tui-session.js", "vimcode@git+https://github.com/oribarilan/vimcode.git#v0.19.1"]
 }
+{{- else -}}
+{
+  "plugin": ["./herdr-tui-session.js"]
+}
+{{- end }}

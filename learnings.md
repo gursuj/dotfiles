@@ -5,6 +5,37 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Pre-apply reconciliation on `t14`: chezmoi normalises modes by filename, and `docs/` needed an ignore line (2026-11-07)
+
+Working through `docs/t14-merge-handoff.md` before the first `apply`: the modified-file list went
+from 11 to 8, and every remaining entry is a superset or a mode normalisation rather than
+content drift.
+
+- **Audit without touching `~/.config/chezmoi/`.** A throwaway config (`sourceDir` + `[data]
+  machine_kind = "t14"`) makes `chezmoi status/diff/managed` work while the real config is still
+  un-initialised, and `--exclude=encrypted` keeps it working before the age identity is
+  configured. Remember `chezmoi diff` needs **absolute** target paths (`diff -- ~/.config/x`);
+  a relative `.config/x` answers "not managed".
+- **This chezmoi build ignores the source file's mode and derives it from the name.** A plain
+  `dot_x/poster.sh` added as 755 is applied as 644 (reproduced in a two-file scratch repo), so a
+  pinned-down script in the source needs the `executable_` prefix (`executable_poster.sh`) to
+  stay executable. Same mechanism the other way: `private_*` forces 600/700 — which is why
+  `~/.local` and `~/.local/share` are "modified" on a box where Omarchy created them 755, and why
+  `dot_config/opencode/private_cli.json` shows a mode-only diff.
+- **A root-level folder that is missing from `.chezmoiignore` gets deployed.** `docs/` was
+  tracked but not ignored, so the first `apply` would have created `~/docs` — the exact trap
+  `AGENTS.md` describes for root docs. It is now listed next to `README.md`/`AGENTS.md`.
+- **Track the format the app writes, not the format you wrote.** `tui.jsonc` drifted after every
+  opencode session because opencode rewrites it with the plugin array inline; the template now
+  renders that shape (and keeps the Windows-only `vimcode` entry on a one-line branch). Both
+  branches were rendered and `jq`-validated, and the Linux render is byte-identical to live.
+- **Template whitespace is part of the diff.** `{{- … -}}` on the comment/if actions is needed or
+  the render starts with a blank line; check with `cat -A` and `chezmoi diff` on the single file
+  rather than trusting the template to look right.
+- Live-vs-source reconciliation for a **templated** file goes into the shared template
+  (`.chezmoitemplates/herdr-config.toml.tmpl`), never `chezmoi re-add` — re-add flattens a
+  `.tmpl` and would drop the conditional blocks.
+
 ## Window rules match the title a window has *at map time* — and the menu may not use the launcher you think (2026-11-07)
 
 The Omarchy package pickers (Install → Package, Install → AUR, Remove → Package) opened on the

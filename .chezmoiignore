@@ -123,6 +123,9 @@ AGENTS.md
 CLAUDE.md
 learnings.md
 TODO.md
+# Repo-only working notes (handoffs, migration state). Same reason as the root docs
+# above: without this line chezmoi would deploy the whole folder to ~/docs.
+docs
 .config/yazi/package.toml
 AppData/Roaming/wtq/wtq.schema.json
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/state.json
