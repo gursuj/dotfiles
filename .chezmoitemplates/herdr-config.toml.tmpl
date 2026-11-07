@@ -1,71 +1,118 @@
 # Run `herdr --default-config` to see all available settings and their defaults.
-# This dumps the defaults compiled into whatever herdr binary is currently
-# installed locally — it does not fetch from upstream. Run `herdr update` first
-# if you want the dump to reflect the latest release.
+# This dumps the defaults compiled into whatever herdr binary is installed.
 #
-# This is the chezmoi-managed source for herdr's config. If you make a live config
-# change and confirm it actually works, port it back here (edit-source-first — not
-# `chezmoi re-add`, since this file is templated) and run `chezmoi apply`.
-# Don't port over changes you haven't verified.
+# Merged 2026-11-07 for the ThinkPad: Omarchy's shipped config
+# (/usr/share/omarchy/config/herdr/config.toml, a tmux mirror) is the base, plus
+# the IdeaPad's additive settings (pane-mover plugin, pickers, agent panel sort,
+# symbol indicators, kitty graphics). Omarchy-owned keybinds win where they
+# collide, since herdr here is meant to behave like Omarchy's tmux.
+#
+# If you change the live config and confirm it works, port it back here (edit
+# source first -- not `chezmoi re-add`, since this file is templated).
 
-onboarding = false
-[update]
-{{- if eq .chezmoi.os "windows" }}
-# Explicit — the channel default is per-build (preview builds default to
-# "preview", stable builds default to "stable"), not per-OS. Confirmed via
-# `herdr --default-config`. The stable build was what got installed here,
-# so it defaulted to "stable" until this override; want preview on Windows.
-channel = "preview"
-{{- else }}
-# channel unset — defaults to stable. That's what we want here: Linux is
-# AUR-managed, `herdr update` would clobber the pacman-owned binary.
-{{- end }}
+# Mirrors the Omarchy tmux config in config/tmux/tmux.conf
+# tmux session -> herdr workspace, tmux window -> herdr tab, tmux pane -> herdr pane
+
+[theme]
+# tmux ran on the terminal's own palette (bg=default, fg=default, ANSI blue accents)
+name = "terminal"
+auto_switch = false
+
+[theme.custom]
+# The tab bar sits on the terminal's own background, like tmux's bg=default, so
+# it turns see-through with the rest of the terminal under Glassy windows. With
+# no panel_bg the active tab's text falls back to surface_dim, so that is black
+# for dark text on the accent - same colors as status-left's "#[fg=black,bg=blue]"
+panel_bg = "reset"
+surface_dim = "black"
 
 [terminal]
+# Matches -c "#{pane_current_path}" on every split, window, and session
 {{- if eq .chezmoi.os "windows" }}
-# Hardcoded — herdr's Windows support is still beta and doesn't actually read
-# $SHELL there (confirmed by testing: set + rebooted, still fell back to
-# PowerShell 5). $SHELL works fine on Linux/Mac so it's left to the fallback
-# there; see README for the full story.
+# Hardcoded: herdr's Windows support does not read $SHELL reliably (confirmed by
+# testing -- it fell back to PowerShell 5), so it is explicit there.
 default_shell = "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
-{{- else }}
-# default_shell unset — falls back to $SHELL, which works correctly on Unix.
 {{- end }}
 new_cwd = "follow"
 
 [keys]
 {{- if eq .machine_kind "vps" }}
-# ctrl+x collides with common shell/tmux-in-SSH usage on the VPS -- ctrl+a instead.
+# ctrl+space/ctrl+x collide with shell usage when herdr runs over SSH -- ctrl+a.
 prefix = "ctrl+a"
-{{- else }}
+{{- else if eq .chezmoi.os "windows" }}
 prefix = "ctrl+x"
+{{- else }}
+prefix = "ctrl+space"
 {{- end }}
-# prefix+ctrl+tab / prefix+ctrl+shift+tab for agent switching didn't work either —
-# Windows Terminal still consumes ctrl+tab before herdr sees it, even with the
-# prefix. Left unbound rather than binding to something that silently does nothing.
-next_tab = "prefix+tab"
-previous_tab = "prefix+shift+tab"
+
+# Config and help
+reload_config = "prefix+q"
+help = "prefix+?"
+detach = "prefix+d"
+
+# Copy mode
+copy_mode = "prefix+["
+
+# Panes
+split_horizontal = ["prefix+h", "alt+enter"]
+split_vertical = ["prefix+v", "alt+shift+enter"]
+close_pane = ["prefix+x", "alt+esc"]
+zoom = "prefix+z"
+last_pane = "prefix+;"
+
+focus_pane_left = "ctrl+alt+left"
+focus_pane_down = "ctrl+alt+down"
+focus_pane_up = "ctrl+alt+up"
+focus_pane_right = "ctrl+alt+right"
+
+resize_mode = ["prefix+ctrl+left", "prefix+ctrl+down", "prefix+ctrl+up", "prefix+ctrl+right"]
+
+# Like resize-pane on C-M-S-arrows
+resize_pane_left = "ctrl+alt+shift+left"
+resize_pane_down = "ctrl+alt+shift+down"
+resize_pane_up = "ctrl+alt+shift+up"
+resize_pane_right = "ctrl+alt+shift+right"
+
+# No tmux equivalent; herdr's default prefix+shift+p is taken by previous session
+rename_pane = "prefix+shift+o"
+
+# Windows -> tabs
+new_tab = "prefix+c"
+rename_tab = "prefix+r"
+close_tab = "prefix+k"
+switch_tab = ["prefix+1..9", "alt+1..9"]
+previous_tab = ["prefix+p", "alt+left"]
+next_tab = ["prefix+n", "alt+right"]
+
+# Like swap-window -t -1/+1 on M-S-Left/Right
+move_tab_previous = "alt+shift+left"
+move_tab_next = "alt+shift+right"
+
+# Sessions -> workspaces
+new_workspace = "prefix+shift+c"
+{{- if eq .chezmoi.os "windows" }}
+rename_workspace = "prefix+shift+e"
+{{- else }}
+rename_workspace = "prefix+shift+r"
+{{- end }}
+close_workspace = "prefix+shift+k"
+{{- if eq .chezmoi.os "windows" }}
+previous_workspace = "prefix+w"
+{{- else }}
+previous_workspace = ["prefix+shift+p", "alt+up"]
+{{- end }}
+{{- if eq .chezmoi.os "windows" }}
+next_workspace = "prefix+s"
+{{- else }}
+next_workspace = ["prefix+shift+n", "alt+down"]
+{{- end }}
+
+# Additive (from the IdeaPad config): settings picker + workspace picker
 settings = "prefix+comma"
 workspace_picker = "prefix+shift+w"
-rename_workspace = "prefix+shift+e"
-previous_workspace = "prefix+w"
-next_workspace = "prefix+s"
 
-{{- if eq .chezmoi.os "windows" }}
-
-[[keys.command]]
-key = "prefix+n"
-type = "shell"
-command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
-{{- end }}
-
-# herdr-pane-mover (osamahbeig/herdr-pane-mover) replaces drovr entirely —
-# move to an existing/new tab or workspace, plus re-split and swap. drovr
-# itself was uninstalled 2026-10-14. It is installed from gursuj/herdr-pane-mover (see
-# desired-plugins.txt), a fork that only adds "windows" to the plugin's
-# `platforms` list. The plugin id is still osamahbeig.pane-mover. Switch the
-# slug back to osamahbeig/herdr-pane-mover once the upstream PR is merged.
-# Confirmed working on linux 2026-10-06 and windows 2026-10-07.
+# herdr-pane-mover (gursuj fork, see desired-plugins.txt): move pane to an
+# existing/new tab or workspace, plus re-split and swap.
 [[keys.command]]
 key = "prefix+m"
 type = "plugin_action"
@@ -73,24 +120,52 @@ command = "osamahbeig.pane-mover.open"
 description = "move pane (pane-mover)"
 
 [ui]
-agent_panel_sort = "priority"
+accent = "blue"
+
+# tmux drew single-line dividers between adjacent panes and no outer frame
 pane_gaps = false
 pane_outer_borders = false
-# Right-aligned tab bar status (PR #2586, merged 2026-08-09).
-tab_bar_right = [
-  { type = "zoom" },
-  { type = "datetime", format = "%H:%M" },
-]
-tab_bar_right_separator = " · "
 
+# tmux had no scrollbar column beside its panes
+pane_scrollbars = false
+
+# kill-window and kill-session never asked
+confirm_close = false
+
+# automatic-rename gave windows a name without prompting
+prompt_new_tab_name = false
+
+# set -g mouse on
+mouse_capture = true
+
+# status-right had the zoom flag followed by #h
+{{- if eq .chezmoi.os "windows" }}
+tab_bar_right = [{ type = "zoom" }, { type = "datetime", format = "%H:%M" }]
+{{- else }}
+tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
+{{- end }}
+
+# set -g set-titles on / set -g set-titles-string '#h:#W', where tmux's #W was
+# the basename of the pane cwd. This is what Hyprland shows in the group bar,
+# and it resolves on the server so remote sessions name the remote host.
+window_title = "{hostname}: {workspace}"
+
+# Additive (from the IdeaPad config): agent-aware pane ordering, symbol indicators
+agent_panel_sort = "priority"
 status_indicators = "symbols"
 show_agent_labels_on_pane_borders = true
+
 [ui.toast]
 delivery = "herdr"
 
-[theme]
-name = "terminal"
-auto_switch = false
-
 [experimental]
 kitty_graphics = true
+
+{{- if eq .chezmoi.os "windows" }}
+
+# New agent tab helper (Documents/PowerShell/herdr-new-cc-tab.ps1)
+[[keys.command]]
+key = "prefix+n"
+type = "shell"
+command = 'pwsh -NoProfile -File "C:\Users\User\scripts\herdr-new-cc-tab.ps1"'
+{{- end }}
