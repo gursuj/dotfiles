@@ -37,12 +37,10 @@ new_cwd = "follow"
 
 [keys]
 {{- if eq .machine_kind "vps" }}
-# ctrl+space/ctrl+x collide with shell usage when herdr runs over SSH -- ctrl+a.
+# ctrl+x collides with shell usage when herdr runs over SSH -- ctrl+a there.
 prefix = "ctrl+a"
-{{- else if eq .chezmoi.os "windows" }}
-prefix = "ctrl+x"
 {{- else }}
-prefix = "ctrl+space"
+prefix = "ctrl+x"
 {{- end }}
 
 # Config and help

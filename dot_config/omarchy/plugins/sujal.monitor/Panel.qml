@@ -42,9 +42,7 @@ Panel {
   //                  j/k walks each row.
   // Mouse hover on a target updates root state via the components' `hovered`
   // signal so keyboard cursor and pointer share one highlight.
-  readonly property var scalePresets: ["1", "1.25", "1.5", "1.6", "2", "3", "4"]
-  // 1.5 is the personal pick; 1.6 is kept so the stock preset can be tried
-  // against it before deciding whether this clone is worth keeping at all.
+  readonly property var scalePresets: ["1", "1.25", "1.5", "2", "3", "4"]
   readonly property var scaleValues: {
     for (var i = 0; i < displays.length; i++) {
       var display = displays[i]
@@ -317,7 +315,12 @@ Panel {
   }
 
   function setScale(scale) {
-    actionProc.command = ["bash", "-c", "omarchy-hyprland-monitor-scaling " + scale]
+    // omarchy-hyprland-monitor-scaling re-applies the monitor with position
+    // "auto", which throws away the t14's auto-up placement and sends the
+    // external display to the right of the laptop. Reload afterwards puts the
+    // configured rule back; the scale it persisted in monitors.lua survives.
+    actionProc.command = ["bash", "-c",
+      "omarchy-hyprland-monitor-scaling " + scale + " && sleep 0.3 && hyprctl reload"]
     if (!actionProc.running) actionProc.running = true
   }
 
