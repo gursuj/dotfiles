@@ -142,6 +142,29 @@ still hold — so it's renamed rather than duplicated.
 - When auditing binds, match on `description`, not on `key`: keycode-bound entries report
   `key: ""` and `keycode: 0` in `hyprctl -j binds` JSON, which makes them look absent.
 
+### Cloning omarchy's lock screen: works, with two traps
+
+`omarchy plugin clone omarchy.lock` produces `~/.config/omarchy/plugins/sujal.lock`, rewrites
+the id (`manifest.json` gets `omarchy.clonedFrom`), registers it in `shell.json`'s `plugins`
+array and disables `omarchy.lock` — the clone is a plain copy, so omarchy updates never touch
+it (and `omarchy plugin update` only handles git-managed plugins, so upstream lock changes must
+be ported by hand).
+
+- **A QML error in the clone takes the whole lock service down**, not just the widget: the
+  service fails to load and `omarchy-shell lock status` answers `Target not found` — i.e. the
+  machine is briefly *unlockable and unlock-less*. Verify right after editing:
+  `omarchy-shell lock status` must return the JSON blob, and `journalctl --user | grep -i
+  "failed for sujal.lock"` must be empty.
+- **`Component.onCompleted` twice is fatal.** `LockView.qml` already sets it; adding a second
+  one fails the whole file with `Property value set multiple times`. Use a
+  `Timer { triggeredOnStart: true }` for an initial refresh instead.
+- `keepLoaded` services (lock/polkit/idle) survive plugin hot-reload, so a rescan keeps the
+  *old* instance and its `ShellIpc target: "lock"` handler — the clone then logs "Handler was
+  registered but will not be used because another handler already exists". `omarchy-restart-shell`
+  is required before the clone actually takes over.
+- The clone keeps the same `ShellIpc target: "lock"`, so `omarchy-shell lock status|isLocked|lock`
+  and `omarchy-system-lock` keep working unchanged.
+
 ## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
 
 Symptom: external HDMI monitor often stayed dark after suspend/wake, and Hyprland shuffled

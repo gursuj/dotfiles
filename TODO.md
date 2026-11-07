@@ -7,6 +7,17 @@
   when the bar is changed from its own UI/menu, so tracking it means a drift diff after every
   such change — treat it as "re-add after a deliberate change", not as a file that stays in sync.
   Same applies to `~/.config/omarchy/extensions/omarchy-menu.jsonc`.
+- omarchy bar: **custom resource-monitoring plugin** (CPU / temperature / RAM / disk, the waybar
+  modules that have no first-party equivalent). Bar widgets are QML plugins under
+  `~/.config/omarchy/plugins/`; wanted: same minimal, clickable UI as the shipped widgets —
+  icon in the bar, popup on click. Also the only route to "only show occupied workspaces" is
+  cloning `omarchy.workspaces` and trimming `workspaceIds()` (it always seeds the monitor's
+  first five slots); not done yet.
+- lock screen: cloned to `~/.config/omarchy/plugins/sujal.lock` (own id, `omarchy.lock`
+  disabled) with clock/date/battery added to `LockView.qml`; battery % in the bar via
+  `omarchy.power`'s `showPercentage` in `shell.json`. The clone is a plain copy — `omarchy
+  plugin update` never touches it, so upstream lock changes must be ported by hand. Not
+  tracked in chezmoi yet; worth adding if it settles.
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
     - tridactyl (replaces vimium): basic rc tracked in `dot_config/tridactyl/tridactylrc`
