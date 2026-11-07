@@ -18,6 +18,13 @@ hl.config({
   binds = {
     workspace_back_and_forth = true,
   },
+  -- Hyprland's own middle-click paste (default true) synthesises a paste into
+  -- the *focused* window, so middle-clicking a terminal on a special/scratchpad
+  -- workspace pasted into whatever window sat behind it. Off => the click
+  -- reaches the client and Ghostty's own middle-click-action decides.
+  misc = {
+    middle_click_paste = false,
+  },
 })
 
 -- Screenshots: omarchy-capture-screenshot (omasnap) saves into this dir.

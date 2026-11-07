@@ -125,6 +125,19 @@ still hold — so it's renamed rather than duplicated.
 - Web apps launched by `omarchy-launch-webapp` **require a Chromium-family browser** (it falls
   back to `chromium.desktop` when the default browser is Firefox), so the Google/Discord/
   WhatsApp launchers all run in Chromium, not Firefox.
+- **`misc:middle_click_paste` defaults to `true`, and it synthesises the paste into the
+  *focused* window.** On a special/scratchpad workspace the terminal overlays the current
+  workspace without taking focus, so middle-clicking it pasted into the window behind it
+  (a chat window, say) instead of the terminal. Set `misc.middle_click_paste = false` in
+  `looknfeel.lua` so the click reaches the client and Ghostty's own `middle-click-action`
+  decides — that is what the IdeaPad config did too.
+- **Ghostty's only omarchy-specific config line is the theme include**
+  (`config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"`); everything else in
+  `/usr/share/omarchy/config/ghostty/config` is plain Ghostty settings. The tracked
+  `dot_config/ghostty/config.tmpl` keeps those defaults plus our additions and gates the theme
+  line on `{{ if lookPath "omarchy" }}` (there is no file-exists test in chezmoi templates;
+  the `omarchy` binary is the reliable proxy), so it renders correctly on a non-omarchy box.
+  `omarchy-refresh-config ghostty/config` would clobber the tracked file.
 
 ### Number-row binds are keycode-based — never rebind them by keysym
 
