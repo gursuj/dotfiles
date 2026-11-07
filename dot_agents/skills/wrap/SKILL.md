@@ -17,6 +17,13 @@ Invoke `/reflect` via the Skill tool. Wait for it to complete before proceeding.
 
 Do NOT inline reflect logic — invoke the skill. It handles MEMORY.md, Basic Memory vault, GitHub issues, plan finalization, and `.last-reflect-ts`.
 
+> **Local note (not upstream):** no `reflect` skill is installed on these machines, and the obvious
+> candidates assume a whole kit — camacho's wants an `ai-workspace/plans/` tree, a Basic Memory
+> vault and GitHub issues; pstack's wants its model-config file plus `poteto-mode`. Until one is
+> installed, use the **`handoff-generic`** skill for this step instead: same artefact (a handoff
+> document written from the conversation), no external assumptions. Everything below — worktree
+> cleanup and the `/clear` prompt — is unchanged.
+
 ## 2. Session Cleanup
 
 After reflect completes, clean up session worktrees:

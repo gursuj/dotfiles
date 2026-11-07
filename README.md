@@ -172,7 +172,12 @@ means editing on any device and running `chezmoi update` on the others picks up 
   and `npx skills add` fails with "Authentication failed"), so the tracked `SKILL.md` was
   reconstructed from skills.sh's cached render of the same page. `npx skills add`/`update` therefore
   cannot manage it — treat this copy as the source. It calls `/reflect` as its first step, which is
-  **not installed** on any machine here; without it, wrap's step 1 has nothing to invoke.
+  **not installed** here; the copy carries a local note pointing that step at `handoff-generic`
+  instead (same artefact, no Basic Memory / `ai-workspace/plans` assumptions). The other wrap
+  skills on skills.sh have the same shape: the most popular (`wrap-up`, 3391 installs,
+  codewithmukesh/dotnet-claude-kit) writes `MEMORY.md` through that kit's `instinct-system` skill,
+  and pstack's `reflect` (8144 installs) needs its model-config file plus `poteto-mode` — none is
+  standalone.
 
 ### npx skills CLI on a fresh device: what actually needs doing
 
