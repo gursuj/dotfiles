@@ -9,14 +9,11 @@
 # fallback location (confirmed via https://opencode.ai/docs/skills, Aug
 # 2026) -- no symlink needed for it, just logged for visibility.
 #
-# TODO: hermes needs the same kind of symlink (~/.hermes/skills/<name>),
-# but its install method -- and possibly its whole skills path -- is being
-# reworked (see TODO.md). Revisit once that's settled instead of wiring up
-# a symlink target that might not exist next week. Also note: even once
-# it's back in scope, `command -v hermes` may not find it here if it needs
-# an env file sourced first (non-interactive script shells don't source
-# interactive rc files) -- don't trust a miss here as proof it's not
-# installed.
+# hermes also reads its skills from a single directory (~/.hermes/skills) and
+# does not look at ~/.agents/skills, so it gets links there too. `npx skills
+# add` knows a "hermes-agent" target and installs straight into that directory
+# when it is present, but the tracked copy here is deployed by chezmoi -- the
+# link is what makes a tracked skill visible to hermes on any box.
 #
 # Windows is out of scope here: it uses junctions, not symlinks, and is
 # a single known device -- kept a manual step per README for now.
@@ -56,4 +53,12 @@ fi
 
 if command -v opencode >/dev/null 2>&1; then
   echo "opencode detected -- reads ~/.agents/skills natively, no symlink needed"
+fi
+
+# hermes only reads its own directory, so link there when it exists. Checked by
+# directory rather than `command -v hermes`: the binary may need an env file
+# sourced first, which a non-interactive script shell does not do, and a miss
+# there would silently leave hermes without the tracked skills.
+if [ -d "$HOME/.hermes/skills" ]; then
+  link_into "$HOME/.hermes/skills"
 fi

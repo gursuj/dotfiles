@@ -5,6 +5,31 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Adding a skill: the CLI, the repo copy, and the links (2026-11-07)
+
+`npx skills add <repo> --skill <name>` is still the way to *fetch* a skill, but three things bite:
+
+- **Agent names are not what you would guess.** `claude` and `opencode,claude-code` are rejected;
+  the flags are `-a claude-code -a opencode -a hermes-agent` — repeated, one per `-a`, not a
+  comma-separated list. `npx skills add <repo> --help` prints nothing useful for this (it dumps the
+  top-level help); the valid list only appears in the error when a name is wrong.
+- **The upstream can vanish.** `camacho/ai-skills` (source of `wrap`) is private/deleted: `gh repo
+  view camacho/ai-skills` cannot resolve it, `gh api users/camacho/repos` does not list it, and
+  `npx skills add` fails with `Authentication failed for https://github.com/camacho/ai-skills.git`.
+  skills.sh still renders the page, and its Next.js RSC payload carries the whole `SKILL.md` body
+  (`previewHtml`/`restHtml` in the flight data: `<h1>Wrap</h1>` through the last table), so the
+  skill was reconstructed from there and tracked — `npx skills add`/`update` cannot manage it
+  afterwards, and the repo copy is the source of truth. Do this only for a skill already in use:
+  the copy stops receiving upstream fixes.
+- **hermes needs its own link.** opencode reads `~/.agents/skills` natively, Claude Code needs
+  `~/.claude/skills/<name>`, and hermes only reads `~/.hermes/skills` — the symlink script now
+  covers all three, and it links every tracked skill, not just the new one.
+
+Also: `chezmoi apply` aborts on `.claude/settings.json` ("has changed since chezmoi last wrote it?
+… could not open a new TTY"), so adding a skill silently deploys nothing unless the apply is
+`--force` — the status line is what catches it (`R` on the skill-symlinks script after an apply
+that should have run it).
+
 ## First `chezmoi init` + `apply` on the t14: two blockers, both in this repo (2026-11-07)
 
 `init` and `apply` had never run on this box. Both needed a fix before anything deployed:

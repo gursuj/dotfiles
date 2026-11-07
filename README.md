@@ -146,7 +146,7 @@ this repo's usage patterns settle.
 | Zed config | `dot_config/zed/private_settings.json.tmpl`, `dot_config/zed/keymap.json` | `theme` must name the generated `Omazed` theme for both light and dark: `omazed` regenerates `themes/omazed.json` from the active Omarchy theme, but only switches Zed to it when `settings.json` already names it. The theme block is gated on `{{ if lookPath "omazed" }}` with Zed's stock pair as the else-branch, so the file still renders on a box without the package. `keymap.json` is the dock toggles (ctrl-escape / ctrl-b). |
 | Omarchy idle timings + display/suspend | `.chezmoiscripts/run_onchange_after_45-omarchy-desktop.sh.tmpl`, `private_dot_local/bin/executable_omarchy-idle`, `dot_config/systemd/user/swayidle.service` | `~/.config/omarchy/shell.json` is deliberately **not** tracked — the shell rewrites it on every bar edit — so a run_onchange script patches only the keys this repo owns, idempotently with jq, and asks the shell to reload: `idle.screensaver` 300 s (the IdeaPad's hypridle "dim at 5 min"), `idle.lock` 600 s (its lock at 10 min), plus the plugin/bar registration for the clones. Omarchy's idle service has no display-off or suspend step, so those hypridle timers live in `swayidle` (repo package): 150 s → keyboard backlight off, 300 s → panel dimmed to 1 % (the screensaver is disabled on this box, so `idle.screensaver` no longer does that job), 630 s → DPMS off, 1200 s → `systemctl suspend`, sharing ext-idle-notify with the shell. Requires `sudo pacman -S swayidle` on a fresh box; the script enables the service once the binary is present. |
 | Working docs | `docs/` | Repo-only, never deployed — `docs` is listed in `.chezmoiignore`, like the root docs above (a root-level file or folder missing from that list gets applied into `$HOME`, which is how `docs/` would have landed at `~/docs`). `docs/t14-merge-handoff.md` is the migration state and merge checklist; `docs/pkg-install-terminal-scratchpad.md` is the resolved package-picker write-up. |
-| Agent skills (9 of them) | `dot_agents/skills/<name>/` | See below. |
+| Agent skills (10 of them) | `dot_agents/skills/<name>/` | See below. |
 | WTQ (quake-terminal launcher) config | `AppData/Roaming/wtq/wtq.jsonc` | Windows-only tool, plain file, no templating needed. `wtq.schema.json` in the same live folder is shipped by the app itself for schema validation, not user-authored — not tracked. |
 | Windows Terminal settings | `AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json` | Profiles, keybindings, color schemes, the `_quake` globalSummon action WTQ hotkeys into. The `8wekyb3d8bbwe` publisher-hash segment is Microsoft's own fixed ID for this package, not machine-specific — same path on any Windows install of the Store version. `state.json` in the same folder (window position, last-active tab) is runtime state, not tracked. |
 | SaneBreak config | `AppData/Roaming/SaneBreak.ini` | Break-reminder timing settings (interval, flash/confirm durations, bell sounds, postpone ratios). There's also a byte-identical copy at `AppData/Roaming/SaneBreak/SaneBreak.ini` plus a `sane-break.db` (break history) in that same subfolder — only the top-level `.ini` is tracked; the nested copy and the db are the app's own runtime data. |
@@ -166,6 +166,13 @@ means editing on any device and running `chezmoi update` on the others picks up 
   **TODO (2026-08-18):** the colliding skill was WPC OS's own `_plugin/skills/handoff` — PR open to rename it to `wpc-handoff` (`sujal/rename-handoff-skill`). Once that PR merges and is pulled locally, the collision is gone — remove this `handoff-generic` fork and go back to plain `npx skills add`/`update` for the upstream `handoff` skill under its real name.
 - `issue-reporter`, `mindwtr`, `wp-plugin-update-check`, `wp-plugin-search` — custom-authored skills, no upstream CLI source; this repo is simply their home. `wp-plugin-search` was renamed from `wp-search-plugins` 2026-08-10 (folder, junction, and frontmatter `name` all updated together).
 - `webclaw` — installed via `npx skills add https://github.com/0xmassi/webclaw-skill --skill webclaw`.
+- `wrap` — session wrap-up (reflect, clean merged worktrees, prompt `/clear`), from
+  `camacho/ai-skills` via <https://www.skills.sh/camacho/ai-skills/wrap>. **The upstream GitHub repo
+  is gone** (private or deleted as of 2026-11-07: `gh repo view camacho/ai-skills` cannot resolve it
+  and `npx skills add` fails with "Authentication failed"), so the tracked `SKILL.md` was
+  reconstructed from skills.sh's cached render of the same page. `npx skills add`/`update` therefore
+  cannot manage it — treat this copy as the source. It calls `/reflect` as its first step, which is
+  **not installed** on any machine here; without it, wrap's step 1 has nothing to invoke.
 
 ### npx skills CLI on a fresh device: what actually needs doing
 
@@ -181,7 +188,9 @@ device:
   ~/.claude/skills/<name>`, idempotent, reruns whenever a skill is added/removed thanks to
   a content hash of `dot_agents/skills` embedded in the script). opencode needs no link at
   all — it reads `~/.agents/skills/<name>/SKILL.md` natively as a global fallback location.
-  hermes is still a manual TODO in that script, pending its install-method rework. On
+  hermes needs a link as well (it only reads `~/.hermes/skills`), and the same script now creates
+  one when that directory exists — keyed on the directory rather than `command -v hermes`, since
+  the binary may need an env file a non-interactive script shell has not sourced. On
   Windows this is still manual: a junction (`New-Item -ItemType Junction ...`, see old
   `dotfiles.md`) — out of scope for that script since Windows is a single known device.
 - Skills **not** tracked here no longer apply — the CLI-only ones (`find-skills`,
