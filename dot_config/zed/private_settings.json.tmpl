@@ -64,11 +64,22 @@
   "relative_line_numbers": "enabled",
   "ui_font_size": 16,
   "buffer_font_size": 15,
+{{- if lookPath "omazed" }}
+  // Omazed (the omarchy/omazed package) regenerates this theme from the active
+  // Omarchy theme on every theme switch -- see hooks/theme-set.d/omazed.
+  "theme": {
+    "mode": "system",
+    "light": "Omazed",
+    "dark": "Omazed",
+  },
+{{- else }}
+  // No Omazed here (non-Omarchy box): fall back to Zed's stock pair.
   "theme": {
     "mode": "system",
     "light": "One Light",
     "dark": "One Dark",
   },
+{{- end }}
   "tab_size": 4,
   "hard_tabs": false,
   "soft_wrap": "editor_width",

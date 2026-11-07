@@ -93,7 +93,10 @@ hl.env("OMARCHY_SCREENSHOT_DIR", (os.getenv("HOME") or "") .. "/Pictures/screens
 -- workspace; they arrive hidden and SUPER+S brings the scratchpad up.
 o.window({
   class = "^(org\\.omarchy\\.terminal)$",
-  title = "^(omarchy-pkg-(aur-)?install|omarchy-pkg-remove)$",
+  -- The window is titled "Omarchy" by omarchy-launch-floating-terminal-with-
+  -- presentation at map time and only later renames itself to the command it
+  -- runs, so the wrapper title has to match too.
+  title = "^(Omarchy|omarchy-pkg-(aur-)?install|omarchy-pkg-remove)$",
 }, {
   float = true,
   center = true,

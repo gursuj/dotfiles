@@ -46,7 +46,7 @@ prefix = "ctrl+space"
 {{- end }}
 
 # Config and help
-reload_config = "prefix+ctrl+r"
+reload_config = "prefix+shift+r"
 help = "prefix+?"
 detach = "prefix+q"
 
@@ -90,11 +90,9 @@ move_tab_next = "alt+shift+right"
 
 # Sessions -> workspaces
 new_workspace = "prefix+shift+c"
-{{- if eq .chezmoi.os "windows" }}
+# reload_config sits on prefix+shift+r, so renaming a workspace moved to shift+e
+# on every machine (it used to be shift+r).
 rename_workspace = "prefix+shift+e"
-{{- else }}
-rename_workspace = "prefix+shift+r"
-{{- end }}
 close_workspace = "prefix+shift+k"
 {{- if eq .chezmoi.os "windows" }}
 previous_workspace = "prefix+w"
@@ -135,8 +133,12 @@ confirm_close = false
 # automatic-rename gave windows a name without prompting
 prompt_new_tab_name = false
 
-# set -g mouse on
-mouse_capture = true
+# tmux's `set -g mouse on` equivalent -- but it also swallows middle-click, so
+# the host terminal never sees it and middle-click paste (Ghostty's
+# middle-click-action) does nothing inside herdr. Off: middle click pastes into
+# the focused pane as typed input. Cost: no mouse-driven herdr chrome (tab
+# click, drag-select, herdr's own scrollback); pane apps can still request mouse.
+mouse_capture = false
 
 # status-right had the zoom flag followed by #h
 {{- if eq .chezmoi.os "windows" }}
