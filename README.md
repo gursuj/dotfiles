@@ -166,18 +166,17 @@ means editing on any device and running `chezmoi update` on the others picks up 
   **TODO (2026-08-18):** the colliding skill was WPC OS's own `_plugin/skills/handoff` — PR open to rename it to `wpc-handoff` (`sujal/rename-handoff-skill`). Once that PR merges and is pulled locally, the collision is gone — remove this `handoff-generic` fork and go back to plain `npx skills add`/`update` for the upstream `handoff` skill under its real name.
 - `issue-reporter`, `mindwtr`, `wp-plugin-update-check`, `wp-plugin-search` — custom-authored skills, no upstream CLI source; this repo is simply their home. `wp-plugin-search` was renamed from `wp-search-plugins` 2026-08-10 (folder, junction, and frontmatter `name` all updated together).
 - `webclaw` — installed via `npx skills add https://github.com/0xmassi/webclaw-skill --skill webclaw`.
-- `wrap` — session wrap-up (reflect, clean merged worktrees, prompt `/clear`), from
-  `camacho/ai-skills` via <https://www.skills.sh/camacho/ai-skills/wrap>. **The upstream GitHub repo
-  is gone** (private or deleted as of 2026-11-07: `gh repo view camacho/ai-skills` cannot resolve it
-  and `npx skills add` fails with "Authentication failed"), so the tracked `SKILL.md` was
-  reconstructed from skills.sh's cached render of the same page. `npx skills add`/`update` therefore
-  cannot manage it — treat this copy as the source. It calls `/reflect` as its first step, which is
-  **not installed** here; the copy carries a local note pointing that step at `handoff-generic`
-  instead (same artefact, no Basic Memory / `ai-workspace/plans` assumptions). The other wrap
-  skills on skills.sh have the same shape: the most popular (`wrap-up`, 3391 installs,
-  codewithmukesh/dotnet-claude-kit) writes `MEMORY.md` through that kit's `instinct-system` skill,
-  and pstack's `reflect` (8144 installs) needs its model-config file plus `poteto-mode` — none is
-  standalone.
+- `wrapup` — **custom**, written 2026-11-07: end-of-session wrap (snapshot the change, fix docs the
+  session made wrong, flag loose ends, offer a handoff, at most three next steps). Based on
+  `handoff-generic` plus the shapes surveyed on skills.sh; assumes nothing beyond the repo's own
+  docs. It replaced the reconstructed `wrap` (camacho/ai-skills) — that one delegated step 1 to a
+  `/reflect` skill whose upstream is gone, and never touched project docs.
+  Why off-the-shelf did not fit: every `wrap`/`wrap-up` on skills.sh is a kit entry point — the most
+  popular (`wrap-up`, 3391 installs, codewithmukesh/dotnet-claude-kit) writes `MEMORY.md` through
+  that kit's `instinct-system` skill, pstack's `reflect` (8144) needs its model-config file and
+  `poteto-mode`, camacho's `reflect` (628) wants an `ai-workspace/plans/` tree, a Basic Memory vault
+  and GitHub issues. camacho/ai-skills itself is private/deleted, so its install command no longer
+  works at all.
 
 ### npx skills CLI on a fresh device: what actually needs doing
 

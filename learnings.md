@@ -5,6 +5,16 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Removing a tracked skill leaves three stale things behind (2026-11-07)
+
+Deleting `dot_agents/skills/<name>` and applying removes nothing from the live machine: chezmoi
+does not prune targets it no longer manages (this build has no `chezmoi prune`), and the
+skill-symlink script only creates links. After dropping the `wrap` skill the leftovers were
+`~/.agents/skills/wrap/` (a plain directory with its `SKILL.md`), plus `~/.claude/skills/wrap` and
+`~/.hermes/skills/wrap` symlinks pointing into it — the latter two still resolve, so any agent
+would keep listing a skill that is no longer tracked. Remove all three by hand, then check
+`~/.agents/skills/` and both agent dirs rather than trusting `chezmoi status`.
+
 ## Adding a skill: the CLI, the repo copy, and the links (2026-11-07)
 
 `npx skills add <repo> --skill <name>` is still the way to *fetch* a skill, but three things bite:
