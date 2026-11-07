@@ -34,16 +34,25 @@ case "${1:-run}" in
   dpms-on) hypr_dpms on ;;
   kbd-off) brightnessctl -s -d tpacpi::kbd_backlight set 0 >/dev/null 2>&1 || true ;;
   kbd-on) brightnessctl -r -d tpacpi::kbd_backlight >/dev/null 2>&1 || true ;;
+  dim) brightnessctl -s set 1% >/dev/null 2>&1 || true ;;
+  undim) brightnessctl -r >/dev/null 2>&1 || true ;;
   run | *)
-    # Timings are the IdeaPad's hypridle listeners, ported: its keyboard
-    # backlight went dark at 150 s, the display off at 630 s, and the machine
-    # suspended at 1200 s. It also dimmed the panel to 10 % at 300 s; Omarchy's
-    # own screensaver fires at that point (idle.screensaver = 300), so no
-    # separate dim step is needed. The T14's backlight LED is
-    # tpacpi::kbd_backlight (the IdeaPad's was rgb:kbd_backlight).
+    # Timings are the IdeaPad's hypridle listeners, ported: 150 s keyboard
+    # backlight off, 300 s panel dimmed to 1 % (its "set 10", which avoided 0
+    # for OLED), 630 s display off, 1200 s suspend. The T14's keyboard LED is
+    # tpacpi::kbd_backlight and its panel is amdgpu_bl1 (max 65535, so 1 % is
+    # the lowest still-visible step).
+    #
+    # The dim step is here rather than in Omarchy's idle service because the
+    # screensaver is disabled on this box (`omarchy-toggle-enabled
+    # screensaver-off`), which leaves `idle.screensaver` a no-op: without this
+    # the display would go from full brightness to DPMS-off with nothing in
+    # between.
     exec swayidle -w \
       timeout 150 "$0 kbd-off" \
       resume "$0 kbd-on" \
+      timeout 300 "$0 dim" \
+      resume "$0 undim" \
       timeout 630 "$0 dpms-off" \
       resume "$0 dpms-on" \
       timeout 1200 "systemctl suspend"

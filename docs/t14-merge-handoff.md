@@ -38,15 +38,17 @@ the 1.5 preset, zed on the Omazed theme.
   git-bash's `diff.exe` and the `NUL:` sentinel) was also being used on Linux, where it broke
   every apply with `diff: …/agent-browser/null: No such file or directory` and exit status 2
   before writing anything. It is now Windows-only; Linux uses chezmoi's own diff.
-- **Idle timings ported from the IdeaPad's `hypridle.conf`**: screensaver 300 s (its "dim at
-  5 min"), lock 600 s (its lock at 10 min), replacing Omarchy's 150/300 defaults. Omarchy's idle
-  service only knows `screensaver` and `lock`, so the other hypridle steps live in `swayidle`
-  (repo package) as `swayidle.service` → `~/.local/bin/omarchy-idle`, sharing ext-idle-notify with
-  the shell so both see one idle clock: 150 s keyboard backlight off (the T14's LED is
-  `tpacpi::kbd_backlight`, the IdeaPad's was `rgb:kbd_backlight`), 630 s display off, 1200 s
-  suspend. Its 300 s "dim to 10 %" step is dropped — Omarchy's screensaver fires at that point.
-  Pane cycling moved off `prefix+tab`/`prefix+shift+tab` in herdr, which now own tab navigation
-  (see the herdr commit).
+- **Idle timings ported from the IdeaPad's `hypridle.conf`**: screensaver 300 s and lock 600 s
+  replacing Omarchy's 150/300 defaults, and `swayidle` (repo package,
+  `swayidle.service` → `~/.local/bin/omarchy-idle`) carries the steps Omarchy's idle service
+  does not have. Full ladder, all from the IdeaPad: 150 s keyboard backlight off, 300 s panel
+  dimmed to 1 % (its "set 10"), 630 s display off, 1200 s suspend. The Omarchy **screensaver is
+  disabled** on this box (`omarchy-toggle-enabled screensaver-off`), which is why the dim step is
+  in `swayidle` and not left to `idle.screensaver` — that key is a no-op now, and without the dim
+  the panel jumped straight from full brightness to DPMS-off. Re-enabling the screensaver would
+  put the art back at the same 300 s point. Device names differ from the IdeaPad:
+  `tpacpi::kbd_backlight` and `amdgpu_bl1`. Pane cycling moved off `prefix+tab`/`prefix+shift+tab`
+  in herdr, which now own tab navigation (see the herdr commit).
 - **`shell.json` is patched by a script, not tracked**: `run_onchange_after_45-omarchy-desktop.sh`
   sets the idle values and the plugin/bar registration (sujal.lock enabled, omarchy.lock
   disabled, sujal.workspaces and sujal.monitor in the bar) idempotently with jq, then asks the
@@ -125,14 +127,14 @@ the 1.5 preset, zed on the Omazed theme.
    `busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
    org.freedesktop.login1.Manager HandleLidSwitchExternalPower`. A BIOS update past R1BET87W
    1.56 is the other candidate — the EC `HKEY`/`MSCB` errors are firmware-side.
-3. **Decide the display pair** that should stay in `monitors.lua`: external `1.25` with
-   `GDK_SCALE = 1` (what the widget last wrote, now mirrored in the repo) or back to `1.5`/`2`.
-   Also re-check the external once the cable is back: only `eDP-1` is connected right now.
-4. **`swayidle` prints one warning at start**: `Failed to parse get BlockInhibited property:
-   Invalid argument` — this is the known swayidle 1.9 / newer-systemd mismatch. Consequence:
-   swayidle does not see logind's idle-inhibit list, so a deliberately inhibited idle (a video
-   player asking for no idle) can still hit the display-off/suspend timeouts. If that bites,
-   either drop the suspend step and rely on the menu, or switch to a different idle daemon.
+3. **Decide the display pair** that should stay in `monitors.lua`, once the cable is back (the
+   external is deliberately unplugged for now): external `1.25` with `GDK_SCALE = 1` (what the
+   display widget last wrote, now mirrored in the repo) or back to `1.5`/`2`. Tracked in
+   `TODO.md`.
+4. **`swayidle` cannot read logind's inhibitor list** (`Failed to parse get BlockInhibited
+   property: Invalid argument`, swayidle 1.9 vs current systemd), so app-held idle inhibitors do
+   not stop the display-off/suspend steps. Tracked in `TODO.md` as an open fix; until then, drop
+   the suspend step if it starts interrupting something.
 5. **Merge mechanics:** rebase/squash `t14` onto `main`, keep `machine_kind = "t14"` as the
    laptop value (do not resurrect `"arch"`), keep the `wpc`/`vps` branches, and drop `main`'s
    hypr monolith (`dot_config/hypr/hyprland.lua`, `hypridle/hyprlock/hyprpaper.conf`,

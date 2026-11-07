@@ -38,15 +38,25 @@ readability and treat a lone `M` there as expected.
 ## Background daemons that share the idle clock, and the one they cannot see (2026-11-07)
 
 Omarchy's shell idle service only knows `idle.screensaver` and `idle.lock`; the IdeaPad's
-`hypridle.conf` also had display-off and suspend steps. Those two now live in `swayidle` (repo
-package), started as `swayidle.service` → `~/.local/bin/omarchy-idle`, and both daemons listen to
-ext-idle-notify-v1 so they share one idle clock.
+`hypridle.conf` also had keyboard-backlight, dim, display-off and suspend steps. Those now live in
+`swayidle` (repo package), started as `swayidle.service` → `~/.local/bin/omarchy-idle`, and both
+daemons listen to ext-idle-notify-v1 so they share one idle clock: 150 s kbd backlight off, 300 s
+panel dimmed to 1 %, 630 s DPMS off, 1200 s suspend.
 
+- **Disabled screensaver turns `idle.screensaver` into a no-op — port the dim step instead of
+  leaning on it.** This box runs `omarchy-toggle-enabled screensaver-off`, so the value in
+  `shell.json` no longer dims or covers anything; the dim at 300 s has to come from the idle
+  helper or the panel jumps from full brightness to display-off. (`omarchy-launch-screensaver`
+  itself checks that same toggle and exits early.)
+- **Backlight device names are per-machine.** The IdeaPad's `brightnessctl -sd rgb:kbd_backlight`
+  does not exist here: the LED is `tpacpi::kbd_backlight` and the panel is `amdgpu_bl1` (max
+  65535, so `set 10` from the old config would be black — `set 1%` is the lowest visible step).
+  `brightnessctl -s` / `-r` save and restore either one.
 - **swayidle 1.9 + current systemd: `Failed to parse get BlockInhibited property: Invalid
   argument`** at start. It means swayidle cannot read logind's inhibitor list, so an application
   that holds an idle inhibitor (video player, presentation mode) will still hit the display-off
-  and suspend timeouts. Cosmetic until it interrupts something; if it does, drop the suspend step
-  rather than fight it.
+  and suspend timeouts. Tracked in `TODO.md` as something to fix; until then, drop the suspend
+  step if it starts interrupting.
 - **A freed default key must be released explicitly.** herdr's defaults bind `prefix+tab` /
   `prefix+shift+tab` to pane cycling; adding those keys to `next_tab`/`previous_tab` (which take
   *arrays*, so multiple binds per action work) is not enough — the default still claims them.

@@ -1,12 +1,38 @@
 # TODO
 
+- **t14 lid switch suspends the machine mid-work (open, 2026-11-07).** logind logs `Lid closed.`
+  → `Suspending…` on phantom lid events; the kernel says `ACPI: button: [Firmware Bug]:
+  Unexpected lid state reported by firmware` (a repeated same-state `_LID` notification is turned
+  into a complement "closed" event). Full diagnosis in `learnings.md` and
+  `docs/t14-merge-handoff.md`. All three flaps seen so far happened with the charger connected,
+  and the ACPI log carries EC firmware errors (`HKEY.MSCB`, `AE_NOT_FOUND`) — unplugged as of
+  21:10 as a discriminator: flaps stop ⇒ AC/EC-side, continue ⇒ switch or firmware.
+  **Fix, once that is known:** `/etc/systemd/logind.conf.d/` drop-in with
+  `HandleLidSwitchExternalPower=ignore` (only while charging) or `HandleLidSwitch=ignore` (no lid
+  suspends; suspend from the menu); a BIOS update past R1BET87W 1.56 is the other candidate.
+  Cannot be deployed from this repo — it lives outside `$HOME`.
+- **swayidle cannot read logind's inhibitor list (open, 2026-11-07).** Startup always logs
+  `Failed to parse get BlockInhibited property: Invalid argument` (swayidle 1.9 against current
+  systemd). Consequence: an app that holds an idle inhibitor (video player, presentation mode)
+  still hits the 630 s display-off and 1200 s suspend. Options: drop the suspend step and rely on
+  the menu, patch/watch for a swayidle update, or replace the daemon with something that parses
+  the current systemd property (`PrepareForSleep` inhibitors are visible via
+  `systemd-inhibit --list`). Re-check after the next `omarchy update`.
+- **t14 external display**: the BenQ was disconnected at the DRM level
+  (`card1-HDMI-A-1: disconnected`) and the cable is out for now. When it goes back, decide the
+  pair in `monitors.lua`: live/repo currently carry external `1.25` + `GDK_SCALE 1` (written by
+  the display widget), the IdeaPad-era value was `1.5` + `2`.
+- **Synaptics fingerprint reader re-enumerates constantly** (`06cb:00bd` on `usb 4-3`, 30+ resets
+  in two hours on 2026-11-07). Also makes lock-screen fingerprint auth flaky (`Verification timed
+  out` before it succeeds). Not investigated yet.
 - add configs from arch laptop, and maybe old: https://github.com/gursuj/dotfiles-old-arch
     - definitely add zed config
-- omarchy `shell.json` / `shell.toml` (bar layout, idle timings) — version-control candidate,
-  deliberately not tracked yet. Caveat: omarchy rewrites `~/.config/omarchy/shell.json` itself
-  when the bar is changed from its own UI/menu, so tracking it means a drift diff after every
-  such change — treat it as "re-add after a deliberate change", not as a file that stays in sync.
-  Same applies to `~/.config/omarchy/extensions/omarchy-menu.jsonc`.
+- omarchy `shell.json` (bar layout, idle timings) — **decided 2026-11-07: not tracked; patched by
+  script.** Omarchy rewrites the file itself whenever the bar is edited from its own UI/menu, so a
+  tracked copy drifts after every such change. `run_onchange_after_45-omarchy-desktop.sh.tmpl`
+  instead sets only the keys this repo owns (idle values, plugin enable/disable, bar layout
+  entries) with jq, idempotently, and reloads the shell. Same reasoning applies to
+  `~/.config/omarchy/extensions/omarchy-menu.jsonc` if it ever needs local rows.
 - omarchy bar: **custom resource-monitoring plugin** (CPU / temperature / RAM / disk, the waybar
   modules that have no first-party equivalent). Bar widgets are QML plugins under
   `~/.config/omarchy/plugins/`; wanted: same minimal, clickable UI as the shipped widgets —
