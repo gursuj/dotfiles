@@ -40,11 +40,13 @@ the 1.5 preset, zed on the Omazed theme.
   before writing anything. It is now Windows-only; Linux uses chezmoi's own diff.
 - **Idle timings ported from the IdeaPad's `hypridle.conf`**: screensaver 300 s (its "dim at
   5 min"), lock 600 s (its lock at 10 min), replacing Omarchy's 150/300 defaults. Omarchy's idle
-  service only knows `screensaver` and `lock`, so the other two hypridle steps — display off at
-  630 s, suspend at 1200 s — are covered by `swayidle` (repo package) as
-  `swayidle.service` → `~/.local/bin/omarchy-idle`, sharing ext-idle-notify with the shell so
-  both see one idle clock. Pane cycling moved off `prefix+tab`/`prefix+shift+tab` in herdr,
-  which now own tab navigation (see the herdr commit).
+  service only knows `screensaver` and `lock`, so the other hypridle steps live in `swayidle`
+  (repo package) as `swayidle.service` → `~/.local/bin/omarchy-idle`, sharing ext-idle-notify with
+  the shell so both see one idle clock: 150 s keyboard backlight off (the T14's LED is
+  `tpacpi::kbd_backlight`, the IdeaPad's was `rgb:kbd_backlight`), 630 s display off, 1200 s
+  suspend. Its 300 s "dim to 10 %" step is dropped — Omarchy's screensaver fires at that point.
+  Pane cycling moved off `prefix+tab`/`prefix+shift+tab` in herdr, which now own tab navigation
+  (see the herdr commit).
 - **`shell.json` is patched by a script, not tracked**: `run_onchange_after_45-omarchy-desktop.sh`
   sets the idle values and the plugin/bar registration (sujal.lock enabled, omarchy.lock
   disabled, sujal.workspaces and sujal.monitor in the bar) idempotently with jq, then asks the

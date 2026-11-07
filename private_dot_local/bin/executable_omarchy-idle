@@ -32,10 +32,18 @@ hypr_dpms() {
 case "${1:-run}" in
   dpms-off) hypr_dpms off ;;
   dpms-on) hypr_dpms on ;;
+  kbd-off) brightnessctl -s -d tpacpi::kbd_backlight set 0 >/dev/null 2>&1 || true ;;
+  kbd-on) brightnessctl -r -d tpacpi::kbd_backlight >/dev/null 2>&1 || true ;;
   run | *)
-    # 630 s: display off. 1200 s: suspend, which Omarchy's sleep-lock service
-    # locks the session for first.
+    # Timings are the IdeaPad's hypridle listeners, ported: its keyboard
+    # backlight went dark at 150 s, the display off at 630 s, and the machine
+    # suspended at 1200 s. It also dimmed the panel to 10 % at 300 s; Omarchy's
+    # own screensaver fires at that point (idle.screensaver = 300), so no
+    # separate dim step is needed. The T14's backlight LED is
+    # tpacpi::kbd_backlight (the IdeaPad's was rgb:kbd_backlight).
     exec swayidle -w \
+      timeout 150 "$0 kbd-off" \
+      resume "$0 kbd-on" \
       timeout 630 "$0 dpms-off" \
       resume "$0 dpms-on" \
       timeout 1200 "systemctl suspend"
