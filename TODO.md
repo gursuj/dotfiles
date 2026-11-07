@@ -2,6 +2,11 @@
 
 - add configs from arch laptop, and maybe old: https://github.com/gursuj/dotfiles-old-arch
     - definitely add zed config
+- omarchy `shell.json` / `shell.toml` (bar layout, idle timings) — version-control candidate,
+  deliberately not tracked yet. Caveat: omarchy rewrites `~/.config/omarchy/shell.json` itself
+  when the bar is changed from its own UI/menu, so tracking it means a drift diff after every
+  such change — treat it as "re-add after a deliberate change", not as a file that stays in sync.
+  Same applies to `~/.config/omarchy/extensions/omarchy-menu.jsonc`.
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
     - tridactyl (replaces vimium): basic rc tracked in `dot_config/tridactyl/tridactylrc`
@@ -27,7 +32,7 @@
     - need to slowly build nvim config. just ask AI to help
 - ~~firefox profile configs for performance~~ done 2026-08-29: `dot_config/firefox-tweaks/user.js`
     + `run_onchange_after_60-browser-user-js-sync.py.tmpl` symlinks it into Firefox/Waterfox
-    profiles automatically, arch-only for now. css, sideberry still TODO.
+    profiles automatically, t14-only for now. css, sideberry still TODO.
 - ~~switch wpc (windows) to Waterfox too, extend firefox-tweaks auto-apply script to cover
     it~~ done 2026-08-31: `run_onchange_after_60-browser-user-js-sync.py.tmpl` now handles
     Windows -- `%APPDATA%\Mozilla\Firefox\` / `%APPDATA%\Waterfox\` profile dirs, a

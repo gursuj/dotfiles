@@ -10,7 +10,7 @@ export PATH="$PATH:$HOME/bin"
 export PATH="$PATH:$HOME/.cargo/bin/"
 # export PATH="$PATH:$HOME/programming/shell-scripts/"
 
-{{- if eq .machine_kind "arch" }}
+{{- if eq .machine_kind "t14" }}
 # Use Native Wayland Backend for Chrome/Electron. helps with laggy scrolling
 # this affected themeing ? forgot
 # for better scrolling, launch w/ flags --ozone-platform=wayland --enable-features=TouchpadOverscrollHistoryNavigation,ImpulseScrollAnimations
@@ -192,7 +192,7 @@ export PATH="$PATH:$HOME/.local/bin"
 
 export PATH="$PATH:$HOME/.config/composer/vendor/bin"
 export PATH="$PATH:$HOME/go/bin"
-{{- if eq .machine_kind "arch" }}
+{{- if eq .machine_kind "t14" }}
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
 {{- end }}
@@ -207,7 +207,7 @@ function f() {
 	rm -f -- "$tmp"
 }
 
-{{- if eq .machine_kind "arch" }}
+{{- if eq .machine_kind "t14" }}
 # force QT apps to follow GTK theme?
 # gtk requires qt5-styleplugins package
 # export QT_STYLE_OVERRIDE='gtk2'
@@ -250,9 +250,12 @@ if [[ -z "$CLAUDECODE" ]]; then
     corepack() { _nvm_lazy_load; corepack "$@"; }
 fi
 
-{{- if eq .machine_kind "arch" }}
-# hyprshot
-export HYPRSHOT_DIR='$HOME/Pictures/screenshots/'
+{{- if eq .machine_kind "t14" }}
+# hyprshot is gone on the t14 (omarchy uses omarchy-capture-screenshot/omasnap,
+# which reads OMARCHY_SCREENSHOT_DIR -- set in ~/.config/hypr/looknfeel.lua);
+# kept here too so shells and scripts that inherit the env agree.
+export OMARCHY_SCREENSHOT_DIR="$HOME/Pictures/screenshots"
+export HYPRSHOT_DIR='$HOME/Pictures/screenshots'
 {{- end }}
 
 # Shared aliases (aliasrc) -- usable on any machine_kind. Machine-specific alias
@@ -268,7 +271,7 @@ function cps { ch ps "$@" }       # Active multiplexer sessions
 function cs  { ch search "$@" }   # Keyword search
 # alternatively, run ch <search-term> to search with AI
 
-{{- if eq .machine_kind "arch" }}
+{{- if eq .machine_kind "t14" }}
 # Load aliases and shortcuts if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/arch-aliasrc"
 {{- end }}

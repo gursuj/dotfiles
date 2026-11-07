@@ -1,14 +1,27 @@
 #
-# ~/.bashrc
+# ~/.bashrc -- Omarchy's wrapper, plus the wp-cli fix
 #
+# Deliberately mirrors /usr/share/omarchy/default/bashrc instead of replacing it.
+# zsh is the login shell on the t14, so this file is only what a `bash -i` or a
+# script shebang gets -- and those still need OMARCHY_PATH and the mise wrapper
+# PATH prepended, which is what the bootstrap line below does. Both halves are
+# sourced *from* $OMARCHY_PATH, so omarchy's own alias/function/PATH changes keep
+# flowing through updates without this file being touched.
+#
+# This is NOT the general bashrc consolidation tracked on main (see TODO.md's
+# bash-on-vps note) -- it is omarchy's default plus exactly one addition.
 
-# If not running interactively, don't do anything
+# Omarchy environment (OMARCHY_PATH + PATH), needed even for non-interactive shells
+[[ -r /usr/share/omarchy/default/bash/env-bootstrap ]] && source /usr/share/omarchy/default/bash/env-bootstrap
+
+# If not running interactively, don't do anything else (leave this above the rc source)
 [[ $- != *i* ]] && return
 
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-alias nv=nvim
-PS1='[\u@\h \W]\$ '
+# All the default Omarchy aliases and functions
+# (don't mess with these directly, just overwrite them here!)
+source "$OMARCHY_PATH/default/bash/rc"
 
-# Auto-fix `wp` inside Local by Flywheel site shells (DB socket mismatch)
+# Auto-fix `wp` inside Local by Flywheel site shells (DB socket mismatch).
+# The only addition to omarchy's default; the zsh equivalent is sourced from
+# dot_zshrc.tmpl before its CLAUDECODE skip-block, for the same reason.
 [ -f ~/.config/shell/local-wpcli/wp-shell-integration.sh ] && source ~/.config/shell/local-wpcli/wp-shell-integration.sh

@@ -1,15 +1,16 @@
 #!/bin/bash
-# Arch laptop specific aliases (desktop/Wayland/pacman/etc) -- sourced only
-# when machine_kind == arch (see dot_zshrc.tmpl). Shared, cross-machine
+# Arch-laptop specific aliases (desktop/Wayland/pacman/etc) -- sourced only
+# when machine_kind == t14 (see dot_zshrc.tmpl). Shared, cross-machine
 # aliases live in aliasrc -- add new ones there, not here, unless they're
-# genuinely arch-only.
+# genuinely t14-only.
 
 alias djournal='cd ~/Documents/obsidian; nvim Journal.md'
 alias wpc='cd ~/Documents/obsidian-wpc-notes; nvim gtd.md'
 alias anydesk="GDK_BACKEND=x11 XWAYLAND_NO_GLAMOR=1 XWAYLAND_SCREEN_SCALE_FACTOR=1 anydesk"
 # ccc is now a function (dot_zshrc.tmpl) — sandbox-prompt wrapper around claude, not a plain alias
 alias lg=lazygit
-alias waybar-reload='killall -SIGUSR2 waybar'
+# waybar-reload: no waybar on the t14 (Omarchy's bar is quickshell).
+# alias waybar-reload='killall -SIGUSR2 waybar'
 
 alias zed=zeditor
 # scratchpad file for writing down current thoughts, rubber ducking, journalling, shouting into void
@@ -38,9 +39,11 @@ alias ytp='yt -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"'
 # cd to git root directory
 alias gcd='cd "$(git rev-parse --show-toplevel)"'
 alias si='swayimg'
-alias emc='emacsclient -c --socket-name=/run/user/1000/emacs/server'
+# emc: emacs isn't installed on the t14 (LazyVim here).
+# alias emc='emacsclient -c --socket-name=/run/user/1000/emacs/server'
 alias xmp='sudo xampp-manager'
-alias ls='ls --color=auto'
+# alias ls='ls --color=auto'  -- dropped: Omarchy's bash/zsh setup already
+# handles this, and it was only ever here for the IdeaPad.
 # open new terminal window. used in old dwm+st setup. no need with ghostty
 # alias termnew="$TERMINAL >/dev/null 2>&1 & disown"
 

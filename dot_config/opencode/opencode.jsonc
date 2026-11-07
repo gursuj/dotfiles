@@ -4,10 +4,7 @@
     "~/.claude/output-styles/terse.md",
     "~/.claude/writing-preferences.md"
   ],
-  "plugin": [
-    "@tarquinen/opencode-dcp@latest"
-  ],
 	"experimental": {
-    "disable_paste_summary": true,
-  },
+		"disable_paste_summary": true,
+	},
 }

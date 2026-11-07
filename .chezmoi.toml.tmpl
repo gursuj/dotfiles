@@ -3,7 +3,7 @@
    again later for the non-Windows [data] table, so it's only prompted once. */ -}}
 {{- $machineKind := "wpc" -}}
 {{- if ne .chezmoi.os "windows" -}}
-{{- $machineKind = promptChoiceOnce . "machine_kind" "Machine kind" (list "arch" "vps" "wpc") -}}
+{{- $machineKind = promptChoiceOnce . "machine_kind" "Machine kind" (list "t14" "vps" "wpc") -}}
 {{- end -}}
 
 {{- if ne $machineKind "vps" }}
@@ -61,7 +61,7 @@ encryption = "age"
 {{- end }}
 
 {{- /* Windows is a single known device -- gated via .chezmoi.os instead.
-   Linux boxes (arch laptop vs Ubuntu VPS) need finer-grained conditionals,
+   Linux boxes (t14 ThinkPad vs Ubuntu VPS) need finer-grained conditionals,
    so ask once per machine and cache the answer in that machine's own local
    chezmoi.toml (this template is synced everywhere; the generated config
    it produces at ~/.config/chezmoi/chezmoi.toml is per-machine and never

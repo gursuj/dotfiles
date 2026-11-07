@@ -14,7 +14,7 @@
 # The actual compositor launch already happens correctly via setup.sh's own
 # `exec "$@"` at the end of the ly-provided command -- this file just needs to
 # get out of the way and not consume that exec itself (see below).
-{{- if eq .machine_kind "arch" }}
+{{- if eq .machine_kind "t14" }}
 # launch hyprland at startup
 # if uwsm check may-start; then
 #     exec uwsm start hyprland.desktop
@@ -34,6 +34,14 @@ fi
 # put this in profile for login shell (prob bash)
 export XDG_RUNTIME_DIR="/run/user/$UID"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+
+# Omarchy environment (OMARCHY_PATH + the mise command-wrapper PATH reorder).
+# Login shells already get this: Arch's /etc/zsh/zprofile does
+# `emulate sh -c 'source /etc/profile'`, which runs /etc/profile.d/omarchy.sh.
+# Non-login interactive shells (`zsh -i` inside another shell) don't, and
+# omarchy-* helpers + mise-managed tools need it, so source it here too.
+# Guarded, so this is a no-op on the VPS and anywhere omarchy isn't installed.
+[ -r /usr/share/omarchy/default/bash/env-bootstrap ] && . /usr/share/omarchy/default/bash/env-bootstrap
 
 # Created by `pipx` on 2025-01-24 02:34:22
 export PATH="$PATH:/home/sujal/.local/bin"

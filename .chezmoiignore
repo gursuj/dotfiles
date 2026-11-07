@@ -1,4 +1,4 @@
-## valid machine kinds: arch, wpc, vps
+## valid machine kinds: t14, wpc, vps
 
 {{ if ne .chezmoi.os "windows" }}
 ## windows only
@@ -33,7 +33,7 @@ scripts/wpc-push.ps1
 .config/shell/aliasrc
 {{ end }}
 
-{{ if and (ne .chezmoi.os "windows") (ne .machine_kind "arch") }}
+{{ if and (ne .chezmoi.os "windows") (ne .machine_kind "t14") }}
 ## exclude vps
 
 # Desktop/Wayland-only GUI config -- pointless on a headless VPS.
@@ -52,15 +52,15 @@ scripts/wpc-push.ps1
 .config/zed
 {{ end }}
 
-{{ if ne .machine_kind "arch" }}
-## arch only 
+{{ if ne .machine_kind "t14" }}
+## t14 only 
 
 # kanata's systemd --user autostart is specific to this physical keyboard's
 # Linux box -- no hardware keyboard to remap on the VPS, and Windows
 # autostarts kanata a different way (not systemd).
 .config/systemd/user/kanata.service
 # Desktop/Wayland/pacman-specific aliases -- only sourced when
-# machine_kind == arch (dot_zshrc.tmpl), no point deploying elsewhere.
+# machine_kind == t14 (dot_zshrc.tmpl), no point deploying elsewhere.
 .config/shell/arch-aliasrc
 # Only tracked for the arch box's Local by Flywheel wp-cli fix so far (see
 # TODO.md's bash-on-vps note) -- not a general bashrc consolidation yet, so
@@ -87,6 +87,23 @@ scripts/wpc-push.ps1
 .config/uwsm
 .config/fontconfig
 .ssh
+{{ end }}
+
+{{ if eq .machine_kind "t14" }}
+## never deploy on the t14
+
+# nvim: the t14 runs Omarchy's own LazyVim setup (~/.config/nvim with
+# lua/plugins/{theme,omarchy-theme-hotreload,remote_clipboard}.lua), themed live
+# from ~/.local/state/omarchy/current/theme/neovim.lua. The tracked config here
+# is the old hand-built one and would replace all of that wholesale. Deliberately
+# not deployed while LazyVim is being tried -- see learnings.md.
+.config/nvim
+# hyprland.lua is Omarchy's entry point (it pulls in default.hypr.* plus the
+# user files below). Tracked here only if you accept syncing it by hand against
+# Omarchy releases -- deliberately left to the package for now. The user-owned
+# files next to it (bindings/looknfeel/autostart/monitors/hyprsunset.conf) are
+# tracked and do deploy.
+.config/hypr/hyprland.lua
 {{ end }}
 
 {{ if ne .machine_kind "wpc" }}
@@ -137,8 +154,8 @@ AppData/Roaming/SaneBreak/sane-break.db
 # tidemail: fetch.log is a runtime log, regenerates on its own -- no reason to
 # track it. config.toml is tracked encrypted instead (secrets live in the OS
 # keyring, not this file, but tracking encrypted anyway as defense in depth).
-{{ if ne .machine_kind "arch" }}
-# tidemail is arch-only -- not set up on wpc or the vps.
+{{ if ne .machine_kind "t14" }}
+# tidemail is t14-only -- not set up on wpc or the vps.
 .config/tidemail/config.toml
 {{ end }}
 .config/tidemail/fetch.log

@@ -5,6 +5,143 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Omarchy already ships a polkit agent — never install hyprpolkitagent (2026-11-07)
+
+Tried `pacman -S hyprpolkitagent` + `systemctl --user enable --now hyprpolkitagent` on the
+t14. It crash-looped five times in four seconds, systemd gave up (`start-limit-hit`), and
+each attempt fired a "Process crashed" notification.
+
+- Cause: the Omarchy shell already registers an agent. `plugins/polkit/PolkitAgent.qml`
+  registers Quickshell's `PolkitAgent` at `/org/omarchy/PolkitAgent`, and polkit allows **one
+  agent per session subject**, so hyprpolkitagent's `RegisterAuthenticationAgent` was refused:
+  "An authentication agent already exists for the given subject".
+- The five SIGSEGVs are a *separate* second failure, not the refusal. `main()` returns 1,
+  then the global `g_pAgent` destructor (`~CPolkitListener`) builds an `sdbus::Variant` to
+  unregister, and sdbus-c++ 2.3.1's lazy "pseudo connection" reset deletes an object its
+  `atexit` handler already freed — a double free in `libsdbus-c++.so.2`. Don't chase the core
+  dump as the bug: the refusal is the bug, the segfault is teardown.
+- Not Omarchy's to fix: crash is in hyprpolkitagent 0.2.0 + sdbus-c++ 2.3.1, both upstream and
+  both current in Arch `extra`. Nothing in this repo is implicated — it deploys no polkit
+  config, and installs aren't tracked as packages.
+- Remedy: `systemctl --user disable --now hyprpolkitagent` then `pacman -Rns hyprpolkitagent`.
+  The unit file disappears with the package; a stale `failed` entry can linger until
+  `systemctl --user reset-failed hyprpolkitagent`.
+- Race to avoid: if a second agent ever *wins* the slot first, the shell's registration is
+  refused and Omarchy does not retry (`keepLoaded`), leaving the session with no agent until
+  `omarchy restart shell` (upstream omarchy#9558).
+
+## Machine kind renamed `arch` -> `t14` for the ThinkPad migration (2026-11-06)
+
+Moving off the IdeaPad (Arch) onto a ThinkPad T14 running Omarchy. The old `arch` value
+named a *machine*, not a distro — Omarchy is Arch-based, so pacman/Wayland conditionals
+still hold — so it's renamed rather than duplicated.
+
+- Done on branch `t14` (not merged): `.chezmoi.toml.tmpl` prompt list
+  (`t14|vps|wpc`), all `.machine_kind "arch"` conditionals in `.chezmoiignore`,
+  `dot_zshrc.tmpl`, `dot_zprofile.tmpl`, `.chezmoitemplates/firefox-preferences.js.tmpl`,
+  plus comments/prose in `README.md`, `TODO.md`, `dot_config/shell/arch-aliasrc`.
+- `arch-aliasrc`'s **filename** was not renamed — it holds pacman/Wayland aliases, which
+  are still Arch-specific even though they're now sourced on `machine_kind == t14`.
+- Gotcha: `promptChoiceOnce` caches the answer in the machine's own
+  `~/.config/chezmoi/chezmoi.toml`. A box that already answered `arch` will keep rendering
+  `arch` (and silently take the vps/not-arch branches) until that `[data] machine_kind`
+  entry is edited or the file is deleted. Fresh `chezmoi init` on the t14 sees `t14` in the
+  list.
+- `main` still says `arch`. Don't apply this repo on the t14 from `main`, and don't apply
+  `t14` on the old IdeaPad — the ignores flip either way.
+
+### First decisions on the t14 (same day)
+
+- **zsh is the login shell again** (`/usr/bin/zsh`), so the zsh layer applies after all.
+  Arch's `/etc/zsh/zprofile` does `emulate sh -c 'source /etc/profile'`, and
+  `/etc/profile.d/omarchy.sh` sources omarchy's `env-bootstrap` — so login shells already
+  get `OMARCHY_PATH` + the mise wrapper PATH. `dot_zprofile.tmpl` sources the same file
+  again behind a `-r` guard for non-login shells; harmless on the VPS.
+- **`.bashrc` now mirrors omarchy's default instead of replacing it.** The old 15-line
+  version would have deleted `OMARCHY_PATH` and the mise-wrapper PATH for every
+  `bash -i` / script shell. It only ever sources `$OMARCHY_PATH/default/bash/{env-bootstrap,rc}`,
+  so omarchy's own aliases keep flowing through updates; the wp-cli fix is the one addition.
+  Omarchy does *not* rewrite `~/.bashrc` after install — the only writer is an
+  Apple-Silicon-only migration that explicitly skips a dotfiles-managed file.
+- **nvim: LazyVim wins for now.** `.config/nvim` is ignored for `machine_kind == t14`; the
+  tracked hand-built config would have replaced omarchy's themed LazyVim setup wholesale.
+- Merge policy for everything else: omarchy's file stays the base, its theming stays
+  authoritative (no hardcoded colours/themes carried), and only chosen old settings are
+  ported into omarchy's *user-owned* files.
+
+### Hypr on the t14: track the user files, never the entry point
+
+- Tracked: `dot_config/hypr/{bindings,looknfeel,autostart,monitors}.lua` +
+  `hyprsunset.conf`. Ignored: `.config/hypr/hyprland.lua` — it is omarchy's entry point
+  (`dofile bootstrap` → `require default.hypr.omarchy` → `require hypr.*`), so replacing it
+  kills every default, toggle and bar binding at once.
+- The IdeaPad's monolith (`hyprland.lua`, `hypridle/hyprlock/hyprpaper.conf`,
+  `new-example-hyprland.conf`, `old-hyprland.conf`) was deleted on this branch; `main` and
+  git history still have it. hypridle/hyprlock/hyprpaper aren't installed on the t14 at all —
+  omarchy does idle/lock through `~/.config/omarchy/shell.json`.
+- **`o.bind` on a key omarchy already binds leaves BOTH actions on that key.** Hyprland then
+  has two binds on one combo (the earlier verification caught `SHIFT+C` = Calendar *and*
+  Close). Use `o.rebind` (it unbinds first), or `hl.unbind` + `o.bind`. Verify by grouping
+  `hyprctl -j binds` output by (modmask, key) and printing any group with >1 entry — that is
+  the only way to see it; `hyprctl configerrors` stays empty.
+- `o.rebind`/`o.bind` with a command string is wrapped in `exec_cmd`, and `{ tui = ... }` /
+  `{ omarchy = ... }` tables are translated by `helpers.lua` — so omarchy's own idioms work
+  in `bindings.lua` too.
+- Resolved mapping (IdeaPad → t14): `Q` terminal (close stays on `W`, plus `SHIFT+C`);
+  `SHIFT+F` maximize; `E` file manager; `SHIFT+M` exit (uwsm ends the session to SDDM, not a
+  tty); `H/J/K/L` focus with split/layout moved to `SHIFT+V` / `ALT+V`; `TAB` last window
+  (workspace paging on `CTRL+TAB`); `A`/`D` + `SHIFT` workspace/window to monitor, which
+  costs omarchy's "select all"; PiP on `ALT+P`; screenshots stay omarchy's `PRINT`.
+- **The desk keyboard has no arrow keys** — that is why monitor movement migrated from arrows
+  to `A`/`D`, and it must stay that way when editing binds.
+- `hyprctl dispatch exec <cmd>` is broken on Hyprland 0.56's Lua config (`')' expected near
+  <cmd>`, same family as the old `dpms` lesson below) — launch things with
+  `hyprctl dispatch 'hl.dsp.exec_cmd("…")'`. `hyprctl reload` alone does not re-run
+  `autostart.lua`, so a newly added `o.launch_on_start` needs one manual launch to take effect
+  in the current session.
+
+### Omarchy surfaces that are *not* config-compatible with the waybar/hypridle setup
+
+- **No hypridle/hyprlock/hyprpaper on the t14.** Idle and lock are Omarchy's own (quickshell):
+  timings in `~/.config/omarchy/shell.json` → `idle` (screensaver 150, lock 300). The lock
+  screen is wallpaper + password card only — `LockView.qml` has no clock, battery or charge
+  indicator, and there is no `shell.json` key for adding them. Getting time/battery there means
+  either cloning the lock plugin (`omarchy plugin clone`) and adding QML, or installing
+  `hyprlock` and pointing idle at it (loses Omarchy's fingerprint/PAM integration styling).
+- **`omarchy.workspaces` always renders the monitor's first five slots** plus any workspace
+  beyond them that exists (`Workspaces.qml`, `workspaceIds()`), so "only occupied" needs a
+  cloned widget with that function trimmed — it is not a `shell.json` option. The *click on the
+  focused workspace* there cycles that workspace's layout by design.
+- Per-monitor workspace blocks come from `~/.local/state/omarchy/monitor-workspaces`, and
+  `hl.get_last_workspace()` is what "go back to the previous workspace" uses (bound on the
+  digits in `bindings.lua`).
+- **Theme changes never touch `~/.config`.** `omarchy-theme-set` stages theme output under
+  `~/.local/state/omarchy/current/theme/` (including the themed `hyprland.lua` and
+  `shell.toml`) and leaves `~/.config/omarchy/{shell.json,shell.toml}` and every tracked hypr
+  file alone — verified by mtimes after a theme switch.
+- `omarchy toggle nightlight` pokes `hyprctl hyprsunset temperature` directly, so a manual
+  toggle lasts until the next timed profile boundary (17:30 / 07:00 in `hyprsunset.conf`),
+  which re-applies itself.
+- Web apps launched by `omarchy-launch-webapp` **require a Chromium-family browser** (it falls
+  back to `chromium.desktop` when the default browser is Firefox), so the Google/Discord/
+  WhatsApp launchers all run in Chromium, not Firefox.
+
+### Number-row binds are keycode-based — never rebind them by keysym
+
+- Omarchy binds the workspace row as `o.bind("SUPER + code:" .. (workspace + 9), …)`, i.e.
+  **keycode** `code:10`…`code:19`, not keysym `1`…`0`. `o.rebind("SUPER + 1", …)` therefore does
+  not replace that bind (`hl.unbind` can't match a code bind by a keysym string) — it adds a
+  second bind on the same physical key. Symptom: `SUPER+1..3` stopped switching workspaces
+  entirely, while `hyprctl -j binds` looked fine except for two entries per key (one with
+  `key: "1"`, one with `key: ""`).
+- Fix that shipped: leave the digits to Omarchy and set Hyprland's own
+  `hl.config({ binds = { workspace_back_and_forth = true } })` in `looknfeel.lua` — pressing the
+  already-active workspace jumps to the last focused one, no Lua callback involved. A
+  hand-written callback reading `hl.get_active_workspace()` / `hl.get_last_workspace()` was
+  tried first and never switched anything, so prefer the native option.
+- When auditing binds, match on `description`, not on `key`: keycode-bound entries report
+  `key: ""` and `keycode: 0` in `hyprctl -j binds` JSON, which makes them look absent.
+
 ## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
 
 Symptom: external HDMI monitor often stayed dark after suspend/wake, and Hyprland shuffled
