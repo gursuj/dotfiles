@@ -80,3 +80,12 @@
     opencode: turns out it falls back to `~/.claude/CLAUDE.md` on its own, but doesn't
     follow file references inside it — so added an explicit `instructions` entry in
     `dot_config/opencode/opencode.jsonc` pointing straight at the file.
+
+- **`~/.config/omarchy/shell.json` is not tracked, so plugin clones are half-applied.**
+    `sujal.lock`, `sujal.workspaces` and `sujal.monitor` are in the repo under
+    `dot_config/omarchy/plugins/`, but a fresh machine also needs their `bar.layout` entry
+    and enabled-list registration in `shell.json` — otherwise the files land and nothing
+    shows. Deciding whether to track `shell.json` means weighing that against Omarchy
+    rewriting it on shell/plugin updates: if it is tracked, expect conflicts after an
+    `omarchy` package update and re-apply the intended deltas (bar layout positions,
+    `showPercentage`, enabled plugins) rather than taking either side wholesale.

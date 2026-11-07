@@ -133,12 +133,10 @@ confirm_close = false
 # automatic-rename gave windows a name without prompting
 prompt_new_tab_name = false
 
-# tmux's `set -g mouse on` equivalent -- but it also swallows middle-click, so
-# the host terminal never sees it and middle-click paste (Ghostty's
-# middle-click-action) does nothing inside herdr. Off: middle click pastes into
-# the focused pane as typed input. Cost: no mouse-driven herdr chrome (tab
-# click, drag-select, herdr's own scrollback); pane apps can still request mouse.
-mouse_capture = false
+# set -g mouse on. Back on: herdr's mouse UI (tab click, drag-select, its own
+# scrollback) is worth more than middle-click paste, which herdr swallows -- use
+# a terminal paste instead while mouse capture is on.
+mouse_capture = true
 
 # status-right had the zoom flag followed by #h
 {{- if eq .chezmoi.os "windows" }}

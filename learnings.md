@@ -71,6 +71,21 @@ still hold — so it's renamed rather than duplicated.
 
 ### Hypr on the t14: track the user files, never the entry point
 
+**Why this branch's hypr config looks nothing like `main`'s, in one paragraph (read this
+first in a fresh session):** the IdeaPad ran one hand-written 836-line
+`~/.config/hypr/hyprland.conf`-as-Lua monolith that owned every bind, monitor, looknfeel
+value and autostart entry. Omarchy replaces that whole layer: `/usr/share/omarchy/config/hypr/`
+ships an entry point (`hyprland.lua` → `dofile bootstrap` → `require default.hypr.omarchy`)
+that loads defaults, toggles, bar bindings and workspace modes, then requires five
+*user-owned* modules (`hypr.monitors`, `input`, `bindings`, `looknfeel`, `autostart`). So on
+this branch the monolith was deleted (`git rm`; it still exists on `main` and in history) and
+the five user modules were re-created from Omarchy's copies with the personal deltas layered
+on top. Concretely: binds are `o.rebind`/`o.bind` over Omarchy's set instead of a full keymap,
+colours/gaps come from Omarchy's theme, idle/lock/paper moved to `shell.json` (hypridle,
+hyprlock and hyprpaper are not installed here), and `hyprland.lua` itself is ignored by
+chezmoi because replacing it kills every default at once. Expect *fewer* lines, not a port.
+
+
 - Tracked: `dot_config/hypr/{bindings,looknfeel,autostart,monitors}.lua` +
   `hyprsunset.conf`. Ignored: `.config/hypr/hyprland.lua` — it is omarchy's entry point
   (`dofile bootstrap` → `require default.hypr.omarchy` → `require hypr.*`), so replacing it

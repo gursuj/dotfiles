@@ -78,20 +78,39 @@ BarWidget {
   // The first five of the monitor's own, and any of the rest that exist. After
   // them come workspaces that are only visiting: those of a monitor that is
   // unplugged, which had no room to join this one's.
+  // Workspace -> has a window. Hyprland's workspace objects do not carry a
+  // usable toplevel list here, so the answer comes from the toplevels themselves
+  // (the dock builds its window list the same way).
+  function occupiedIds() {
+    var occupied = {}
+    var toplevels = Hyprland.toplevels.values
+    for (var i = 0; i < toplevels.length; i++) {
+      var workspace = toplevels[i].workspace
+      if (workspace && workspace.id > 0) occupied[workspace.id] = true
+    }
+    return occupied
+  }
+
+  // Hyprland's toplevel list is not a notifying dependency when read inside a JS
+  // function, so the model below would be computed once (at startup, when no
+  // windows exist yet) and never again. Bump this on window events instead.
+  property int occupancyRevision: 0
+
   function workspaceIds() {
+    var revision = root.occupancyRevision
+    var occupied = root.occupiedIds()
     var ids = []
     var guests = []
     var values = Hyprland.workspaces.values
     var active = root.activeWorkspaceId()
 
-    // Only workspaces that hold a window are shown, plus the one the monitor is
-    // on (so there is always something to look at on a fresh, empty session).
+    // Only workspaces that hold a window, plus the one this monitor is on, so an
+    // empty session still shows where you are.
     for (var i = 0; i < values.length; i++) {
       var workspace = values[i]
       var id = workspace.id
       if (id <= 0) continue
-      var occupied = workspace.toplevels.values.length > 0
-      if (!occupied && id !== active) continue
+      if (!occupied[id] && id !== active) continue
       if (root.blockOf(id) === root.block) ids.push(id)
       else if (workspace.monitor && workspace.monitor.name === root.monitorName) guests.push(id)
     }
@@ -216,6 +235,10 @@ BarWidget {
       // between monitors switches the others, so ask Hyprland for the truth.
       // A workspace that changes number is only learned by asking too. Every
       // bar shares what Hyprland answers, so one asks after a plain switch.
+      if (name === "openwindow" || name === "closewindow" || name === "movewindowv2" || name === "movewindow") {
+        root.occupancyRevision++
+        Hyprland.refreshToplevels()
+      }
       var switched = name === "workspacev2" && root.monitor !== null && root.monitor.focused
       if (switched || name === "moveworkspacev2" || name === "changeworkspaceid") {
         Hyprland.refreshMonitors()
@@ -261,7 +284,7 @@ BarWidget {
     anchors.fill: parent
     anchors.rightMargin: root.trailingGap
     columns: root.vertical ? 1 : root.workspaceIds().length
-    columnSpacing: root.vertical ? 0 : Style.space(1)
+    columnSpacing: root.vertical ? 0 : Style.space(3)
     rowSpacing: root.vertical ? Style.space(2) : 0
 
     Repeater {
@@ -282,6 +305,13 @@ BarWidget {
         Layout.topMargin: firstGuest && root.vertical ? Style.space(6) : 0
 
         bar: root.bar
+
+        // Hover cue: the bar has none of its own on a workspace chip, so the
+        // label takes the active colour (and full opacity) under the pointer.
+        HoverHandler { id: itemHover }
+        foreground: itemHover.hovered ? (root.bar ? root.bar.urgent : "white")
+                                      : (root.bar ? root.bar.barForeground : "white")
+        opacity: itemHover.hovered || occupied || shown ? 1 : 0.5
         // Number first, then one space, then its icon: "1 ✓". The tiling-mode
         // glyph the original swapped in for the shown workspace is dropped: it
         // renders as a solid block in this font, and `active` carries the
@@ -296,10 +326,9 @@ BarWidget {
         // the number for a layout glyph. `active` paints the shown number in the
         // bar's active colour (WidgetButton.activeColor defaults to it).
         active: shown
-        opacity: occupied || shown ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6
-        fixedWidth: root.vertical ? root.barSize : Style.space(28)
+        fixedWidth: root.vertical ? root.barSize : Style.space(32)
         fixedHeight: root.barSize
         onPressed: function() {
           if (shown) root.cycleLayout()
