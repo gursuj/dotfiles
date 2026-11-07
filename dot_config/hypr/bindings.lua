@@ -102,6 +102,25 @@ hl.unbind("SUPER + SHIFT + Y")        -- "YouTube"
 hl.unbind("SUPER + SHIFT + X")        -- "X"
 
 ---------------------------------------------------------------
+-- scratchpad + number-row moves
+---------------------------------------------------------------
+-- Omarchy's SHIFT+S was the Google Maps web app; it now moves the focused
+-- window to the scratchpad without following it. (Omarchy's ALT+S still does
+-- the same thing; this just puts it on the key the IdeaPad used.)
+hl.unbind("SUPER + SHIFT + S")
+o.bind("SUPER + SHIFT + S", "Move window to scratchpad", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
+
+-- Moving a window to a numbered workspace must NOT follow it: the window goes,
+-- the focus stays where it is. Omarchy binds the row by keycode
+-- (SUPER + code:10..19), so the rebind has to use the same form -- a keysym
+-- rebind ("SUPER + 1") does not replace a code bind, it adds a second one.
+for i = 1, 10 do
+    local key = "code:" .. (i + 9)
+    o.rebind("SUPER + SHIFT + " .. key, "Move window to workspace " .. i .. " (no follow)",
+             o.workspaces.move_window(i, false))
+end
+
+---------------------------------------------------------------
 -- browser / swallow
 ---------------------------------------------------------------
 o.bind("SUPER + B", "Browser", { omarchy = "browser" })
