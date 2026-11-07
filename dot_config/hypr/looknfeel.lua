@@ -24,6 +24,17 @@ hl.config({
   -- reaches the client and Ghostty's own middle-click-action decides.
   misc = {
     middle_click_paste = false,
+    -- Window swallowing, as on the IdeaPad: opening a terminal from a GUI app
+    -- hides the GUI app, and closing the terminal brings it back. Omarchy ships
+    -- this off, which left bindings.lua's "Toggle window swallow" a dead key.
+    enable_swallow = true,
+    swallow_regex = "^(com\\.mitchellh\\.ghostty)$",
+    swallow_exception_regex = "^(dev\\.zed\\.Zed)$",
+  },
+  binds = {
+    -- The IdeaPad could fullscreen a pinned window (the PiP case); Omarchy
+    -- ships this off, so `f` in a pinned mpv did nothing.
+    allow_pin_fullscreen = true,
   },
 })
 
@@ -151,3 +162,58 @@ hl.on("window.close", function(window)
     end
   end, { type = "oneshot", timeout = 60 })
 end)
+
+-- The scratchpad itself, as the IdeaPad had it: a window landing there floats at
+-- 80% of its monitor and is centred, and opening an empty scratchpad spawns a
+-- terminal in it.
+--
+-- A window *rule* cannot do this: Hyprland matches rules on the workspace, but
+-- neither `workspace = "special:scratchpad"` nor the `name:` selector matched a
+-- special workspace here (a probe rule setting `pin` never applied). So the
+-- arrangement runs on the window event, the same way Omarchy's own
+-- workspace-modes.lua does it — float, resize, centre.
+local function arrange_on_scratchpad(window)
+  if not (window and window.workspace and window.workspace.name == "special:scratchpad") then
+    return
+  end
+  -- A window that already floats (the package pickers) keeps its own geometry.
+  if window.floating then return end
+
+  local monitor = window.monitor
+  if not (monitor and monitor.width and monitor.scale and monitor.scale > 0) then return end
+
+  local reserved = monitor.reserved or {}
+  local width = monitor.width / monitor.scale - (reserved.left or 0) - (reserved.right or 0)
+  local height = monitor.height / monitor.scale - (reserved.top or 0) - (reserved.bottom or 0)
+
+  hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
+  hl.dispatch(hl.dsp.window.resize({
+    x = math.floor(width * 0.8),
+    y = math.floor(height * 0.8),
+    relative = false,
+    window = window,
+  }))
+  hl.dispatch(hl.dsp.window.center({ window = window }))
+end
+
+hl.on("window.open", arrange_on_scratchpad)
+
+-- Same arrangement when a window is *moved* there (SUPER+SHIFT+S). The window
+-- object still reports its old workspace at event time, so decide one loop
+-- later, as pop.lua does for its centre.
+hl.on("window.move_to_workspace", function(window, workspace)
+  if not (workspace and workspace.name == "special:scratchpad") then return end
+  hl.timer(function() arrange_on_scratchpad(window) end, { type = "oneshot", timeout = 1 })
+end)
+
+-- Seeding follows the pattern Omarchy itself uses for its console
+-- (default/hypr/qconsole.lua): an event, then an exec pinned to the workspace.
+-- `on_created_empty` on the workspace rule is still in the stub, but Omarchy
+-- runs misc.initial_workspace_tracking = 0, which is exactly what keeps a plain
+-- spawn from being tagged to the workspace it was meant for.
+hl.on("workspace.created", function(workspace)
+  if workspace and workspace.name == "special:scratchpad" and workspace.is_empty then
+    hl.exec_cmd("xdg-terminal-exec", { workspace = "special:scratchpad" })
+  end
+end)
+

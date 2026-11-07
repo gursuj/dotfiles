@@ -31,13 +31,16 @@ SOURCE = Path.home() / ".config/firefox-tweaks/user.js"
 {{ if eq .chezmoi.os "windows" -}}
 _APPDATA = Path(os.environ["APPDATA"])
 BROWSERS = {
-    "firefox": _APPDATA / "Mozilla" / "Firefox",
-    "waterfox": _APPDATA / "Waterfox",
+    "firefox": [_APPDATA / "Mozilla" / "Firefox"],
+    "waterfox": [_APPDATA / "Waterfox"],
 }
 {{- else -}}
+# Firefox 147 moved its profile root to XDG (bug 259356): ~/.config/mozilla/firefox.
+# Older installs still use ~/.mozilla/firefox, so candidates are tried in order.
+_CONFIG_HOME = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
 BROWSERS = {
-    "firefox": Path.home() / ".mozilla/firefox",
-    "waterfox": Path.home() / ".waterfox",
+    "firefox": [_CONFIG_HOME / "mozilla" / "firefox", Path.home() / ".mozilla/firefox"],
+    "waterfox": [_CONFIG_HOME / "waterfox", Path.home() / ".waterfox"],
 }
 {{- end }}
 
@@ -66,11 +69,16 @@ def main():
         print(f"no tracked user.js at {SOURCE}, skipping", file=sys.stderr)
         return
 
-    for name, install_dir in BROWSERS.items():
-        if not install_dir.exists():
-            continue
-        profile = active_profile_dir(install_dir)
-        if profile is None or not profile.is_dir():
+    for name, install_dirs in BROWSERS.items():
+        profile = None
+        for install_dir in install_dirs:
+            if not install_dir.exists():
+                continue
+            profile = active_profile_dir(install_dir)
+            if profile is not None and profile.is_dir():
+                break
+            profile = None
+        if profile is None:
             print(f"{name}: couldn't find an active profile, skipping", file=sys.stderr)
             continue
 

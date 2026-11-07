@@ -5,6 +5,53 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Firefox moved its profile root to XDG, so profile scripts did nothing (2026-11-07)
+
+Firefox 147+ keeps profiles under `~/.config/mozilla/firefox` (bug 259356, following the XDG
+base-dir spec), not `~/.mozilla/firefox`. Both `run_onchange_after_60-browser-user-js-sync.py`
+and `scripts/sync-search-engines.py` hardcoded the legacy path, found no `profiles.ini`, and
+skipped with a message that reads like benign "not installed". The tracked `user.js` had therefore
+never been linked into a profile on this box. Both now try candidates in order
+(`$XDG_CONFIG_HOME/mozilla/firefox`, then `~/.mozilla/firefox`; `$XDG_CONFIG_HOME/waterfox`, then
+`~/.waterfox`) — when a browser "isn't found" by a chezmoi script, check the profile root before
+believing the message.
+
+Related: `sync-search-engines.py` imports `lz4`, which on Arch comes from `python-lz4` installed
+for `/usr/bin/python3`. This box has a Hermes venv's `python3` first on PATH, which cannot see
+distribution site-packages, so the script exits at import. It now re-execs `/usr/bin/python3`
+once when `lz4` is missing and the distribution python exists.
+
+## Window rules cannot match a special workspace; arrange on the event instead (2026-11-07)
+
+`special:scratchpad` cannot be used as a window-rule match on Hyprland 0.56.2: neither
+`workspace = "special:scratchpad"` nor the documented `name:` selector form matched (proved with
+a probe rule setting `pin`, which never applied, while a class rule in the same config did). The
+wiki lists `workspace` as a match property, so this fails *silently* — the rule is accepted and
+`configerrors` stays empty.
+
+What works is the pattern Omarchy's own `default/hypr/workspace-modes.lua` uses: react to
+`window.open` / `window.move_to_workspace`, then dispatch
+`hl.dsp.window.float({ action = "on", window = w })`,
+`hl.dsp.window.resize({ x = ..., y = ..., relative = false, window = w })` and
+`hl.dsp.window.center({ window = w })` — sizes computed from `monitor.width / monitor.scale`
+minus `monitor.reserved`. Skip windows that already float, so the package pickers keep their
+packaged 875×600.
+
+Seeding a terminal into an empty scratchpad: `hl.on("workspace.created", ...)` with
+`workspace.is_empty`, then `hl.exec_cmd("xdg-terminal-exec", { workspace = "special:scratchpad" })`.
+`on_created_empty` on a workspace rule looks tidier in the stub, but the event + pinned exec is the
+shape that is proven here (same as `qconsole.lua`), and `misc.initial_workspace_tracking = 0` is
+what makes the explicit `workspace` option necessary rather than optional.
+
+## Register touchpad gestures once, in bindings.lua (2026-11-07)
+
+This repo already ported the IdeaPad's three-finger gestures into `bindings.lua`, so adding the
+same `hl.gesture` calls to `input.lua` produced
+`Gesture will be overshadowed by a previous gesture` from `hyprctl configerrors` — the first
+registration wins and the duplicate is dead code plus permanent noise. Before porting a setting
+from `main`, grep the repo's own modules: the packaged Omarchy defaults are not the only thing
+that can already implement it.
+
 ## Removing a tracked skill leaves three stale things behind (2026-11-07)
 
 Deleting `dot_agents/skills/<name>` and applying removes nothing from the live machine: chezmoi

@@ -35,18 +35,32 @@ from pathlib import Path
 try:
     import lz4.block
 except ImportError:
+    # lz4 is Arch's python-lz4, installed for the *system* python. A mise/venv
+    # python3 earlier on PATH (this box has one) cannot see it, so re-exec into
+    # the distribution python once before giving up.
+    if sys.platform != "win32" and sys.executable != "/usr/bin/python3" and Path("/usr/bin/python3").exists():
+        os.execv("/usr/bin/python3", ["/usr/bin/python3", *sys.argv])
     sys.exit("error: python3 lz4 module required -- pip install lz4")
 
 if sys.platform == "win32":
     _APPDATA = Path(os.environ["APPDATA"])
     BROWSERS = {
-        "firefox": {"dir": _APPDATA / "Mozilla" / "Firefox", "proc": "firefox.exe"},
-        "waterfox": {"dir": _APPDATA / "Waterfox", "proc": "waterfox.exe"},
+        "firefox": {"dirs": [_APPDATA / "Mozilla" / "Firefox"], "proc": "firefox.exe"},
+        "waterfox": {"dirs": [_APPDATA / "Waterfox"], "proc": "waterfox.exe"},
     }
 else:
+    # Firefox 147 moved its profile root to XDG (bug 259356): ~/.config/mozilla/firefox.
+    # Older installs still use ~/.mozilla/firefox, so candidates are tried in order.
+    _CONFIG_HOME = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
     BROWSERS = {
-        "firefox": {"dir": Path.home() / ".mozilla/firefox", "proc": "firefox"},
-        "waterfox": {"dir": Path.home() / ".waterfox", "proc": "waterfox-bin"},
+        "firefox": {
+            "dirs": [_CONFIG_HOME / "mozilla" / "firefox", Path.home() / ".mozilla/firefox"],
+            "proc": "firefox",
+        },
+        "waterfox": {
+            "dirs": [_CONFIG_HOME / "waterfox", Path.home() / ".waterfox"],
+            "proc": "waterfox-bin",
+        },
     }
 
 TRACKED_JSON = Path.home() / ".config/search-engines/custom-engines.json"
@@ -59,9 +73,15 @@ def is_custom(engine):
 
 def active_profile_dir(browser):
     info = BROWSERS[browser]
-    ini_path = info["dir"] / "profiles.ini"
-    if not ini_path.exists():
-        sys.exit(f"error: no profiles.ini at {ini_path} -- is {browser} installed?")
+    install_dir = None
+    for candidate in info["dirs"]:
+        if (candidate / "profiles.ini").exists():
+            install_dir = candidate
+            break
+    if install_dir is None:
+        tried = ", ".join(str(d) for d in info["dirs"])
+        sys.exit(f"error: no profiles.ini for {browser} (tried {tried}) -- is it installed?")
+    ini_path = install_dir / "profiles.ini"
 
     cfg = ConfigParser()
     cfg.read(ini_path)
@@ -70,12 +90,12 @@ def active_profile_dir(browser):
     for section in cfg.sections():
         if section.startswith("Install") and cfg.getboolean(section, "Locked", fallback=False):
             rel = cfg.get(section, "Default")
-            return info["dir"] / rel
+            return install_dir / rel
 
     for section in cfg.sections():
         if section.startswith("Profile") and cfg.getboolean(section, "Default", fallback=False):
             rel = cfg.get(section, "Path")
-            return info["dir"] / rel
+            return install_dir / rel
 
     sys.exit(f"error: couldn't find a default profile in {ini_path}")
 
