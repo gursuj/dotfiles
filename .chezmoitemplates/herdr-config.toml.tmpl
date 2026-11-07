@@ -80,8 +80,16 @@ new_tab = "prefix+c"
 rename_tab = "prefix+r"
 close_tab = "prefix+k"
 switch_tab = ["prefix+1..9", "alt+1..9"]
-previous_tab = ["prefix+p", "alt+left"]
-next_tab = ["prefix+n", "alt+right"]
+previous_tab = ["prefix+p", "alt+left", "prefix+shift+tab"]
+next_tab = ["prefix+n", "alt+right", "prefix+tab"]
+
+# herdr's defaults put pane cycling on prefix+tab / prefix+shift+tab; both keys
+# are wanted for tab navigation here, and a key can only drive one action, so
+# pane cycling moves to tmux's own prefix+o (next) and is unbound in the other
+# direction (tmux has no previous-pane bind either; prefix+; jumps to the last
+# pane, bound as last_pane above).
+cycle_pane_next = "prefix+o"
+cycle_pane_previous = ""
 
 # Like swap-window -t -1/+1 on M-S-Left/Right
 move_tab_previous = "alt+shift+left"
