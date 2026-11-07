@@ -270,6 +270,14 @@ o.bind("SUPER + SHIFT + MINUS", "Brightness down", "brightnessctl s 8%-", { lock
 -- (coarse) and SUPER (fine) here. --sn pins this specific monitor; --noverify
 -- keeps each press fast instead of probing every bus.
 local benq_sn = "3BG00085019"
+-- CTRL + brightness: Omarchy binds these to the keyboard backlight (its macOS
+-- convention). On the T14 the external panel is what we want on those keys; the
+-- keyboard backlight keeps its own XF86KbdBrightnessUp/Down keys.
+hl.unbind("CTRL + XF86MonBrightnessUp")
+hl.unbind("CTRL + XF86MonBrightnessDown")
+o.bind("CTRL + XF86MonBrightnessUp",   "External brightness up",   "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 + 8", { locked = true, repeating = true })
+o.bind("CTRL + XF86MonBrightnessDown", "External brightness down", "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 - 8", { locked = true, repeating = true })
+
 o.bind("CTRL + SHIFT + XF86MonBrightnessUp",   "External brightness up",   "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 + 8", { locked = true })
 o.bind("CTRL + SHIFT + XF86MonBrightnessDown", "External brightness down", "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 - 8", { locked = true })
 o.bind("SUPER + XF86MonBrightnessUp",   "External brightness up fine",   "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 + 2", { locked = true })

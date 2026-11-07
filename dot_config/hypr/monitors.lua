@@ -21,3 +21,16 @@ hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.
 -- app for a change to reach it.
 local omarchy_gdk_scale = 2
 hl.env("GDK_SCALE", tostring(omarchy_gdk_scale))
+
+-- External display (BenQ GW2270 over HDMI) sits above the laptop, as on the
+-- IdeaPad. auto-up keeps it working when the panel is 1440p or the cable swaps
+-- to DP. `reserved.bottom` keeps a strip at the bottom of the external display
+-- out of the work area -- 40 px, half of the 80 px the IdeaPad used. The
+-- laptop stays at 0x0, so with nothing plugged in it still starts at the top.
+hl.monitor({
+  output = "HDMI-A-1",
+  mode = "preferred",
+  position = "auto-up",
+  scale = 1,
+  reserved = { bottom = 40 },
+})

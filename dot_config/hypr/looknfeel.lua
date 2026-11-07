@@ -84,3 +84,19 @@ hl.env("OMARCHY_SCREENSHOT_DIR", (os.getenv("HOME") or "") .. "/Pictures/screens
 --     column_width = 0.97,
 --   },
 -- })
+
+----------------------------------------------------------------
+-- window rules
+----------------------------------------------------------------
+-- Omarchy's package pickers (pacman/omarchy repos and the AUR one) open in a
+-- floating terminal. Park them on the scratchpad so they never land on top of a
+-- workspace; they arrive hidden and SUPER+S brings the scratchpad up.
+o.window({
+  class = "^(org\\.omarchy\\.terminal)$",
+  title = "^(omarchy-pkg-(aur-)?install|omarchy-pkg-remove)$",
+}, {
+  float = true,
+  center = true,
+  size = { 1000, 620 },
+  workspace = "special:scratchpad silent",
+})
