@@ -1,10 +1,17 @@
 {
   "$schema": "https://opencode.ai/config.json",
+
+  // Omarchy sets this one: the binary is pacman/mise-managed, so a self-update
+  // would replace it outside the package manager. Kept on every machine.
+  "update": "disable",
+
+  // Shared Claude instructions, used by both Claude Code and OpenCode.
   "instructions": [
     "~/.claude/output-styles/terse.md",
     "~/.claude/writing-preferences.md"
   ],
-	"experimental": {
-		"disable_paste_summary": true,
-	},
+
+  "experimental": {
+    "disable_paste_summary": true
+  }
 }

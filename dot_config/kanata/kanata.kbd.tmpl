@@ -5,6 +5,13 @@
 
 (defcfg
   process-unmapped-keys no
+{{- if ne .chezmoi.os "windows" }}
+  ;; The T14's internal keyboard exposes no /dev/input/by-id/*-event-kbd symlink
+  ;; (only by-path), so kanata's default discovery finds no device and exits
+  ;; with "No keyboard devices were found". The i8042 path is stable across
+  ;; reboots; the group-ACL for reading it comes from the udev rule below.
+  linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd
+{{- end }}
 {{- if eq .chezmoi.os "windows" }}
   ;; Avoids false "Unexpected keycode" errors when other apps (e.g. WTQ's
   ;; global hotkey hook) race with kanata's own key-state sync on Windows.
