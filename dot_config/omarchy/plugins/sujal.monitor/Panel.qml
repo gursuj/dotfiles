@@ -42,7 +42,9 @@ Panel {
   //                  j/k walks each row.
   // Mouse hover on a target updates root state via the components' `hovered`
   // signal so keyboard cursor and pointer share one highlight.
-  readonly property var scalePresets: ["1", "1.25", "1.5", "2", "3", "4"]
+  readonly property var scalePresets: ["1", "1.25", "1.5", "1.6", "2", "3", "4"]
+  // 1.5 is the personal pick; 1.6 is kept so the stock preset can be tried
+  // against it before deciding whether this clone is worth keeping at all.
   readonly property var scaleValues: {
     for (var i = 0; i < displays.length; i++) {
       var display = displays[i]
