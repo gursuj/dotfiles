@@ -6,6 +6,21 @@ not a custom choice, so it's the same on Windows and Linux without any config.
 
 Remote: `git@github.com:gursuj/dotfiles.git`.
 
+## Branches
+
+`main` is the IdeaPad-era config. **`t14` is a migration branch for the ThinkPad T14 running
+Omarchy, and it is meant to merge back into `main`** once the IdeaPad is retired (a few days
+after 2026-11-07) — it is not a permanent fork. On `t14`, `machine_kind` for the laptop is
+`t14` (`"arch"` is retired), and the intent is to reproduce the old machine's behaviour on top
+of Omarchy's own config layer rather than redesign it.
+
+Two working notes from that effort live in `docs/`:
+
+- `docs/t14-merge-handoff.md` — state of the migration, what is left before `chezmoi apply`,
+  and the merge checklist for folding `t14` back into `main`.
+- `docs/pkg-install-terminal-handoff.md` — context for the Omarchy package-picker window
+  placement work (why hand-spawned windows are not evidence).
+
 ## Dependencies
 
 Everything here is stdlib shell/Python, except:
