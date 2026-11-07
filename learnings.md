@@ -445,13 +445,22 @@ tracked here): 90 s warmup, 5 min idle, then 4 jobs x 12 GB sha256. Brightness f
   has `energy_*` + `power_now`. First run there = stock profile, before installing TLP or
   auto-cpufreq. Tracked as a Mindwtr task, not here.
 
-## Syncthing config: deliberately not tracked (2026-08-17)
+## Syncthing config: deliberately not tracked (2026-08-17, path updated 2026-11-07)
 
-`.config/syncthing/` (`config.xml`, `cert.pem`, `key.pem`, `https-cert.pem`, `https-key.pem`,
-`csrftokens.txt`, `index-v0.14.0.db/`) is not tracked here and should never be added. It
-contains TLS private keys, session tokens, and a local leveldb index — secrets and per-device
-state, not shareable config. Syncthing regenerates all of this itself on first run per device;
-there's nothing worth templating.
+Syncthing's config directory (`config.xml`, `cert.pem`, `key.pem`, `https-cert.pem`,
+`https-key.pem`, `csrftokens.txt`, the index DB) is not tracked here and should never be added. It
+contains TLS private keys, session tokens, and a local database — secrets and per-device state,
+not shareable config. Syncthing regenerates all of this itself on first run per device; there's
+nothing worth templating. **Syncthing 2.x moved it**: it is now `~/.local/state/syncthing/`, not
+`~/.config/syncthing/` (the old path is what the 2026-08-17 note described; the box here runs
+2.1.7 and wrote nothing to `~/.config`).
+
+- **Startup is the packaged user unit, not a hand-run binary.**
+  `systemctl --user enable --now syncthing` (unit at `/usr/lib/systemd/user/syncthing.service`,
+  `ExecStart=… serve --no-browser --no-restart`, `WantedBy=default.target`). It generates the
+  config on first start and serves the setup GUI on <http://127.0.0.1:8384>. Running `syncthing`
+  in a terminal first is optional and only makes you stop that instance again — one process per
+  config dir — so set the device up in the GUI instead.
 
 ## Nvim cross-platform path (resolved 2026-08-10)
 

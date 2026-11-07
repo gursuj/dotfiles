@@ -49,6 +49,12 @@ Not everything here is `chezmoi apply`-and-done:
   too, but the Windows path is untested on a real machine -- check the
   `run_onchange_after_60-browser-user-js-sync.py.tmpl` output on first `chezmoi apply` on
   a new Windows box rather than assuming it linked (or copied) correctly.
+- **Syncthing** — `systemctl --user enable --now syncthing` (the packaged `syncthing.service`,
+  `WantedBy=default.target`, so it comes up with the session), then add the device and folders in
+  the web GUI at <http://127.0.0.1:8384>. Nothing to start by hand first: the service generates
+  `~/.local/state/syncthing/config.xml` and the TLS keys itself, and running the binary manually
+  before enabling it just means stopping that instance again — one process per config dir. The
+  config is deliberately not tracked (keys, tokens, per-device index); see `learnings.md`.
 
 `AGENTS.md` at repo root points agents (opencode natively, Claude Code where it honours
 `AGENTS.md`) at `learnings.md` — the dated log of resolved issues and corrections for
