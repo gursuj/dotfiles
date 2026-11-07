@@ -89,17 +89,65 @@ hl.env("OMARCHY_SCREENSHOT_DIR", (os.getenv("HOME") or "") .. "/Pictures/screens
 -- window rules
 ----------------------------------------------------------------
 -- Omarchy's package pickers (pacman/omarchy repos and the AUR one) open in a
--- floating terminal. Park them on the scratchpad so they never land on top of a
--- workspace; they arrive hidden and SUPER+S brings the scratchpad up.
+-- floating terminal. Park them on the scratchpad, and *show* the scratchpad
+-- while they are up: they are interactive fzf TUIs, so a window parked silently
+-- reads as "the menu item did nothing".
+--
+-- The menu runs these two without the presentation wrapper
+-- (`xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-install`, no
+-- --title), so the window maps with the terminal's own title -- "Ghostty"
+-- here -- and only later renames itself to the command it runs. Matching the
+-- command name, or the wrapper's "Omarchy" title, never fires.
+--
+-- Everything else with this class comes from
+-- omarchy-launch-floating-terminal-with-presentation, which always sets
+-- --title=Omarchy (plugin install, omarchy-install-*, ...). Those are the
+-- flows the user just triggered from the menu, so they must keep landing on
+-- the focused workspace: the title matcher is a *negative* one for that
+-- reason. It is also terminal-agnostic, unlike listing "Ghostty".
+--
+-- Float, centre and size are deliberately not repeated here: Omarchy's own
+-- apps/system.lua tags org.omarchy.terminal as a floating-window (875x600,
+-- centred), and a size in this rule would be ignored anyway -- the packaged
+-- tag rule wins.
+--
+-- No `silent`: the picker is an interactive fzf TUI, so the scratchpad is
+-- opened and focused on the same monitor when it maps -- otherwise the window
+-- lands hidden and looks like nothing happened. SUPER+S still closes it.
 o.window({
   class = "^(org\\.omarchy\\.terminal)$",
-  -- The window is titled "Omarchy" by omarchy-launch-floating-terminal-with-
-  -- presentation at map time and only later renames itself to the command it
-  -- runs, so the wrapper title has to match too.
-  title = "^(Omarchy|omarchy-pkg-(aur-)?install|omarchy-pkg-remove)$",
+  title = "negative:^(Omarchy)$",
 }, {
-  float = true,
-  center = true,
-  size = { 1000, 620 },
-  workspace = "special:scratchpad silent",
+  workspace = "special:scratchpad",
 })
+
+-- Coming back out. Showing the scratchpad means it is on screen while the picker
+-- runs, and Hyprland only closes a scratchpad by itself when it is empty -- this
+-- desk keeps a terminal parked there. So when the last picker on the scratchpad
+-- closes and the scratchpad is what the user is looking at, close it again:
+-- `toggle_special` returns to the workspace that was active underneath, and
+-- whatever is parked stays parked (SUPER+S brings it back).
+--
+-- Guards: only windows parked on the scratchpad by the rule above qualify (the
+-- wrapper's install flows share the class and must not trigger this), and only
+-- when no other picker is still open there.
+hl.on("window.close", function(window)
+  if not window or window.class ~= "org.omarchy.terminal" then return end
+  if not (window.workspace and window.workspace.name == "special:scratchpad") then return end
+  local closed = tostring(window.address)
+
+  -- a picker that closes right after another one opens would otherwise steal
+  -- the view from the picker still on screen, so decide one loop later
+  hl.timer(function()
+    for _, other in ipairs(hl.get_workspace_windows("special:scratchpad") or {}) do
+      if other.class == "org.omarchy.terminal" and tostring(other.address) ~= closed then
+        return
+      end
+    end
+
+    local focused = hl.get_active_window()
+    if focused and focused.workspace and focused.workspace.name == "special:scratchpad" then
+      hl.dispatch(hl.dsp.workspace.toggle_special("scratchpad"))
+    end
+  end, { type = "oneshot", timeout = 60 })
+end)

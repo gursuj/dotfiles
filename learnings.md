@@ -5,6 +5,49 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Window rules match the title a window has *at map time* — and the menu may not use the launcher you think (2026-11-07)
+
+The Omarchy package pickers (Install → Package, Install → AUR, Remove → Package) opened on the
+focused workspace instead of the scratchpad although a rule for them existed and a hand-spawned
+window obeyed it.
+
+- **Two launchers, one class.** `install.package` / `install.aur` / `remove.package` run
+  `xdg-terminal-exec --app-id=org.omarchy.terminal <cmd>` **directly** (no `--title`), so the
+  window maps with the terminal's own title (`Ghostty`) and only later renames itself to
+  `omarchy-pkg-install`. Every *other* row (plugin add, `omarchy-install-browser …`) goes through
+  `omarchy-launch-floating-terminal-with-presentation`, which passes `--title=Omarchy` at map
+  time. Read the menu jsonc rows before assuming which wrapper is in play.
+- **Hyprland applies rules at map only.** A rule keyed on the post-rename command name never
+  fires; the rename does not re-evaluate rules. Key on the map-time pair (`title` /
+  `initialTitle`, `class` / `initialClass`).
+- **The passing hand-spawn was a false positive.** `ghostty --class=org.omarchy.terminal
+  --title=Omarchy -e sleep 20` reproduces the *wrapper* path. Re-test with the literal menu
+  action string, not a lookalike.
+- Fix: `class = "^(org\\.omarchy\\.terminal)$", title = "negative:^(Omarchy)$"` →
+  `workspace = "special:scratchpad"` (no `silent`, so the picker is actually on screen), plus a
+  `hl.on("window.close")` hook that closes the scratchpad once the last picker leaves it.
+  Negative title keeps the rule terminal-agnostic and leaves the wrapper install flows where
+  they were; `negative:` is Hyprland's own regex negation (Omarchy uses it too,
+  `workspace-modes.lua`).
+- **A parked-but-silent window is an invisible bug, and Hyprland only auto-closes a special
+  workspace when it is *empty*.** With a terminal permanently parked on the scratchpad, dropping
+  `silent` leaves the user staring at the scratchpad after the picker exits; the close hook
+  (`toggle_special` back off, guarded to "no picker left on it" and "the focused window is on
+  it") is what makes showing it on open safe.
+- **There is no Lua query for "is this special workspace shown"** in 0.56: `monitor.specialWorkspace`
+  is nil in the binding and `hl.on("workspace.special_active")` does not fire for a rule-driven
+  switch. Infer it from the focused window's workspace, and check `hyprctl monitors -j`
+  (`specialWorkspace.name`) from the shell. `hl.get_active_workspace()` reports the *regular*
+  workspace underneath, not the special one. `hl` window objects are **userdata**, so `pairs()`
+  on them errors — read fields (`class`, `title`, `address`, `workspace.name`), don't iterate.
+- **A user rule's `size` loses to a packaged tag rule.** `apps/system.lua` tags
+  `org.omarchy.terminal` as `floating-window` and sets 875×600, which beat the rule's
+  `size = {1000, 620}` — the size had never applied. Don't re-specify geometry packaging
+  already sets.
+- Don't clean up test windows with `pkill -f omarchy-pkg-install`: the pattern matches the
+  agent's own `bash -c` and kills the running call. Read addresses from `hyprctl clients -j` and
+  `hl.dsp.window.kill({ window = 'address:0x…' })`.
+
 ## Omarchy already ships a polkit agent — never install hyprpolkitagent (2026-11-07)
 
 Tried `pacman -S hyprpolkitagent` + `systemctl --user enable --now hyprpolkitagent` on the
