@@ -164,6 +164,12 @@ be ported by hand).
   is required before the clone actually takes over.
 - The clone keeps the same `ShellIpc target: "lock"`, so `omarchy-shell lock status|isLocked|lock`
   and `omarchy-system-lock` keep working unchanged.
+- **Clones import omarchy's internal QML modules (`qs.Commons`, `qs.Ui`, `Style`,
+  `Commons.Color.*`, `Commons.I18n`), which are not a stable API.** A future omarchy release can
+  rename or drop those tokens and break a clone while the packaged original keeps working — so
+  after any sizable omarchy update, check `omarchy-shell lock status` still returns JSON and
+  `journalctl --user | grep -i "failed for <id>"` is empty. Same applies to a cloned
+  `omarchy.workspaces` (it reads `Hyprland.*` and `Util.*` from the same modules).
 
 ## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
 

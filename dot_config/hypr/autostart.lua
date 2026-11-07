@@ -5,3 +5,6 @@
 -- 17:30, identity from 07:00). hyprsunset has to be running for the timed
 -- profiles to fire, so it is launched with the session.
 o.launch_on_start("hyprsunset")
+
+-- GTD app, autostarted on the IdeaPad too.
+o.launch_on_start("mindwtr")

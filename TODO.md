@@ -17,7 +17,10 @@
   disabled) with clock/date/battery added to `LockView.qml`; battery % in the bar via
   `omarchy.power`'s `showPercentage` in `shell.json`. The clone is a plain copy — `omarchy
   plugin update` never touches it, so upstream lock changes must be ported by hand. Not
-  tracked in chezmoi yet; worth adding if it settles.
+  tracked in chezmoi yet; worth adding if it settles. **Cloned plugins depend on omarchy's
+  internal QML modules (`qs.Commons`, `qs.Ui`, `Style`, `Commons.Color.*`), which are not a
+  stable API** — after a big omarchy update, re-check `omarchy-shell lock status` and the
+  journal for "failed for sujal.lock".
 - on vps, make hermes use webclaw instead of firecralwl(?) though check comparisons first
 - include browser config, extensions configs too?
     - tridactyl (replaces vimium): basic rc tracked in `dot_config/tridactyl/tridactylrc`
