@@ -1,0 +1,43 @@
+#!/bin/sh
+# Idle actions Omarchy's own idle service does not cover.
+#
+# The shell's idle service (shell.json `idle.screensaver` / `idle.lock`) owns the
+# screensaver and the lock. The IdeaPad's hypridle config also turned the display
+# off 30 s after locking and suspended 20 minutes in, and Omarchy has no
+# equivalent, so swayidle covers exactly those two steps.
+#
+# swayidle speaks ext-idle-notify-v1, the same protocol the Omarchy shell uses,
+# so both daemons see one idle clock instead of two that can disagree.
+#
+# Invoked by swayidle.service (dot_config/systemd/user/swayidle.service) with no
+# arguments; the arguments above it call back into this script.
+set -eu
+
+# DPMS off/on, retrying against the newest Hyprland instance if the inherited
+# signature is stale (a compositor restart leaves it pointing at a dead socket).
+hypr_dpms() {
+  action="$1"
+  if hyprctl dispatch "hl.dsp.dpms({ action = \"$action\" })" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  sig="$(ls -1dt "$runtime"/hypr/*/ 2>/dev/null | head -n 1 || true)"
+  [ -n "${sig:-}" ] || return 0
+
+  HYPRLAND_INSTANCE_SIGNATURE="$(basename "$sig")" \
+    hyprctl dispatch "hl.dsp.dpms({ action = \"$action\" })" >/dev/null 2>&1 || true
+}
+
+case "${1:-run}" in
+  dpms-off) hypr_dpms off ;;
+  dpms-on) hypr_dpms on ;;
+  run | *)
+    # 630 s: display off. 1200 s: suspend, which Omarchy's sleep-lock service
+    # locks the session for first.
+    exec swayidle -w \
+      timeout 630 "$0 dpms-off" \
+      resume "$0 dpms-on" \
+      timeout 1200 "systemctl suspend"
+    ;;
+esac

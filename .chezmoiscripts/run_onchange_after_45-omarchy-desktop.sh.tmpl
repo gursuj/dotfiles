@@ -1,0 +1,72 @@
+#!/bin/sh
+# Two things Omarchy's own config surface cannot express declaratively, applied
+# idempotently after the files above are in place.
+#
+# 1. ~/.config/omarchy/shell.json is NOT tracked as a file: the shell rewrites it
+#    itself whenever the bar is edited from its own UI/menu, so a tracked copy
+#    means a drift diff after every such edit. Only the keys this repo owns are
+#    patched here, everything else is left exactly as the shell left it:
+#      idle.screensaver / idle.lock  -- the IdeaPad's hypridle timings (dim at
+#                                       5 min, lock at 10 min); Omarchy's
+#                                       defaults are 150/300
+#      plugins / disabledPlugins     -- sujal.lock enabled, omarchy.lock disabled
+#      bar.layout.left/right         -- sujal.workspaces and sujal.monitor
+#                                       instead of the first-party widgets they
+#                                       were cloned from
+#    This is a run_onchange script: it re-runs when its content changes, not when
+#    the user edits the bar, so a deliberate bar change sticks until the next
+#    edit here.
+#
+# 2. Enable the idle helper service (display off, then suspend) once its binary
+#    and swayidle are both installed. See private_dot_local/bin/executable_omarchy-idle.
+
+set -eu
+
+shell_json="$HOME/.config/omarchy/shell.json"
+
+patch_shell_json() {
+  [ -f "$shell_json" ] || { echo "no $shell_json (not an Omarchy box), skipping" >&2; return 0; }
+  command -v jq >/dev/null 2>&1 || { echo "jq not on PATH, skipping shell.json patch" >&2; return 0; }
+
+  tmp="$(mktemp "${TMPDIR:-/tmp}/shell.json.XXXXXX")"
+  trap 'rm -f "$tmp"' EXIT
+
+  jq '
+    def ensure_id($id): if any(.[]; .id == $id) then . else . + [{id: $id}] end;
+    def swap_id($from; $to): map(if .id == $from then .id = $to else . end);
+
+    .idle = ((.idle // {}) + {screensaver: 300, lock: 600})
+    | .plugins = ((.plugins // []) | ensure_id("sujal.lock"))
+    | .disabledPlugins = ((.disabledPlugins // [])
+        | if index("omarchy.lock") == null then . + ["omarchy.lock"] else . end)
+    | .bar.layout.left = ((.bar.layout.left // [])
+        | swap_id("omarchy.workspaces"; "sujal.workspaces") | ensure_id("sujal.workspaces"))
+    | .bar.layout.right = ((.bar.layout.right // [])
+        | swap_id("omarchy.monitor"; "sujal.monitor") | ensure_id("sujal.monitor"))
+  ' "$shell_json" > "$tmp"
+
+  if cmp -s "$tmp" "$shell_json"; then
+    echo "shell.json already matches (idle + plugin/bar registration)"
+  else
+    cp "$tmp" "$shell_json"
+    echo "patched shell.json (idle + plugin/bar registration)"
+    command -v omarchy-shell >/dev/null 2>&1 && omarchy-shell -q shell reloadConfig
+  fi
+}
+
+enable_idle_service() {
+  unit="swayidle.service"
+  helper="$HOME/.local/bin/omarchy-idle"
+  command -v swayidle >/dev/null 2>&1 || { echo "swayidle not installed, idle helper inactive" >&2; return 0; }
+  [ -x "$helper" ] || { echo "no $helper, skipping idle helper" >&2; return 0; }
+  command -v systemctl >/dev/null 2>&1 || return 0
+
+  systemctl --user enable --now "$unit" >/dev/null 2>&1 || true
+  # a re-applied unit keeps running the old command line; restart only when the
+  # unit file is newer than the running process's start time
+  systemctl --user restart "$unit" >/dev/null 2>&1 || true
+  echo "swayidle service enabled"
+}
+
+patch_shell_json
+enable_idle_service

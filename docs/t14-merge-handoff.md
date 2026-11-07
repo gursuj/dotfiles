@@ -29,13 +29,72 @@ the 1.5 preset, zed on the Omazed theme.
 
 ## Done since this handoff was written (2026-11-07)
 
+- **`chezmoi init` + `apply` have run on this box.** `~/.config/chezmoi/chezmoi.toml` now
+  exists (`machine_kind = "t14"`, age identity wired up), 118 targets were created, 6 modified,
+  9 scripts ran. Post-apply: `hyprctl configerrors` empty, `omarchy-shell shell ping` ok, kanata
+  active, `herdr config check` ok, `zsh -lc` works with antidote installed, `ch` present,
+  `~/.local`/`~/.local/share` are 700 as their `private_` names intend.
+- **`apply` needed one fix to the config template first**: the `[diff]` sh-wrapper (there for
+  git-bash's `diff.exe` and the `NUL:` sentinel) was also being used on Linux, where it broke
+  every apply with `diff: …/agent-browser/null: No such file or directory` and exit status 2
+  before writing anything. It is now Windows-only; Linux uses chezmoi's own diff.
+- **Idle timings ported from the IdeaPad's `hypridle.conf`**: screensaver 300 s (its "dim at
+  5 min"), lock 600 s (its lock at 10 min), replacing Omarchy's 150/300 defaults. Omarchy's idle
+  service only knows `screensaver` and `lock`, so the other two hypridle steps — display off at
+  630 s, suspend at 1200 s — are covered by `swayidle` (repo package) as
+  `swayidle.service` → `~/.local/bin/omarchy-idle`, sharing ext-idle-notify with the shell so
+  both see one idle clock. Pane cycling moved off `prefix+tab`/`prefix+shift+tab` in herdr,
+  which now own tab navigation (see the herdr commit).
+- **`shell.json` is patched by a script, not tracked**: `run_onchange_after_45-omarchy-desktop.sh`
+  sets the idle values and the plugin/bar registration (sujal.lock enabled, omarchy.lock
+  disabled, sujal.workspaces and sujal.monitor in the bar) idempotently with jq, then asks the
+  shell to reload. A deliberate bar edit therefore survives until the script's own content
+  changes.
 - **Package-picker placement is fixed and verified** — `ebbef01` puts the pickers on the
   scratchpad, shows/focuses it while they are up, and closes it again when the last one exits.
   Verified through the menu itself (Install → Package → Return), plus AUR and Remove, two
   pickers closing one at a time, and the wrapper install flows staying put. Details and the
   re-verification recipe: `docs/pkg-install-terminal-scratchpad.md`.
+- **`.claude/settings.json` is rewritten by Claude Code itself** (it inlines the `hooks` block
+  and re-indents). The tracked file is still the superset; `chezmoi status` showing it as
+  modified after a Claude Code session is that rewrite, not lost config.
+- **`superwhisper-panel` must NOT be removed** (the old item 6 below said to): the app is
+  installed (`superwhisper-bin 1.2.0-1`), the plugin ships with it from
+  `/opt/superwhisper/assets/omarchy-plugin/`, and it is already live in the bar's tray section.
+- **The screen turning off mid-typing was the lid switch, not idle.** logind logged
+  `Lid closed. / Suspending…` three times in nine minutes (20:43, 20:49, 20:51 — the last one
+  suspended for 9 s), and the kernel logged
+  `ACPI: button: [Firmware Bug]: Unexpected lid state reported by firmware`. The ACPI driver
+  turns a repeated same-state notification into a *complement* "closed" event, so a spurious
+  firmware notification reads as a lid close. Nothing to do with `idle.*` — input was arriving
+  the whole time, and the `owed` wallpaper daemon only *reacts* to the resulting
+  `dpms-off`/`locked`/`sleep` states.
+  - **Was the charger involved?** All three flaps happened with AC plugged in, and the ACPI log
+    also carries EC firmware errors (`\_SB.PCI0.LPC0.EC0.HKEY.MSCB`, `AE_NOT_FOUND`, at every
+    resume), so an EC/firmware trigger that only fires under charge is plausible — but nothing in
+    the log ties a lid notification to a power event, and the EC errors are a known T14/BIOS
+    problem on their own. The charger was unplugged at 21:10; **if the flaps stop now, the trigger
+    is AC/EC-side; if they continue, it is the switch (or the firmware `_LID` handler) itself.**
+    That is the discriminator to watch, so no logind change is committed yet.
+  - **The fix depends on that answer.** `HandleLidSwitchExternalPower=ignore` only helps
+    while charging; `HandleLidSwitch=ignore` (suspend from the menu instead) is the only setting
+    that survives a phantom event on battery. A BIOS update is the other candidate — this
+    machine still runs R1BET87W 1.56, and the `HKEY`/`MSCB` errors are exactly the kind of thing
+    a later EC firmware fixes.
+- **Separate finding, same boot: the fingerprint reader re-enumerates constantly.** `usb 4-3`
+  (`06cb:00bd`, Synaptics) resets every few minutes — 30+ times since 18:37, including at
+  20:49:30 and 20:51:47, i.e. right after the first two lid flaps, and again at 21:05. That is
+  also why the lock screen logged `Verification timed out` at 20:50:24 before the fingerprint
+  finally authenticated. Unrelated to the lid suspends, worth its own look if the reader misbehaves
+  under `fprintd`.
+- **The external BenQ was disconnected at the DRM level during this session**
+  (`/sys/class/drm/card1-HDMI-A-1/status` = `disconnected`, so Hyprland has only `eDP-1`). Not a
+  config problem — check the cable/monitor power. Consumer of that fact: the live
+  `monitors.lua` now carries `scale = 1.25` and `GDK_SCALE = 1` (the display widget's
+  `persist_scale` rewrite at 20:22), and that live state was mirrored into the repo rather than
+  reverted. Say which pair is wanted long-term (1.5/2 or 1.25/1).
 - **The modified-file list is down from 11 to 8, and none of it is content drift:**
-  - `~/.config/hypr/looknfeel.lua` — repo and live byte-identical.
+  - `~/.config/hypr/looknfeel.lua`, `~/.config/hypr/monitors.lua` — repo and live byte-identical.
   - `~/.config/herdr/config.toml` — live's `onboarding = false` ported into
     `.chezmoitemplates/herdr-config.toml.tmpl` (the shared template, not the rendered file); the
     template's `reload_config`/`rename_workspace` comment written into live. Renders and parses
@@ -52,44 +111,39 @@ the 1.5 preset, zed on the Omazed theme.
 
 ## Still to do (in order)
 
-1. **`chezmoi init`, then a staged `apply`.** It has never run here: `~/.config/chezmoi/`
-   holds only `key.txt`, so there is no `chezmoi.toml` and no cached `machine_kind`. Verified
-   pending (2026-11-07, throwaway config, `machine_kind = t14`): **113 creates, 8 modifications,
-   8 script runs**. The age key is present and `0600`, so `cliamp`/`tidemail`/`.ssh` decrypt.
-   The 8 modifications and why none of them loses live work:
-   - `.bashrc`, `.claude/settings.json` — tracked versions are **supersets** of live (see item
-     2). Applying *adds* the wp-cli source line / the full Claude Code config.
-   - `.config/opencode/cli.json` — source is `private_cli.json` (600), live is 644; apply
-     tightens the mode, content identical.
-   - `.local`, `.local/share` — source is `private_dot_local` (700), live is 755; apply
-     tightens the directory mode. Nothing inside is affected.
-   - `.config/omarchy/plugins/sujal.workspaces` — plain dir in source (755), live clone is 700;
-     apply widens it. Cosmetic.
-2. **`.claude/settings.json` is a superset, not a conflict.** Live is 196 bytes: just the
-   `SessionStart` hook running `herdr-agent-state.sh session`. The tracked file carries that
-   same hook block plus `model`, `permissions`, `statusLine`, `enabledPlugins`,
-   `extraKnownMarketplaces`, `theme`, `tui`, `outputStyle`, `skillOverrides` and friends. No
-   key exists only in live, so applying loses nothing.
-3. **`shell.json` is still untracked**, so the three plugin clones (`sujal.lock`,
-   `sujal.workspaces`, `sujal.monitor`) land as files but never get registered — a fresh
-   machine shows nothing. Decide whether to track `shell.json` (conflicts on Omarchy updates)
-   or add an idempotent `run_onchange` script that patches the bar layout. See `TODO.md`.
-4. **First-apply side effects to expect:** `30-antidote-install.sh` installs antidote (network)
-   — that is what finally makes `~/.zshrc` usable; `35-cch-install.sh` rebuilds `ch`
-   (already installed on this box, harmless); `10-yazi-pkg-install.sh` self-skips; skill
-   symlinks + browser `user.js` sync run (`python-lz4` is installed); `~/.local` and
-   `~/.local/share` get chmod'ed 700 by their `private_` names.
+1. **Remaining drift after the first apply** is small and understood: the always-run scripts
+   (`05-herdr-plugin-sync`, `20-herdr-plugin-install`) show `R` on every status, and
+   `.claude/settings.json` shows `M` whenever Claude Code has rewritten its own formatting.
+   Nothing left needs a decision.
+2. **Watch the lid switch, then pick the logind policy.** The flaps stopped being explained the
+   moment the charger came out (see above) — let a day of unplugged use answer whether it is
+   AC/EC-correlated or the switch. Then either `/etc/systemd/logind.conf.d/30-lid.conf` with
+   `[Login]` + `HandleLidSwitchExternalPower=ignore` (only the AC case) or
+   `HandleLidSwitch=ignore` (no lid suspends at all; suspend from the menu), and verify with
+   `busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
+   org.freedesktop.login1.Manager HandleLidSwitchExternalPower`. A BIOS update past R1BET87W
+   1.56 is the other candidate — the EC `HKEY`/`MSCB` errors are firmware-side.
+3. **Decide the display pair** that should stay in `monitors.lua`: external `1.25` with
+   `GDK_SCALE = 1` (what the widget last wrote, now mirrored in the repo) or back to `1.5`/`2`.
+   Also re-check the external once the cable is back: only `eDP-1` is connected right now.
+4. **`swayidle` prints one warning at start**: `Failed to parse get BlockInhibited property:
+   Invalid argument` — this is the known swayidle 1.9 / newer-systemd mismatch. Consequence:
+   swayidle does not see logind's idle-inhibit list, so a deliberately inhibited idle (a video
+   player asking for no idle) can still hit the display-off/suspend timeouts. If that bites,
+   either drop the suspend step and rely on the menu, or switch to a different idle daemon.
 5. **Merge mechanics:** rebase/squash `t14` onto `main`, keep `machine_kind = "t14"` as the
    laptop value (do not resurrect `"arch"`), keep the `wpc`/`vps` branches, and drop `main`'s
    hypr monolith (`dot_config/hypr/hyprland.lua`, `hypridle/hyprlock/hyprpaper.conf`,
    `new-example-hyprland.conf`) since the user-module layout supersedes it. Keep the
-   `arch-aliasrc` filename: its contents are pacman/Wayland aliases, still accurate.
-6. **Post-merge cleanup:** remove the leftover `~/.config/omarchy/plugins/superwhisper-panel`
-   (its app is uninstalled), decide whether `sujal.monitor` (1.5 preset) is worth keeping over
-   stock 1.6, and confirm no test-only binds/scaffolding survived.
+   `arch-aliasrc` filename: its contents are pacman/Wayland aliases, still accurate. Note that
+   `main`'s `hypridle.conf` is the file whose timings were ported in this branch — keep it in
+   the history so the numbers have a provenance, but do not deploy it.
+6. **Post-merge cleanup:** `superwhisper-panel` stays (app-owned, live in the bar — see above),
+   `sujal.monitor` stays (the 1.5 preset is wanted), and the remaining check is that no test-only
+   binds/scaffolding survived.
 7. **Docs:** README's tracked-files table now covers the hypr user modules, the `sujal.*` plugin
-   clones, zed and `docs/` (done 2026-11-07). Left for the merge itself: refresh the `Branches`
-   section once `t14` is `main`, and drop the migration framing from it.
+   clones, zed, `docs/`, and the idle setup (done 2026-11-07). Left for the merge itself: refresh
+   the `Branches` section once `t14` is `main`, and drop the migration framing from it.
 
 ## Gotchas that will bite (all learned the hard way; details in `learnings.md`)
 

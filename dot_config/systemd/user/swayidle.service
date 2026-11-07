@@ -1,0 +1,14 @@
+[Unit]
+Description=Idle actions: display off, then suspend (swayidle)
+Documentation=file:///usr/share/omarchy/default/hypr
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omarchy-idle
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

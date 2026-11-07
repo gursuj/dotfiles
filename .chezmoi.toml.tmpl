@@ -39,9 +39,16 @@ encryption = "age"
     sandbox_dir = 'D:\claude-sandbox'
 {{- end -}}
 
-{{- $diffCmd := "diff" -}}
-{{- if and (eq .chezmoi.os "windows") (not (lookPath "diff")) -}}
-  {{- $diffCmd = "" -}}
+{{- /* The sh wrapper below exists only for Windows, where git-bash's diff.exe does not
+   understand the "NUL:" sentinel chezmoi passes for a missing destination. On Linux it
+   was being used too, and it breaks `apply`: for a target that does not exist yet chezmoi
+   runs the diff against a scratch path ending in "/null", so the wrapper handed diff a
+   file that is not there ("diff: .../agent-browser/null: No such file or directory") and
+   `apply` aborted with exit status 2 before writing anything. Only set the wrapper where
+   it is needed; everywhere else use chezmoi's own diff with just the exclude list. */ -}}
+{{- $diffCmd := "" -}}
+{{- if and (eq .chezmoi.os "windows") (lookPath "diff") -}}
+  {{- $diffCmd = "diff" -}}
 {{- end -}}
 
 {{- if $diffCmd }}
@@ -49,8 +56,7 @@ encryption = "age"
    device sentinel "NUL:" (colon included) when there's no destination file on disk. Git for
    Windows' diff.exe only understands "/dev/null", not "NUL:", and errors with
    "diff: NUL:: No such file or directory". Route through sh -c to swap that sentinel for
-   /dev/null before calling the real diff -- harmless on non-Windows since Destination/Target
-   never equal "NUL:" there. */}}
+   /dev/null before calling the real diff. */}}
 [diff]
     command = "sh"
     args = ["-c", "a=$1; b=$2; label=$a; [ \"$label\" = 'NUL:' ] && label=$b; printf '\\n\\033[1m%s\\033[0m\\n' \"$label\"; [ \"$a\" = 'NUL:' ] && a=/dev/null; [ \"$b\" = 'NUL:' ] && b=/dev/null; exec {{ $diffCmd }} --color=always --strip-trailing-cr \"$a\" \"$b\"", "diffwrap", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]

@@ -19,7 +19,7 @@ hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.
 -- crisp instead of being stretched by the compositor. GTK only honors whole
 -- numbers, so use the nearest integer to the monitor scale, and restart an
 -- app for a change to reach it.
-local omarchy_gdk_scale = 2
+local omarchy_gdk_scale = 1
 hl.env("GDK_SCALE", tostring(omarchy_gdk_scale))
 
 -- External display (BenQ GW2270 over HDMI) sits above the laptop, as on the
@@ -31,4 +31,4 @@ hl.env("GDK_SCALE", tostring(omarchy_gdk_scale))
 -- Kept on ONE line on purpose: omarchy-hyprland-monitor-scaling's persist_scale
 -- only rewrites single-line rules with a plain scale value, and the display
 -- widget's scale chips go through it.
-hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-up", scale = 1.5, reserved = { bottom = 40 } })
+hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-up", scale = 1.25, reserved = { bottom = 40 } })

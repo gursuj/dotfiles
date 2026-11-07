@@ -5,6 +5,75 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## First `chezmoi init` + `apply` on the t14: two blockers, both in this repo (2026-11-07)
+
+`init` and `apply` had never run on this box. Both needed a fix before anything deployed:
+
+- **`promptChoiceOnce` needs a TTY and `--promptDefaults` does not bypass it.** `chezmoi init`
+  died with `could not open a new TTY: /dev/tty`. Under a PTY it exited 0 but answered nothing,
+  leaving `machine_kind = ""` in the generated config. The answer *is* cached in
+  `~/.config/chezmoi/chezmoi.toml` under `[data]`, so writing the right value there makes every
+  later `init` non-interactive — verify with `chezmoi data | jq .machine_kind` before applying,
+  because an empty kind silently flips every `{{ if ne .machine_kind … }}` gate.
+- **A Windows-only `[diff]` wrapper broke `apply` on Linux.** The template routed diffs through
+  `sh -c` to translate the `NUL:` sentinel for git-bash's `diff.exe`; on Linux that wrapper is
+  unnecessary *and* fatal — for a target that does not exist yet chezmoi diffs against a scratch
+  path ending in `/null`, so the wrapper handed `diff` a missing file and `apply` aborted with
+  `chezmoi: .agents/skills/agent-browser: exit status 2` **before writing anything**. Gate the
+  wrapper on `eq .chezmoi.os "windows"`; everywhere else leave `[diff]` with just `exclude`.
+  (Nothing had been applied, so `chezmoi status` was the check that caught it.)
+- With those fixed, the apply created 118 targets and ran 9 scripts cleanly. Post-apply checks
+  worth repeating: `hyprctl configerrors`, `omarchy-shell shell ping`, `herdr config check`,
+  `systemctl --user is-active kanata`, `zsh -lc 'echo ok'`, and `stat -c %a ~/.local` (700, from
+  its `private_` name).
+
+## Claude Code rewrites its own `settings.json`; `chezmoi status` will say so (2026-11-07)
+
+Ten minutes after apply, `.claude/settings.json` was `M` again: Claude Code had re-saved it with
+the `hooks` block inlined onto one line and a tab indent on one plugin key. The content is
+semantically identical (no key lost), so this is not drift to chase — the same class as the
+line-ending churn already documented in the README. Leave the tracked file formatted for
+readability and treat a lone `M` there as expected.
+
+## Background daemons that share the idle clock, and the one they cannot see (2026-11-07)
+
+Omarchy's shell idle service only knows `idle.screensaver` and `idle.lock`; the IdeaPad's
+`hypridle.conf` also had display-off and suspend steps. Those two now live in `swayidle` (repo
+package), started as `swayidle.service` → `~/.local/bin/omarchy-idle`, and both daemons listen to
+ext-idle-notify-v1 so they share one idle clock.
+
+- **swayidle 1.9 + current systemd: `Failed to parse get BlockInhibited property: Invalid
+  argument`** at start. It means swayidle cannot read logind's inhibitor list, so an application
+  that holds an idle inhibitor (video player, presentation mode) will still hit the display-off
+  and suspend timeouts. Cosmetic until it interrupts something; if it does, drop the suspend step
+  rather than fight it.
+- **A freed default key must be released explicitly.** herdr's defaults bind `prefix+tab` /
+  `prefix+shift+tab` to pane cycling; adding those keys to `next_tab`/`previous_tab` (which take
+  *arrays*, so multiple binds per action work) is not enough — the default still claims them.
+  `cycle_pane_next = "prefix+o"` and `cycle_pane_previous = ""` frees them, and
+  `herdr server reload-config` answering `status: applied, diagnostics: []` is the proof: a key
+  claimed twice shows up there as `kept X, disabled Y`.
+
+## A phantom "Lid closed" suspends the machine, and the kernel says why (2026-11-07)
+
+Screen went black mid-typing; it was not the idle timers.
+
+- logind logged `Lid closed.` → `Suspending…` three times in nine minutes, one of them a real
+  9-second suspend; the kernel logged `ACPI: button: [Firmware Bug]: Unexpected lid state
+  reported by firmware`. In `drivers/acpi/button.c` a *repeated same-state* `_LID` notification
+  is turned into a **complement** switch event ("closed" if it was open) so buggy firmware events
+  stay visible to userspace — which is exactly a phantom lid close.
+- Diagnose in that order: `journalctl -b | grep -iE "Lid (closed|opened)"` for logind's view,
+  `journalctl -k -b | grep "Unexpected lid state"` for the firmware complaint, and
+  `/proc/acpi/button/lid/LID/state` for the live value. Post-hoc greps of "dpms" alone mislead —
+  the wallpaper engine (`owed`) only logs that it *reacted* to `dpms-off`/`locked`/`sleep`.
+- Mitigation is a logind policy, not a Hyprland one: `HandleLidSwitch=ignore` (never suspend on
+  lid) or `HandleLidSwitchExternalPower=ignore` (only while charging). Both need a drop-in under
+  `/etc/systemd/logind.conf.d/`; a `private_`-style chezmoi target cannot deploy outside `$HOME`.
+- Same boot, unrelated: the Synaptics fingerprint reader (`06cb:00bd`) re-enumerated 30+ times in
+  two hours (`usb 4-3: reset full-speed USB device`), which is also why a lock-screen fingerprint
+  attempt logged `Verification timed out` before succeeding.
+
 ## Pre-apply reconciliation on `t14`: chezmoi normalises modes by filename, and `docs/` needed an ignore line (2026-11-07)
 
 Working through `docs/t14-merge-handoff.md` before the first `apply`: the modified-file list went
