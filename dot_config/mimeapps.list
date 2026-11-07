@@ -1,7 +1,7 @@
 [Added Associations]
 application/pdf=sioyek-3.desktop;sioyek-2.desktop;onlyoffice-desktopeditors.desktop;sioyek.desktop;
-image/jpeg=imv.desktop;swayimg.desktop;
-image/png=imv.desktop;swayimg.desktop;
+image/jpeg=swayimg.desktop;
+image/png=swayimg.desktop;
 video/mp4=firefox.desktop;mpv.desktop;
 video/x-matroska=mpv.desktop;
 text/csv=nvim.desktop;onlyoffice-desktopeditors.desktop;
