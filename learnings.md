@@ -5,6 +5,28 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## A duplicated table key silently dropped a setting (2026-11-07)
+
+`hl.config({ ... })` takes a Lua table literal, so two `binds = {...}` keys in the same literal
+mean the second replaces the first — no error, `configerrors` stays empty. That is how
+`binds.workspace_back_and_forth = true` disappeared: it went in with `middle_click_paste` etc., and
+a later patch appended a second `binds = { allow_pin_fullscreen = true }` at the end of the same
+call. The symptom was the user-visible one ("pressing SUPER+3 while on 3 no longer jumps to the
+last workspace"), and `hyprctl getoption binds:workspace_back_and_forth` reporting `false` is what
+exposed it — always read the option back after touching `hl.config`, because a lost key looks
+exactly like a lost feature. `getoption` cannot set it back; the fix is merging the tables.
+
+## Window-rule `move` and `size` disagree about which comes first (2026-11-07)
+
+A rule that sets both is evaluated with the window's *pre-rule* geometry for `move`: with
+`size = { 600, 338 }` and `move = { "(monitor_w-window_w-40)", "(monitor_h-window_h-40)" }`, a
+window that mapped at 800x600 landed at x = monitor_w - 800 - 40, not in the corner. Percentages
+and the `monitor_w` expressions parse fine, so nothing reports an error. For anything that must
+sit flush in a corner at a size it did not choose, arrange it on `window.open` instead
+(`float` → `resize` → `move` with `relative = false`, coordinates computed from
+`monitor.width / monitor.scale`); Omarchy's own PiP rule (top-right at 600x338) has the same
+offset, which is why overriding only its `size` left the window badly placed.
+
 ## Trackpad scroll: the notchiness was `emulate_discrete_scroll`, not speed (2026-11-07)
 
 Hyprland reports `input:emulate_discrete_scroll` as 1 by default: pixel-precise touchpad deltas
