@@ -200,6 +200,35 @@ end
 
 hl.on("window.open", arrange_on_scratchpad)
 
+-- Bitwarden vault window (bitwarden-popout): a CLI-opened Firefox window cannot
+-- be a chrome-less popup, so at least float it, at the scratchpad's size (80% of
+-- the monitor, centred). The title is set after map, so a static window rule
+-- never matches -- float from the title event, once per window, so a manual
+-- re-tile is not undone on the next title change.
+local bitwarden_arranged = {}
+hl.on("window.title", function(window)
+  if not (window and window.class == "firefox") then return end
+  if not (window.title or ""):match("^Bitwarden") then return end
+  local id = tostring(window.address)
+  if bitwarden_arranged[id] then return end
+  bitwarden_arranged[id] = true
+
+  local monitor = window.monitor
+  if not (monitor and monitor.width and monitor.scale and monitor.scale > 0) then return end
+  local reserved = monitor.reserved or {}
+  local width = monitor.width / monitor.scale - (reserved.left or 0) - (reserved.right or 0)
+  local height = monitor.height / monitor.scale - (reserved.top or 0) - (reserved.bottom or 0)
+
+  hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
+  hl.dispatch(hl.dsp.window.resize({
+    x = math.floor(width * 0.8),
+    y = math.floor(height * 0.8),
+    relative = false,
+    window = window,
+  }))
+  hl.dispatch(hl.dsp.window.center({ window = window }))
+end)
+
 -- Same arrangement when a window is *moved* there (SUPER+SHIFT+S). The window
 -- object still reports its old workspace at event time, so decide one loop
 -- later, as pop.lua does for its centre.

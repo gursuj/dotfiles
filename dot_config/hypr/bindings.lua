@@ -66,14 +66,14 @@ o.bind("SUPER + CTRL + SHIFT + TAB", "Previous workspace", hl.dsp.focus({ worksp
 ---------------------------------------------------------------
 -- keybindings guide
 ---------------------------------------------------------------
--- Omarchy's SUPER+SLASH was "monitor scale up" (unused here); the key now opens
--- the same guide `omarchy menu keybindings --print` documents.
-hl.unbind("SUPER + SLASH")
-o.bind("SUPER + SLASH", "Keybindings", "omarchy menu keybindings")
+-- SUPER+SHIFT+SLASH ("?") opens the guide `omarchy menu keybindings --print`
+-- documents; Omarchy had 1Password there. SUPER+SLASH is swallow (see below).
+o.rebind("SUPER + SHIFT + SLASH", "Keybindings", "omarchy menu keybindings")
 
--- Password manager: Omarchy's SHIFT+SLASH was 1Password; Bitwarden instead
--- (native package in extra). The browser extension still does the filling.
-o.rebind("SUPER + SHIFT + SLASH", "Bitwarden", o.launch("bitwarden"))
+-- Password manager on SUPER+COMMA (Omarchy's 1Password bind was on SHIFT+SLASH).
+-- Opens the Firefox extension's vault as its own window (bitwarden-popout, falls
+-- back to the web vault) rather than the native app, so one vault, one session.
+o.bind("SUPER + COMMA", "Bitwarden", o.launch("bitwarden-popout"))
 
 ---------------------------------------------------------------
 -- monitors
@@ -108,6 +108,10 @@ hl.unbind("SUPER + SHIFT + X")        -- "X"
 -- window to the scratchpad without following it. (Omarchy's ALT+S still does
 -- the same thing; this just puts it on the key the IdeaPad used.)
 hl.unbind("SUPER + SHIFT + S")
+-- Clipboard manager: SUPER+SHIFT+V instead of Omarchy's SUPER+CTRL+V.
+hl.unbind("SUPER + CTRL + V")
+o.bind("SUPER + SHIFT + V", "Clipboard manager", { panel = "omarchy.clipboard" })
+
 o.bind("SUPER + SHIFT + S", "Move window to scratchpad", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
 
 -- Moving a window to a numbered workspace must NOT follow it: the window goes,
@@ -174,7 +178,8 @@ end
 -- browser / swallow
 ---------------------------------------------------------------
 o.bind("SUPER + B", "Browser", { omarchy = "browser" })
-o.bind("SUPER + CTRL + SLASH", "Toggle window swallow", hl.dsp.window.toggle_swallow())
+-- SUPER+SLASH was "monitor scale up" in Omarchy (unused here); swallow as on main.
+o.rebind("SUPER + SLASH", "Toggle window swallow", hl.dsp.window.toggle_swallow())
 
 ---------------------------------------------------------------
 -- picture-in-picture helper on SUPER+P; Omarchy's "pseudo" moves to SHIFT+P
