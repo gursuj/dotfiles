@@ -257,7 +257,7 @@ end)
 -- window's size *before* the rule's own `size` applies, which left the window
 -- at x = monitor_w - 800 - 40 instead of tucked into the corner.
 local PIP_SIZE = { 450, 253 } -- Omarchy's 600x338, cut by a quarter
-local PIP_MARGIN = 40
+local PIP_MARGIN = 0 -- flush with the monitor corner
 
 local function arrange_pip(window)
   if not (window and window.monitor) then return end
@@ -271,9 +271,10 @@ local function arrange_pip(window)
   local monitor = window.monitor
   if not (monitor.width and monitor.scale and monitor.scale > 0) then return end
 
-  local reserved = monitor.reserved or {}
-  local width = monitor.width / monitor.scale - (reserved.left or 0) - (reserved.right or 0)
-  local height = monitor.height / monitor.scale - (reserved.top or 0) - (reserved.bottom or 0)
+  -- Full monitor, not the bar-reserved area: "bottom-right" means the real
+  -- corner, over the bars (the old reserved-area maths left it ~26px short).
+  local width = monitor.width / monitor.scale
+  local height = monitor.height / monitor.scale
 
   hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
   hl.dispatch(hl.dsp.window.resize({
@@ -288,6 +289,11 @@ local function arrange_pip(window)
 end
 
 hl.on("window.open", arrange_pip)
+
+-- Never take keyboard focus when a PiP window opens (keep typing where you were).
+-- Matched on title like Omarchy's own tag rule; ff2mpv by class.
+o.window({ title = "(Picture.?in.?[Pp]icture)" }, { no_initial_focus = true })
+o.window({ class = "^(ff2mpv)$" }, { no_initial_focus = true })
 
 -- ff2mpv is not one of Omarchy's tagged PiP windows, so it still needs the
 -- float/pin/aspect part of the rule (geometry comes from arrange_pip above).
