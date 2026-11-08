@@ -286,6 +286,18 @@ local function arrange_pip(window)
     relative = false,
     window = window,
   }))
+
+  -- The no_initial_focus rule below does not stop Firefox's PiP from grabbing
+  -- focus here, so hand it straight back to whatever had it before. Only when
+  -- the PiP really is the active window, so focus is never bounced needlessly.
+  -- Checked a beat later: Hyprland hands focus over after the open event, so an
+  -- immediate check would still see the old window.
+  hl.timer(function()
+    local active = hl.get_active_window()
+    if active and tostring(active.address) == tostring(window.address) then
+      hl.dispatch(hl.dsp.focus({ last = true }))
+    end
+  end, { type = "oneshot", timeout = 50 })
 end
 
 hl.on("window.open", arrange_pip)
