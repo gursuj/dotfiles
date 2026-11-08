@@ -80,9 +80,6 @@ scripts/wpc-push.ps1
 # and the t14's systemd --user autostart, so not for vps/windows either.
 .local/bin/omarchy-battery-notify
 .config/systemd/user/omarchy-battery-notify.service
-# tidemail is only set up on the arch box so far -- don't deploy its
-# (encrypted) config elsewhere until it's actually used there.
-.config/tidemail
 # GUI/laptop-only apps and the ssh config (hosts only, encrypted; keys are never
 # tracked). Windows has different config paths for these, so not deployed there yet.
 .config/ghostty
@@ -143,12 +140,3 @@ AppData/Roaming/SaneBreak/sane-break.db
 
 # webclaw: plaintext API key lives here, never tracked -- live credential, not config.
 .config/webclaw
-
-# tidemail: fetch.log is a runtime log, regenerates on its own -- no reason to
-# track it. config.toml is tracked encrypted instead (secrets live in the OS
-# keyring, not this file, but tracking encrypted anyway as defense in depth).
-{{ if ne .machine_kind "t14" }}
-# tidemail is t14-only -- not set up on wpc or the vps.
-.config/tidemail/config.toml
-{{ end }}
-.config/tidemail/fetch.log

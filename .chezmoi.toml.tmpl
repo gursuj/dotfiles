@@ -7,7 +7,7 @@
 {{- end -}}
 
 {{- if ne $machineKind "vps" }}
-# age encryption for secrets tracked in the (public) repo, e.g. tidemail's
+# age encryption for secrets tracked in the (public) repo, e.g. the ssh config
 # config.toml. Ciphertext lives in the repo; the private key never does --
 # it stays local-only at the path below (outside the chezmoi source dir).
 # Must stay above every [table] header in this file -- TOML has no way to

@@ -74,8 +74,8 @@ Two ways to make a change; pick edit-source-first as the default.
   plain source files only, so running it against a `.tmpl` will either skip it or clobber
   the template logic (`{{- if ... }}` blocks etc.) with flattened, rendered output. Given
   several files here are templated (`settings.json.tmpl`, the herdr config template), treat
-  this path as the exception, not the habit. For an age-encrypted file (e.g. tidemail's
-  `config.toml`), plain `chezmoi add` without `chezmoi init` having loaded the `[age]` block
+  this path as the exception, not the habit. For an age-encrypted file (e.g. the ssh
+  config), plain `chezmoi add` without `chezmoi init` having loaded the `[age]` block
   will offer to *remove* the encrypted attribute instead of re-encrypting — always run
   `chezmoi add --encrypt <file>` for these, and make sure `chezmoi init` has been run on the
   machine first so the age identity/recipient are actually configured.
