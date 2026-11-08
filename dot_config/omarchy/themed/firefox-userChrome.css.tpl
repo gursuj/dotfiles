@@ -1,3 +1,10 @@
+/* Colours are gated on the mode this theme is built for. Omarchy renders this
+ * file again on every theme switch, but a system light/dark flip without one
+ * used to leave the old palette pinned over Firefox's chrome -- with the gate,
+ * a flip in the other direction falls back to Firefox's own palette instead of
+ * showing the wrong one. Layout (the collapsed tab strip) applies either way.
+ */
+@media (prefers-color-scheme: {{ mode }}) {
 /* Firefox chrome in the Omarchy theme.
  *
  * Rendered by `omarchy-theme-refresh` (and every theme switch) from
@@ -43,16 +50,6 @@
   --focus-outline-color: {{ accent }} !important;
 }
 
-/* The tab strip is gone: Sideberry puts the tab list in the sidebar, so the top
- * strip was a second, redundant tab UI. Nothing here depends on it -- Sideberry
- * keeps its own chrome. `visibility: collapse` (rather than `display: none`)
- * keeps the window controls where the window manager expects them.
- *
- * Reverting: comment this rule out and Sideberry's sidebar still works, the
- * strip just comes back. */
-#TabsToolbar {
-  visibility: collapse !important;
-}
 
 #navigator-toolbox {
   background-color: {{ background }} !important;
@@ -112,4 +109,13 @@ panelview,
 /* Scrollbars, so long panels and the sidebar don't fall back to stock grey. */
 * {
   scrollbar-color: {{ muted }} {{ background }};
+}
+}
+
+/* Layout, not colour: the tab strip stays collapsed in both modes -- Sideberry
+ * puts the tab list in the sidebar, so the top strip was a second tab UI.
+ * `visibility: collapse` (rather than `display: none`) keeps the window
+ * controls where the window manager expects them. */
+#TabsToolbar {
+  visibility: collapse !important;
 }
