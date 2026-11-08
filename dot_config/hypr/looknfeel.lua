@@ -41,8 +41,10 @@ hl.config({
 })
 
 -- Screenshots: omarchy-capture-screenshot (omasnap) saves into this dir.
--- Replaces the IdeaPad's HYPRSHOT_DIR.
-hl.env("OMARCHY_SCREENSHOT_DIR", (os.getenv("HOME") or "") .. "/Pictures/screenshots")
+-- Replaces the IdeaPad's HYPRSHOT_DIR. /var/tmp, not /tmp: it survives reboots and
+-- systemd-tmpfiles only prunes it after 30 days. omasnap mkpath's the dir, so a
+-- pruned (empty, old) dir is recreated on the next shot.
+hl.env("OMARCHY_SCREENSHOT_DIR", "/var/tmp/screenshots")
 
 -- Opt another application in to Omarchy's standard transparency.
 -- Find its class with: hyprctl clients
