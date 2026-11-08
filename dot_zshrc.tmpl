@@ -35,8 +35,13 @@ fi
 
 export VISUAL=nvim;
 export EDITOR=nvim;
+export SUDO_EDITOR="$EDITOR";      # sudoedit / visudo follow the same editor
 export TERMINAL=ghostty;
 export SYSTEMD_EDITOR=nvim;
+# Omarchy's browser launcher (picks the default browser from its own config, so
+# xdg-open and scripts agree with the Omarchy menu). Guarded: no-op without it.
+command -v omarchy-launch-browser >/dev/null 2>&1 && export BROWSER=omarchy-launch-browser
+export BAT_THEME=ansi   # bat inherits the terminal's theme colours instead of its own
 export ALTERNATE_EDITOR=""
 export XDG_CONFIG_HOME="$HOME/.config"
 
