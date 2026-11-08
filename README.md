@@ -29,6 +29,11 @@ Not everything here is `chezmoi apply`-and-done:
   `chezmoi apply`, with both browsers closed first (they rewrite this file on exit and
   would clobber the merge). This is deliberate, not a gap -- see the script's own
   docstring.
+- **Firefox extension shortcuts** (`dot_config/extension-shortcuts/firefox-shortcuts.json`)
+  never auto-apply either -- run `scripts/sync-extension-shortcuts.py apply` by hand after
+  `chezmoi apply`, Firefox closed. Changed a shortcut in the GUI? Run
+  `scripts/sync-extension-shortcuts.py dump`, then `chezmoi re-add` the file it names,
+  review, commit. Firefox only (Waterfox bindings differ, see the script's docstring).
 - **Firefox/Waterfox `user.js`** auto-syncs via a symlink on Linux, and now on Windows
   too, but the Windows path is untested on a real machine -- check the
   `run_onchange_after_60-browser-user-js-sync.py.tmpl` output on first `chezmoi apply` on
@@ -101,6 +106,7 @@ this repo's usage patterns settle.
 | Custom scripts | `scripts/` | `~/scripts` |
 | Firefox/Waterfox `user.js` | `dot_config/firefox-tweaks/user.js` (built from `.chezmoitemplates/firefox-performance.js.tmpl` + `firefox-preferences.js.tmpl`) | Auto-symlinked (copy fallback on Windows) into each browser's active profile by `run_onchange_after_60-browser-user-js-sync.py.tmpl` on every `chezmoi apply`. Skipped on the VPS (no browser there). See Dependencies above for the python3 requirement. |
 | Custom search engines | `dot_config/search-engines/custom-engines.json` | Firefox Sync doesn't carry custom search engines (they live in `search.json.mozlz4`, not `places.sqlite`). Merged into a live profile manually via `scripts/sync-search-engines.py apply both` -- never auto-applied by chezmoi, see Dependencies above. |
+| Firefox extension shortcuts | `dot_config/extension-shortcuts/firefox-shortcuts.json` | Bindings from about:addons -> Manage Extension Shortcuts live in `extension-settings.json`, which Sync doesn't carry and `user.js` can't set. Merged into the live profile manually via `scripts/sync-extension-shortcuts.py apply` (Firefox closed), captured back with `dump`. Never auto-applied, see New-device manual steps above. |
 | Agent pointer files | `AGENTS.md`, `CLAUDE.md`, `learnings.md`, `TODO.md` | Repo root, not chezmoi-templated. `AGENTS.md` (opencode's native file, also honoured by Claude Code in setups that support it) and `CLAUDE.md` (thin pointer, see below) both point at `learnings.md` — the dated log of resolved issues/corrections — so any agent working in this repo picks it up regardless of which one it reads by default. `TODO.md` holds open items, kept out of this README. |
 | Claude Code settings | `dot_claude/settings.json.tmpl` | Templated — the PowerShell notification/herdr hooks only render on Windows (`{{ if eq .chezmoi.os "windows" }}`), since those `.ps1` scripts don't exist on Linux. The real personal `CLAUDE.md` (full org/user instructions) is deliberately **not** tracked here — it can carry client/work-sensitive content. The tracked root `CLAUDE.md` is just a thin pointer to `AGENTS.md`, not the real one. |
 | Claude Code terse output style | `dot_claude/output-styles/terse.md` | `outputStyle: Terse` in settings.json above makes this the global default for every session. Has an explicit exception for drafting messages meant for someone else (emails, ClickUp updates, LinkedIn posts, client-facing docs) — those use normal writing-voice guidance instead, and for code comments specifically it now applies the same fragment/abbreviation rules as prose (previously exempted all code content wholesale). |

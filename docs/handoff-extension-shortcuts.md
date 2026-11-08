@@ -1,81 +1,68 @@
-# Handoff — lift the IdeaPad's Firefox extension shortcuts into the repo
+# Handoff — Firefox extension shortcuts
 
-Status: **open, blocked on the IdeaPad side.** Nothing below needs re-discovery.
+Status: **done on the IdeaPad (2026-11-08). One step left on every other machine (t14 first).**
 
-## Goal
+## Result
 
-The user set keyboard shortcuts for browser extensions on the IdeaPad. They do not come across on
-their own (Firefox Sync syncs extensions, not their command bindings). Extract them on the
-IdeaPad, put them in the repo, so `chezmoi apply` restores them.
+The shortcuts are tracked in `dot_config/extension-shortcuts/firefox-shortcuts.json` and
+carried by `scripts/sync-extension-shortcuts.py` (`apply` / `dump`). 14 bindings across 5
+add-ons: Dark Reader, Sidebery, Bitwarden, UltimaDark, Violentmonkey. Deliberately unset keys
+(e.g. Dark Reader `toggle` = `""`) are tracked too.
 
-## What is already known on the t14
+## Findings
 
-- The t14 profile (`~/.config/mozilla/firefox/ay458jc3.default-release`) has nothing to migrate:
-  `extensions.json` has no `shortcuts` key and `prefs.js` has no `commands.*` prefs.
-- Format when they exist: one pref per binding in `prefs.js` —
+- The original plan was wrong. This doc used to say bindings are
+  `user_pref("commands.<id>.<cmd>", ...)` lines in `prefs.js`, to be carried via `user.js`.
+  A scan found **0** such lines on the IdeaPad, which has 14 bindings set.
+- Real store: the profile's `extension-settings.json`, top-level `commands` key. Each command
+  has a `precedenceList` of `{id, installDate, value: {shortcut}, enabled}`. `user.js` cannot
+  write it, so nothing was added to `firefox-preferences.js.tmpl`.
+- Firefox 147+ keeps profiles in `~/.config/mozilla/firefox` (XDG) on a fresh install, but
+  the IdeaPad's profile is still at the legacy `~/.mozilla/firefox`. Both machines' paths are
+  worth checking, which is why the script reads `profiles.ini` instead of hardcoding a profile.
+- Profile dir names are random per machine (`l6zcy5s7.default-release` on the IdeaPad,
+  `ay458jc3.default-release` on the t14) and Firefox rewrites `extension-settings.json` on
+  exit. That is why this is a manual script and not a chezmoi `modify_` script.
+- Containers' `open_container_N` / `reopen_in_container_N` entries have no `shortcut` key, so
+  they are not bindings and `dump` skips them.
+- `Ctrl+Alt+D` is bound to both Dark Reader `addSite` and UltimaDark `toggle-site`. Kept on
+  purpose (user decision 2026-11-08). Do not "fix" it.
+- Waterfox is not covered. It has different add-ons and different bindings (Bitwarden is
+  `_execute_browser_action` there, `_execute_sidebar_action` in Firefox). Applying this
+  file to it would set the wrong commands. See the script docstring for what a Waterfox
+  switch needs.
+- `apply` skips add-ons missing from the profile's `extensions.json`, so Sync must have
+  installed the extensions first.
+- Tested: `dump` against the live IdeaPad profile; `apply` against a scratch copy of it
+  (in-sync no-op, changed key, new command, uninstalled add-on skipped, re-apply no-op).
+  **Not yet run** against a live profile, on Windows, or on the t14.
 
-  ```
-  user_pref("commands.<extension-id>.<command-name>", "Ctrl+Shift+Y");
-  ```
+## Instructions for the t14 agent
 
-  id is the addon id (`uBlock0@raymondhill.net`, `{uuid}` for AMO-hosted ones); command name is the
-  manifest name (`_execute_browser_action`, `_execute_sidebar_action`, or a custom one); the key
-  uses Firefox syntax (`Ctrl+Shift+Y`, `Alt+P`, `F7`).
-- The obvious one-liner failed for a reason worth remembering: it assumed the legacy root.
-  Firefox 147+ keeps profiles in `~/.config/mozilla/firefox` (XDG, bug 259356).
+1. `git pull` in `~/.local/share/chezmoi`, then `chezmoi apply`. This deploys the script
+   (`~/scripts/`) and `~/.config/extension-shortcuts/firefox-shortcuts.json`.
+2. Confirm the add-ons are installed in Firefox (Sync). The ids are in the json.
+3. **Close Firefox fully.** `pgrep -x firefox` should print nothing. The script refuses to
+   run otherwise.
+4. Run `~/scripts/sync-extension-shortcuts.py apply`. It prints each shortcut it set, any
+   add-on it skipped, and a `.bak-<pid>` backup path.
+5. Start Firefox. Check `about:addons` → gear → **Manage Extension Shortcuts** shows the
+   keys from the json.
+6. If something looks wrong, close Firefox and restore the `.bak-<pid>` file over
+   `extension-settings.json` in the profile dir.
+7. Do not run `dump` on the t14 unless you changed a shortcut there on purpose. It
+   overwrites the tracked json with that machine's state.
 
-## Do this on the IdeaPad
+## Adding or changing a shortcut later
 
-Search **both** roots and **every** profile (not just the default one):
+1. Set it in `about:addons` → Manage Extension Shortcuts.
+2. Close Firefox (it writes `extension-settings.json` on exit).
+3. `scripts/sync-extension-shortcuts.py dump`
+4. `chezmoi re-add ~/.config/extension-shortcuts/firefox-shortcuts.json`
+5. Review `git diff`, commit.
 
-```bash
-python3 - <<'PY'
-import configparser, pathlib, re
+## Open items
 
-roots = [pathlib.Path.home()/".config/mozilla/firefox", pathlib.Path.home()/".mozilla/firefox"]
-cands = []
-for root in roots:
-    ini = root/"profiles.ini"
-    if ini.exists():
-        cfg = configparser.ConfigParser(); cfg.read(ini)
-        for s in cfg.sections():
-            if s.startswith("Profile"):
-                cands.append(root/cfg.get(s, "Path", fallback=""))
-    cands += [p for p in root.glob("*") if (p/"prefs.js").exists()]
-
-pat = re.compile(r'user_pref\("commands\.([^"]+)\.([^"]+)",\s*"([^"]*)"\)')
-n = 0
-for profile in dict.fromkeys(p for p in cands if p and (p/"prefs.js").exists()):
-    for line in (profile/"prefs.js").read_text(errors="replace").splitlines():
-        if m := pat.search(line):
-            n += 1
-            print(f"{profile.name}\t{m.group(1)}\t{m.group(2)}\t{m.group(3)}")
-print(f"# {n} binding(s) found")
-PY
-```
-
-Tab-separated: `profile / extension id / command / key`. `# 0 binding(s) found` means the shortcuts
-are the extensions' defaults — nothing to migrate, close this. Cross-check in the browser:
-`about:addons` → gear → **Manage Extension Shortcuts** (shows the effective key per command).
-
-## Land it in the repo
-
-Append to `.chezmoitemplates/firefox-preferences.js.tmpl` on `main`:
-
-```js
-/** EXTENSION SHORTCUTS ***/
-// Set by hand on the IdeaPad and carried here: Sync syncs extensions, not their
-// command bindings, which live in prefs.js as commands.<id>.<command>. user.js is
-// applied at startup and wins over prefs.js, so these are fixed from here on --
-// changing a shortcut means editing this block, not just about:addons.
-user_pref("commands.<extension-id>.<command-name>", "<key>");
-```
-
-Render to check (`chezmoi execute-template < .chezmoitemplates/firefox-preferences.js.tmpl`),
-commit, and note in the message that `t14` needs the same block merged.
-
-## Definition of done
-
-- The extracted lines are in `.chezmoitemplates/firefox-preferences.js.tmpl` on `main`, additive only.
-- The rendered `~/.config/firefox-tweaks/user.js` contains them after `chezmoi apply`.
-- `about:addons` → Manage Extension Shortcuts shows the same keys.
+- Verify `apply` on the t14's live profile and report back here or in `learnings.md`.
+- The Windows path (`%APPDATA%\Mozilla\Firefox`) is copied from `sync-search-engines.py` and
+  untested.

@@ -45,6 +45,7 @@ scripts/wpc-push.ps1
 # No browser on a headless VPS either.
 .config/firefox-tweaks
 .config/search-engines
+.config/extension-shortcuts
 .config/tridactyl
 # No physical keyboard to remap on the VPS either.
 .config/kanata

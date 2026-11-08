@@ -5,6 +5,32 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Firefox extension shortcuts: in `extension-settings.json`, not `prefs.js` (2026-11-08)
+
+A handoff doc assumed shortcuts are `user_pref("commands.<id>.<cmd>", ...)` lines in
+`prefs.js` and planned to carry them via `user.js`. Wrong: that search found 0 bindings on
+the IdeaPad even though 14 are set. Real store is the profile's `extension-settings.json`,
+top-level `commands` key, one entry per command with a `precedenceList` of
+`{id, installDate, value: {shortcut}, enabled}`. `user.js` can't write it.
+
+- **Fix:** `scripts/sync-extension-shortcuts.py` (`apply` / `dump`), tracked data at
+  `dot_config/extension-shortcuts/firefox-shortcuts.json` (`{addon id: {name, commands}}`).
+  Same shape as `sync-search-engines.py`: manual-only, Firefox closed, backup on write.
+  Not a chezmoi `modify_` script: profile dir name is random per machine and Firefox
+  rewrites the file on exit.
+- **Unset keys are tracked** (`"toggle": ""` for Dark Reader): deliberate unbinds of the
+  extension's default, so they need restoring too. Entries with only a `description`
+  (Containers `open_container_N`) aren't bindings and are skipped.
+- `apply` skips add-ons missing from the profile's `extensions.json`, so install
+  extensions first (Sync does that), then apply.
+- **Waterfox not covered.** Different add-ons and bindings (Bitwarden is
+  `_execute_browser_action` there, `_execute_sidebar_action` in Firefox). If switching,
+  give it its own tracked json and a per-browser `TRACKED_JSON`, don't reuse this one.
+- `Ctrl+Alt+D` is bound to both Dark Reader `addSite` and UltimaDark `toggle-site`. Kept
+  on purpose (user decision), not a bug to fix.
+- Handoff and t14 rollout steps: `docs/handoff-extension-shortcuts.md`.
+- Windows path is untested (copied from the search-engines script).
+
 ## Monitor not waking after suspend: hypridle used pre-Lua `dpms` syntax (2026-10-31)
 
 Symptom: external HDMI monitor often stayed dark after suspend/wake, and Hyprland shuffled
