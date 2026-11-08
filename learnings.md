@@ -54,6 +54,22 @@ its own menu entry, `omarchy-update-firmware`), while `omarchy update` adds the 
 check, keyring step, boot verification and reboot handling that a hand-rolled `pacman -Syu` has
 none of. Hence: `pac-update` = reflector + `omarchy update` + cleanup.
 
+## `dump` wrote the deployed copy, and a live dump wiped 31 search engines (2026-11-07)
+
+`scripts/sync-search-engines.py dump <browser>` used to write the *deployed* file
+(`~/.config/search-engines/custom-engines.json`) while the repo copy stayed untouched. Two
+consequences, both observed: the dump is silently reverted by the next `chezmoi apply` (and makes
+chezmoi ask "has changed since chezmoi last wrote it?"), and a profile that reports **0** custom
+engines — a fresh profile, or one that never had them — replaces the tracked list with `[]`. That
+is how 31 engines went; the file had to be re-applied from source.
+
+Now `dump` writes the chezmoi source path (`chezmoi source-path`), and refuses to write an empty
+list over a non-empty one unless `--force` is passed. General rule for this repo: a tool that
+*edits* tracked content writes the source path and prints the `git diff` to review; only `apply`
+touches deployed paths, and `chezmoi apply --force -- <file>` is the way to overwrite something
+that was edited outside chezmoi (a bare apply tries to prompt and dies with `could not open a new
+TTY`).
+
 ## Firefox moved its profile root to XDG, so profile scripts did nothing (2026-11-07)
 
 Firefox 147+ keeps profiles under `~/.config/mozilla/firefox` (bug 259356, following the XDG

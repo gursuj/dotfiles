@@ -182,7 +182,20 @@ def cmd_apply(browsers):
         print(f"{browser}: backup at {backup}")
 
 
-def cmd_dump(browser):
+def source_json():
+    """The chezmoi source copy -- what `dump` has to write.
+
+    TRACKED_JSON is the *deployed* path: chezmoi regenerates it from the repo on
+    every apply, so a dump written there is silently reverted (and makes chezmoi
+    ask "has changed since chezmoi last wrote it?" on the next apply).
+    """
+    repo = subprocess.run(
+        ["chezmoi", "source-path"], capture_output=True, text=True
+    ).stdout.strip() or str(Path.home() / ".local/share/chezmoi")
+    return Path(repo) / "dot_config/search-engines/custom-engines.json"
+
+
+def cmd_dump(browser, force=False):
     profile = active_profile_dir(browser)
     search_json = profile / "search.json.mozlz4"
     if not search_json.exists():
@@ -191,15 +204,27 @@ def cmd_dump(browser):
     data = load_mozlz4(search_json)
     custom = [e for e in data["engines"] if is_custom(e)]
 
-    TRACKED_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TRACKED_JSON.write_text(json.dumps(custom, indent=2, sort_keys=True))
-    print(f"wrote {len(custom)} custom engine(s) from {browser} to {TRACKED_JSON}")
+    target = source_json()
+    existing = []
+    if target.exists():
+        try:
+            existing = json.loads(target.read_text())
+        except json.JSONDecodeError:
+            existing = []
 
-    source_repo = subprocess.run(
-        ["chezmoi", "source-path"], capture_output=True, text=True
-    ).stdout.strip() or str(Path.home() / ".local/share/chezmoi")
-    print(f"\nreview with: git -C {source_repo} diff -- dot_config/search-engines/custom-engines.json")
-    print("then commit from the source repo")
+    # A profile with no custom engines -- a fresh one, or the wrong browser --
+    # must not wipe the tracked list. This is how 31 engines disappeared once.
+    if not custom and existing and not force:
+        sys.exit(
+            f"error: {browser} reports 0 custom engines but {target} tracks {len(existing)}\n"
+            f"       refusing to overwrite it -- re-run with --force if that is really wanted"
+        )
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(custom, indent=2, sort_keys=True) + "\n")
+    print(f"wrote {len(custom)} custom engine(s) from {browser} to {target}")
+    print(f"\nreview with: git -C {target.parents[2]} diff -- dot_config/search-engines/custom-engines.json")
+    print("then commit from the source repo, and `chezmoi apply` to deploy it")
 
 
 def main():
@@ -217,7 +242,8 @@ def main():
     elif action == "dump":
         if len(sys.argv) < 3 or sys.argv[2] not in BROWSERS:
             sys.exit(f"usage: {sys.argv[0]} dump <{'|'.join(BROWSERS)}>")
-        cmd_dump(sys.argv[2])
+        rest = sys.argv[2:]
+        cmd_dump(sys.argv[2], force="--force" in rest)
     else:
         sys.exit(__doc__)
 
