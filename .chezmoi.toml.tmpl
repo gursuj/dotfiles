@@ -7,13 +7,13 @@
 {{- end -}}
 
 {{- if ne $machineKind "vps" }}
-# age encryption for secrets tracked in the (public) repo, e.g. cliamp's
+# age encryption for secrets tracked in the (public) repo, e.g. tidemail's
 # config.toml. Ciphertext lives in the repo; the private key never does --
 # it stays local-only at the path below (outside the chezmoi source dir).
 # Must stay above every [table] header in this file -- TOML has no way to
 # "exit" a table once one is opened, so a bare key placed after any table
 # header silently becomes nested under that table instead of the top-level
-# key chezmoi expects. Skipped entirely on the vps: no cliamp there, so no
+# key chezmoi expects. Skipped entirely on the vps: no encrypted configs there, so no
 # reason for the private key to exist on that box.
 encryption = "age"
 [age]
