@@ -371,9 +371,17 @@ each attempt fired a "Process crashed" notification.
 - Remedy: `systemctl --user disable --now hyprpolkitagent` then `pacman -Rns hyprpolkitagent`.
   The unit file disappears with the package; a stale `failed` entry can linger until
   `systemctl --user reset-failed hyprpolkitagent`.
-- Race to avoid: if a second agent ever *wins* the slot first, the shell's registration is
-  refused and Omarchy does not retry (`keepLoaded`), leaving the session with no agent until
-  `omarchy restart shell` (upstream omarchy#9558).
+- Race to avoid, and how it actually shows up: if another agent *wins* the slot first, the
+  shell's registration is refused and Omarchy does not retry (`keepLoaded`), leaving the
+  session with no agent until `omarchy restart shell` (upstream omarchy#9558). Seen live on
+  2026-11-08: the shell exited with status 255 at 20:15 (`omarchy-launch-shell` relaunches
+  after one second on any non-zero status, without checking that the old instance's D-Bus
+  names are free), and its replacement was refused **both** the polkit agent and the
+  `org.freedesktop.Notifications` name. Neither registration is retried. The session then
+  had no agent for 30 min; LocalWP's `/etc/hosts` write failed with `No polkit
+  authentication agent found` (exit 127, `@vscode/sudo-prompt` → `pkexec`) and site
+  creation aborted. `omarchy restart shell` re-registered it immediately. Confirm with
+  `journalctl --user -g 'omarchy polkit agent'` → `omarchy polkit agent registered`.
 
 ## Machine kind renamed `arch` -> `t14` for the ThinkPad migration (2026-11-06)
 
