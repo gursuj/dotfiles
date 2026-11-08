@@ -108,6 +108,10 @@ hl.unbind("SUPER + SHIFT + X")        -- "X"
 -- window to the scratchpad without following it. (Omarchy's ALT+S still does
 -- the same thing; this just puts it on the key the IdeaPad used.)
 hl.unbind("SUPER + SHIFT + S")
+-- mindwtr quick-add: the app disables its own global shortcut on Wayland, so
+-- bind it at compositor level (same as main).
+o.bind("CTRL + SHIFT + A", "Mindwtr quick add", o.launch("mindwtr --quick-add"))
+
 -- Clipboard manager: SUPER+SHIFT+V instead of Omarchy's SUPER+CTRL+V.
 hl.unbind("SUPER + CTRL + V")
 o.bind("SUPER + SHIFT + V", "Clipboard manager", { panel = "omarchy.clipboard" })
