@@ -64,6 +64,58 @@ def active_profile_dir(install_dir):
     return None
 
 
+def sync_user_js(name, profile):
+    target = profile / "user.js"
+    if target.is_symlink() and target.resolve() == SOURCE.resolve():
+        print(f"{name}: already linked")
+        return
+
+    # a plain-copy target (symlink fallback, likely Windows) counts as
+    # synced if its bytes already match -- no point re-copying every run.
+    if target.is_file() and not target.is_symlink() and target.read_bytes() == SOURCE.read_bytes():
+        print(f"{name}: already synced (copy)")
+        return
+
+    if target.exists() or target.is_symlink():
+        backup = target.with_suffix(f".js.bak-{os.getpid()}")
+        target.rename(backup)
+        print(f"{name}: backed up existing user.js to {backup}")
+
+    try:
+        target.symlink_to(SOURCE)
+        print(f"{name}: linked {target} -> {SOURCE}")
+    except OSError as e:
+        shutil.copyfile(SOURCE, target)
+        print(f"{name}: symlink failed ({e}) -- copied {SOURCE} -> {target} instead "
+              f"(enable Developer Mode or run as admin for a real symlink)")
+
+
+def sync_user_chrome(name, profile):
+    """Point chrome/userChrome.css at the stylesheet the theme renders.
+
+    The symlink targets the *current* theme's rendered file, and a theme switch
+    rewrites that file in place, so the chrome follows the theme without this
+    script running again.
+    """
+    theme_css = Path.home() / ".local/state/omarchy/current/theme/firefox-userChrome.css"
+    if not theme_css.is_file():
+        print(f"{name}: no rendered theme chrome at {theme_css} "
+              f"(run omarchy-theme-refresh once)", file=sys.stderr)
+        return
+
+    link = profile / "chrome" / "userChrome.css"
+    if link.is_symlink() and link.resolve() == theme_css.resolve():
+        print(f"{name}: chrome already linked")
+        return
+
+    link.parent.mkdir(parents=True, exist_ok=True)
+    if link.exists() or link.is_symlink():
+        link.unlink()
+
+    link.symlink_to(theme_css)
+    print(f"{name}: linked {link} -> {theme_css}")
+
+
 def main():
     if not SOURCE.exists():
         print(f"no tracked user.js at {SOURCE}, skipping", file=sys.stderr)
@@ -82,29 +134,8 @@ def main():
             print(f"{name}: couldn't find an active profile, skipping", file=sys.stderr)
             continue
 
-        target = profile / "user.js"
-        if target.is_symlink() and target.resolve() == SOURCE.resolve():
-            print(f"{name}: already linked")
-            continue
-
-        # a plain-copy target (symlink fallback, likely Windows) counts as
-        # synced if its bytes already match -- no point re-copying every run.
-        if target.is_file() and not target.is_symlink() and target.read_bytes() == SOURCE.read_bytes():
-            print(f"{name}: already synced (copy)")
-            continue
-
-        if target.exists() or target.is_symlink():
-            backup = target.with_suffix(f".js.bak-{os.getpid()}")
-            target.rename(backup)
-            print(f"{name}: backed up existing user.js to {backup}")
-
-        try:
-            target.symlink_to(SOURCE)
-            print(f"{name}: linked {target} -> {SOURCE}")
-        except OSError as e:
-            shutil.copyfile(SOURCE, target)
-            print(f"{name}: symlink failed ({e}) -- copied {SOURCE} -> {target} instead "
-                  f"(enable Developer Mode or run as admin for a real symlink)")
+        sync_user_js(name, profile)
+        sync_user_chrome(name, profile)
 
 
 if __name__ == "__main__":

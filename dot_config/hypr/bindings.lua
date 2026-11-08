@@ -121,6 +121,56 @@ for i = 1, 10 do
 end
 
 ---------------------------------------------------------------
+-- workspace keys: focus the workspace that has something in it
+---------------------------------------------------------------
+-- Omarchy gives every monitor its own block of ten (the panel 1-10, the next
+-- monitor 11-20) and SUPER+2 means "slot 2 of the focused monitor", so a key
+-- pressed over the external screen opens an empty slot there while the one
+-- worth seeing sits on the other screen. Prefer a populated workspace: the
+-- focused monitor's own first (a repeat press stays put), then the lowest
+-- populated slot anywhere. With nothing populated, fall back to Omarchy's own
+-- focus, which reuses or creates the local slot.
+local function focus_slot(slot)
+    local focused = hl.get_active_monitor()
+    local focused_id = focused and o.workspaces.workspace_id(focused, slot)
+    local best = nil
+
+    for _, workspace in ipairs(hl.get_workspaces()) do
+        local occupied = not workspace.special and workspace.id > 0 and (workspace.windows or 0) > 0
+
+        if occupied and (workspace.id - 1) % 10 + 1 == slot then
+            if workspace.id == focused_id then
+                best = workspace.id
+                break
+            elseif not best or workspace.id < best then
+                best = workspace.id
+            end
+        end
+    end
+
+    if best then
+        hl.dispatch(hl.dsp.focus({ workspace = tostring(best) }))
+    else
+        hl.dispatch(o.workspaces.focus(slot))
+    end
+end
+
+-- Exposed on o.workspaces so the keybindings menu can replay it, the way
+-- Omarchy's own actions are addressable: `hyprctl dispatch
+-- 'o.workspaces.focus_occupied(5)'` runs exactly what the key runs.
+function o.workspaces.focus_occupied(slot)
+    return function() focus_slot(slot) end
+end
+
+-- Same keycode form as Omarchy's row: a keysym rebind ("SUPER + 5") would add a
+-- second binding instead of replacing the code one.
+for i = 1, 10 do
+    local key = "code:" .. (i + 9)
+    o.rebind("SUPER + " .. key, "Focus workspace " .. i .. " (wherever it has windows)",
+             function() focus_slot(i) end)
+end
+
+---------------------------------------------------------------
 -- browser / swallow
 ---------------------------------------------------------------
 o.bind("SUPER + B", "Browser", { omarchy = "browser" })

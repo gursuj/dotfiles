@@ -7,12 +7,16 @@
 -- /usr/share/omarchy/default/hypr/input.lua if they are wanted back.
 hl.config({
   input = {
-    sensitivity = -0.04,
+    sensitivity = 0,
     scroll_button_lock = true,
     repeat_delay = 280,
+    -- Hyprland converts pixel-precise scroll into whole wheel notches by
+    -- default, which is what makes two-finger scrolling feel notchy; 0 passes
+    -- the smooth deltas through. Speed is the scroll_factor below.
+    emulate_discrete_scroll = 0,
     touchpad = {
       natural_scroll = true, -- content follows the fingers
-      scroll_factor = 0.22,  -- Omarchy's 0.4 is nearly twice as fast
+      scroll_factor = 0.4,   -- Omarchy's default; lower is slower
     },
   },
 })

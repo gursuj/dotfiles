@@ -5,6 +5,49 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Trackpad scroll: the notchiness was `emulate_discrete_scroll`, not speed (2026-11-07)
+
+Hyprland reports `input:emulate_discrete_scroll` as 1 by default: pixel-precise touchpad deltas
+are folded into whole wheel notches, so two-finger scrolling steps rather than glides. There is no
+"smoothed scroll" option in Hyprland — the only knobs are `input:touchpad:scroll_factor` (speed),
+`input:scroll_factor` (all devices) and `emulate_discrete_scroll` (0 = pass the smooth deltas
+through). Firefox smooths on its own (`general.smoothScroll`, `mousewheel.default.delta_multiplier_y`,
+`mousewheel.min_line_scroll_amount`), which is why an app with its own scrolling (Hermes desktop,
+browsers) felt smoother than a GTK app under the notched events.
+
+## Per-monitor workspaces: SUPER+N goes to the local block, so override the focus (2026-11-07)
+
+Omarchy's `default/hypr/monitor-workspaces.lua` gives every monitor its own block of ten ids
+(panel 1-10, the next monitor 11-20) and `SUPER+N` means "slot N of the focused monitor". Pressing
+`SUPER+2` over the external screen therefore opens an empty 12 while the browser sits on 2 on the
+panel. `bindings.lua` now rebinds the row (`SUPER + code:10..19`, a keysym bind would sit beside
+the code bind instead of replacing it) to `o.workspaces.focus_occupied(N)`: prefer a populated
+workspace in that slot — the focused monitor's own first, then the lowest id anywhere — and fall
+back to Omarchy's `focus(N)`, which reuses or creates the local slot. Focusing a workspace id that
+lives on another monitor moves focus there, which is the wanted behaviour; nothing is moved.
+
+Expose such a helper on `o.workspaces` and return a function: `hyprctl dispatch
+'o.workspaces.focus_occupied(5)'` then runs exactly what the key runs, which is the only practical
+way to test a bind without pressing it (wtype does not reach Hyprland's bind layer).
+
+## Updating: `omarchy update` and the user's `pac-update` do different things (2026-11-07)
+
+`omarchy update` (= the menu's Update → Omarchy row, which runs `omarchy-update`) is a pipeline,
+not a pacman wrapper: update lock, sudo keepalive, stay-awake, log to `/tmp/omarchy-update.log`,
+free-space check, package-cache prune, keyring refresh, then
+`pacman -Syu --noconfirm --overwrite '/usr/share/omarchy/*'` inside a `systemd-run --scope` (so a
+systemd reexec cannot kill the transaction mid-upgrade; a conflict re-runs it interactively), then
+orphan prune, log analysis, restart of stale services, `omarchy-update-mise`, AUR via
+`yay -Sua --noconfirm --cleanafter --ignore gcc14,gcc14-libs`, a boot/loader check, and a reboot
+prompt when the kernel or systemd moved.
+
+The zsh `pac-update` function (`dot_config/shell/arch-aliasrc`) instead refreshes mirrors with
+reflector, runs `sudo pacman -Syu` then `yay -Syu` **interactively**, greps the two logs for the
+failure summary, then `yay -Sc`/`yay -Yc` and deletes leftover `pkg/download-*` dirs. Neither
+subsumes the other: Omarchy has no mirror refresh and no firmware step (firmware is its own menu
+entry, `omarchy-update-firmware`), and pac-update has no lock, free-space check, keyring step,
+boot verification or reboot handling. The sane combination is `pac-mirror-update && omarchy update`.
+
 ## Firefox moved its profile root to XDG, so profile scripts did nothing (2026-11-07)
 
 Firefox 147+ keeps profiles under `~/.config/mozilla/firefox` (bug 259356, following the XDG

@@ -32,6 +32,10 @@ user_pref("sidebar.visibility", "hide-launcher");
 user_pref("sidebar.verticalTabs", false);
 {{- end }}
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enables userChrome.css
+// The chrome stylesheet is linked from the rendered Omarchy theme
+// (~/.local/state/omarchy/current/theme/firefox-userChrome.css). Without this
+// GTK repaints the toolbars over it on a light system theme.
+user_pref("browser.theme.native-theme", false);
 user_pref("browser.backspace_action", 0); // 0 = Backspace navigates back, like the old Back button behavior
 user_pref("browser.urlbar.showSearchSuggestionsFirst", false);
 
