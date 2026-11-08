@@ -342,3 +342,13 @@ mindwtr_update() {
     mindwtr_start
 }
 {{- end }}
+
+# Omarchy's shell functions (hdl/hds/hsl/hdlm, tmux, worktrees, ssh helpers).
+# Upstream loads them from the bash rc, which zsh never reads, so they are absent
+# in every zsh pane -- including herdr panes, where hdl is meant to be used.
+if [[ -d $OMARCHY_PATH/default/bash/fns ]]; then
+  for _omarchy_fn in "$OMARCHY_PATH"/default/bash/fns/*(.N); do
+    source "$_omarchy_fn"
+  done
+  unset _omarchy_fn
+fi

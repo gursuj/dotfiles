@@ -157,11 +157,11 @@ BarWidget {
   property bool modeStale: false
 
   // Per-workspace icons, shown before the number: 1 = done/check, 2 = browser,
-  // 3 = agents (robot head), 4 = code. Other slots stay plain numbers.
+  // 3 = agents (the bar's agents-panel icon), 4 = code. Other slots stay plain numbers.
   function iconFor(slot) {
     if (slot === 1) return "\uf00c"   // nf-fa-check
     if (slot === 2) return "\uf0ac"   // nf-fa-globe
-    if (slot === 3) return "\uf17b"   // nf-fa-android (robot head)
+    if (slot === 3) return "󱚣"   // U+F16A3 -- the agents panel icon in the bar
     if (slot === 4) return "\uf121"   // nf-fa-code
     return ""
   }
