@@ -5,6 +5,29 @@ dotfiles repo. Kept separate from `README.md` so the README stays a clean curren
 reference and this file stays the historical "why" record. Referenced from `AGENTS.md` and
 `README.md` so any agent working in this repo picks it up.
 
+## Extension shortcuts are not in `prefs.js` (2026-11-08)
+
+Two extraction attempts on the IdeaPad came up empty because they looked for `commands.*` in
+`prefs.js` (`user_pref("commands.<id>.<command>", "Ctrl+Alt+D")`). That is the shape older Firefox
+used; current Firefox stores them in the profile's **`extension-settings.json`**, under
+`commands.<command name>.precedenceList[]` as `{id, installDate, value: {shortcut}, enabled}`.
+Consequences: `user.js` cannot carry shortcuts (it only sets prefs), Firefox Sync does not sync
+them, and the only route is a file-level merge — `scripts/sync-extension-shortcuts.py`, tracked at
+`dot_config/extension-shortcuts/firefox-shortcuts.json`, applied with Firefox closed (it rewrites
+the file on exit).
+
+## Check the branch before touching chezmoi (2026-11-08)
+
+`main` and `t14` disagree about `machine_kind`: main (IdeaPad) asks for `"arch"` in every
+`.chezmoiignore`/template gate, t14 asks for `"t14"`. Working on the wrong branch makes a whole
+category of paths look unmanaged (`firefox-tweaks`, `search-engines`, `tridactyl`, `kanata` all
+reported managed=0 under main's gates) and produces diffs that "prove" a regression which does not
+exist on the branch that matters. `git branch --show-current` before diagnosing, and be suspicious
+when a `git log` shows commits you expected on the other branch — that is how the slip was caught.
+A branch switch also leaves `~/.config/chezmoi/chezmoi.toml` generated from the *other* branch's
+template, which makes chezmoi warn "config file template has changed"; `chezmoi init
+--promptDefaults` rewrites it byte-identically when the first prompt choice is the right one.
+
 ## A duplicated table key silently dropped a setting (2026-11-07)
 
 `hl.config({ ... })` takes a Lua table literal, so two `binds = {...}` keys in the same literal
