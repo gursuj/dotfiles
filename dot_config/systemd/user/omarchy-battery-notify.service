@@ -1,0 +1,18 @@
+[Unit]
+Description=Battery notifications: low charge and charge limit reached
+Documentation=file:///usr/lib/udev/hwdb.d/60-upower-battery.hwdb
+# The toasts are drawn by the shell's notification service.
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omarchy-battery-notify
+Restart=on-failure
+RestartSec=10
+# Low warning percentage (Omarchy's own 10% warning still fires) and poll rate.
+Environment=BATTERY_NOTIFY_LOW=20
+Environment=BATTERY_NOTIFY_INTERVAL=30
+
+[Install]
+WantedBy=graphical-session.target

@@ -962,3 +962,24 @@ recognized".
 Fix: the profile now derives `usr\bin` from wherever `git.exe` resolves (two levels up, then
 `usr\bin`), and falls back to the old path if git isn't on PATH. Any Git location now works,
 including a non-admin install. Existing terminals need a restart to pick it up.
+
+## Charge threshold is systemd's, and Omarchy only warns at 10% (2026-11-08)
+
+`BAT0/charge_control_end_threshold` reads 80 (start 75) on the t14 -- not set by Omarchy and
+not a BIOS setting. systemd ships `/usr/lib/udev/hwdb.d/60-upower-battery.hwdb` with a
+blanket rule `battery:*:*:dmi:* CHARGE_LIMIT=75,80`, applied by `60-upower-battery.rules` to
+every laptop battery. To change it, add `/etc/udev/hwdb.d/61-battery-local.hwdb` with the
+same match and your own CHARGE_LIMIT, then `sudo systemd-hwdb update` and trigger the battery
+(`udevadm trigger -v -p /sys/class/power_supply/BAT0`). The EC holds it: at 80% it stops
+charging, and start=75 means it resumes once the pack falls back to 75.
+
+Omarchy 4.5 has one battery notification: `omarchy-battery-low` at 10%, from the shell's
+`plugins/services/battery/Service.qml` (`batteryThreshold = 10`, once per discharge, then
+`~/.config/omarchy/hooks/battery-low.d/`). Nothing fires at the charge limit -- the power
+panel only *shows* "holding at 80%". `omarchy-battery-notify` (in this repo, deployed to
+`~/.local/bin`) adds a 20% warning plus the limit-reached toast: it polls sysfs every 30s and
+keeps two flags in `~/.local/state/battery-notify.state` so each fires once per plug-in or
+discharge cycle.
+
+Toasts are drawn by the shell's notification service, so the systemd --user unit is
+`After=graphical-session.target`; a udev `RUN+=` as root would never reach the desktop session.

@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# battery-notify: toast on low charge and when the charge limit is reached.
+#
+# Omarchy already warns once at 10% while discharging (omarchy-battery-low),
+# and the power panel shows "holding at 80%" -- but nothing tells you when AC
+# charging actually stops at the limit. This adds both:
+#   - a low warning at BATTERY_NOTIFY_LOW (default 20%), once per discharge
+#   - a notification when the battery reaches charge_control_end_threshold
+#     (80% on the t14 -- systemd's /usr/lib/udev/hwdb.d/60-upower-battery.hwdb
+#     sets 75/80 for every laptop battery; Omarchy does not set it), once per
+#     AC plug-in
+#
+# Usage: omarchy-battery-notify [--once] [--dry-run]
+# Env: BATTERY_NOTIFY_LOW        low warning percentage (default 20)
+#      BATTERY_NOTIFY_INTERVAL   seconds between checks (default 30)
+#      BATTERY_NOTIFY_SYSFS      power_supply dir (default /sys/class/power_supply)
+set -uo pipefail
+
+once=false
+dry_run=false
+for arg in "$@"; do
+  case $arg in
+  --once) once=true ;;
+  --dry-run) dry_run=true ;;
+  -h | --help)
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+  *)
+    echo "unknown argument: $arg" >&2
+    exit 2
+    ;;
+  esac
+done
+
+low_percent=${BATTERY_NOTIFY_LOW:-20}
+interval=${BATTERY_NOTIFY_INTERVAL:-30}
+sysfs=${BATTERY_NOTIFY_SYSFS:-/sys/class/power_supply}
+state_file=${XDG_STATE_HOME:-$HOME/.local/state}/battery-notify.state
+
+[[ $low_percent =~ ^[0-9]+$ ]] || low_percent=20
+[[ $interval =~ ^[0-9]+$ ]] || interval=30
+
+# The battery that powers the machine: BAT* with a readable capacity.
+battery=
+for d in "$sysfs"/BAT*; do
+  [[ -r $d/capacity ]] && battery=$d && break
+done
+if [[ -z $battery ]]; then
+  echo "battery-notify: no battery under $sysfs" >&2
+  exit 0
+fi
+
+low_notified=0
+limit_notified=0
+if [[ -r $state_file ]]; then
+  while IFS='=' read -r key value; do
+    case $key in
+    low_notified) low_notified=${value:-0} ;;
+    limit_notified) limit_notified=${value:-0} ;;
+    esac
+  done <"$state_file"
+fi
+
+save_state() {
+  $dry_run && return 0
+  mkdir -p "${state_file%/*}"
+  printf 'low_notified=%s\nlimit_notified=%s\n' "$low_notified" "$limit_notified" >"$state_file"
+}
+
+# notify <glyph> <urgency> <title> <body>
+notify() {
+  if $dry_run; then
+    echo "DRY-RUN would notify: [$2] $3 -- $4"
+    return 0
+  fi
+  # Omarchy's own sender so the toast matches the shell's styling.
+  if command -v omarchy-notification-send >/dev/null 2>&1; then
+    omarchy-notification-send -g "$1" -u "$2" --app-name Battery "$3" "$4"
+  else
+    notify-send -u "$2" "$3" "$4"
+  fi
+}
+
+# Minutes left at the present draw, or nothing when there is no usable reading.
+remaining_minutes() {
+  local energy power
+  energy=$(<"$battery/energy_now") || return 0
+  power=$(<"$battery/power_now") || return 0
+  [[ $energy =~ ^[0-9]+$ && $power =~ ^[0-9]+$ ]] || return 0
+  ((power > 200000)) || return 0
+  echo $((energy * 60 / power))
+}
+
+check() {
+  local pct status limit ac_online=0 supply minutes body
+
+  pct=$(<"$battery/capacity") || return 0
+  status=$(<"$battery/status") || status=Unknown
+  # No threshold support means "charges to full".
+  limit=$(<"$battery/charge_control_end_threshold") || limit=100
+  [[ $limit =~ ^[0-9]+$ ]] || limit=100
+
+  for supply in "$sysfs"/*; do
+    [[ -r $supply/type ]] || continue
+    [[ $(<"$supply/type") == Mains ]] || continue
+    if [[ -r $supply/online && $(<"$supply/online") == 1 ]]; then
+      ac_online=1
+      break
+    fi
+  done
+
+  # Flags reset per plug / per discharge cycle, never on the reading itself:
+  # the battery dips below the limit while holding, and back above the low mark
+  # for a moment as it recovers.
+  if ((ac_online)); then
+    low_notified=0
+  else
+    limit_notified=0
+    ((pct > low_percent + 5)) && low_notified=0
+  fi
+
+  # Charge limit reached: on AC, at or above the limit, and no longer charging.
+  if ((ac_online)) && ((limit < 100)) && ((pct >= limit)) && [[ $status != Charging ]] && ((limit_notified == 0)); then
+    if notify 󰂄 normal "Battery at charge limit" \
+      "Holding at ${pct}% (limit ${limit}%). Unplug the charger or raise the limit."; then
+      limit_notified=1
+    fi
+  fi
+
+  # Low charge, higher than Omarchy's own 10% warning.
+  if ((!ac_online)) && [[ $status == Discharging ]] && ((pct > 0 && pct <= low_percent)) && ((low_notified == 0)); then
+    body="Battery at ${pct}%."
+    minutes=$(remaining_minutes)
+    if ((minutes >= 90)); then
+      body+=" About $((minutes / 60)) h $((minutes % 60)) min left."
+    elif ((minutes > 0)); then
+      body+=" About ${minutes} min left."
+    fi
+    body+=" Plug in soon."
+    if notify 󰁺 normal "Battery low" "$body"; then
+      low_notified=1
+    fi
+  fi
+
+  save_state
+}
+
+if $once; then
+  check
+  exit 0
+fi
+
+trap 'save_state; exit 0' TERM INT
+while :; do
+  check
+  sleep "$interval" &
+  wait $!
+done
