@@ -1,0 +1,41 @@
+{
+  "addon@darkreader.org": {
+    "commands": {
+      "addSite": "Ctrl+Alt+D",
+      "toggle": ""
+    },
+    "name": "Dark Reader"
+  },
+  "{3c078156-979c-498b-8990-85f7987dd929}": {
+    "commands": {
+      "_execute_sidebar_action": "Ctrl+Alt+A",
+      "new_tab_in_group": "",
+      "new_tab_on_panel": "",
+      "next_panel": "",
+      "prev_panel": "",
+      "search": "Ctrl+Alt+S"
+    },
+    "name": "Sidebery"
+  },
+  "{446900e4-71c2-419f-a6a7-df9c091e268b}": {
+    "commands": {
+      "_execute_sidebar_action": "Ctrl+Alt+B",
+      "autofill_login": "Ctrl+Alt+L",
+      "generate_password": "Ctrl+Alt+G"
+    },
+    "name": "Bitwarden Password Manager"
+  },
+  "{7c7f6dea-3957-4bb9-9eec-2ef2b9e5bcec}": {
+    "commands": {
+      "toggle-site": "Ctrl+Alt+D"
+    },
+    "name": "UltimaDark"
+  },
+  "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}": {
+    "commands": {
+      "SkipScripts": "Ctrl+Alt+W",
+      "toggleInjection": "Ctrl+Alt+Q"
+    },
+    "name": "Violentmonkey"
+  }
+}
