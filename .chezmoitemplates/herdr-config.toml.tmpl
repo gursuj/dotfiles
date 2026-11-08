@@ -19,13 +19,13 @@ onboarding = false
 name = "terminal"
 auto_switch = false
 
-[theme.custom]
-# The tab bar sits on the terminal's own background, like tmux's bg=default, so
-# it turns see-through with the rest of the terminal under Glassy windows. With
-# no panel_bg the active tab's text falls back to surface_dim, so that is black
-# for dark text on the accent - same colors as status-left's "#[fg=black,bg=blue]"
-panel_bg = "reset"
-surface_dim = "black"
+# No [theme.custom] here on purpose. The sidebar/main-pane divider is a "│" drawn
+# in the `surface_dim` colour (herdr src/client/shell/render.rs), so overriding
+# surface_dim (it was "black") made it invisible. panel_bg = "reset" (see-through
+# tab bar) was dropped with it: it is what made surface_dim double as the active
+# tab's text colour, forcing that override.
+# Cost: the tab bar is opaque instead of see-through under Glassy windows. Getting
+# that back needs a surface_dim that works as both divider and tab-text colour.
 
 [terminal]
 # Matches -c "#{pane_current_path}" on every split, window, and session
@@ -145,12 +145,9 @@ prompt_new_tab_name = false
 # a terminal paste instead while mouse capture is on.
 mouse_capture = true
 
-# status-right had the zoom flag followed by #h
-{{- if eq .chezmoi.os "windows" }}
+# zoom flag + clock (main-branch behaviour; the tmux #h host readout was dropped)
 tab_bar_right = [{ type = "zoom" }, { type = "datetime", format = "%H:%M" }]
-{{- else }}
-tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
-{{- end }}
+tab_bar_right_separator = " · "
 
 # set -g set-titles on / set -g set-titles-string '#h:#W', where tmux's #W was
 # the basename of the pane cwd. This is what Hyprland shows in the group bar,
