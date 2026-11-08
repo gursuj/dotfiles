@@ -74,6 +74,8 @@ scripts/wpc-push.ps1
 .local/bin/wpl
 # battbench: laptop battery/power benchmark, needs BAT0 + systemd -- not for vps/windows.
 .local/bin/battbench
+# bitwarden-popout: Hyprland + Linux Firefox profile paths only.
+.local/bin/bitwarden-popout
 # battery charge notifications (low + charge-limit reached) -- laptop hardware
 # and the t14's systemd --user autostart, so not for vps/windows either.
 .local/bin/omarchy-battery-notify

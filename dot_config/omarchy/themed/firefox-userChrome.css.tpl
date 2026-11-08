@@ -119,3 +119,17 @@ panelview,
 #TabsToolbar {
   visibility: collapse !important;
 }
+
+/* Bitwarden vault window (bitwarden-popout, Super+comma): strip all browser
+ * chrome -- tabs, URL bar, sidebar -- so it looks like the extension's own "pop
+ * out" window. The root element has no usable `title` attribute (the window
+ * title is built from the page title), so key on the selected tab's label
+ * instead: exactly "Bitwarden" (the extension page), and only when it is the
+ * window's sole tab, so a normal window is never stripped by accident. */
+:root:has(.tabbrowser-tab[selected][label="Bitwarden"]):not(:has(.tabbrowser-tab ~ .tabbrowser-tab)) #navigator-toolbox {
+  visibility: collapse !important;
+}
+/* `display: none` for the sidebar: collapse leaves its box and splitter taking width. */
+:root:has(.tabbrowser-tab[selected][label="Bitwarden"]):not(:has(.tabbrowser-tab ~ .tabbrowser-tab)) :is(#sidebar-main, sidebar-main, #sidebar-box, #sidebar-splitter, #sidebar-launcher-splitter) {
+  display: none !important;
+}

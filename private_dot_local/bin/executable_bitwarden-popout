@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Open Bitwarden's extension vault as a standalone Firefox window.
+# Ext's moz-extension:// host is a per-profile random UUID, so read it from the
+# profile's prefs.js. Fall back to the web vault if it can't be found.
+set -u
+ID='{446900e4-71c2-419f-a6a7-df9c091e268b}'
+root="${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox"
+[ -d "$root" ] || root="$HOME/.mozilla/firefox"
+
+# Profile the install is locked to; else first profile that has the ext.
+profile=$(awk -F= '/^\[Install/{i=1} i&&/^Default=/{print $2; exit}' "$root/installs.ini" 2>/dev/null)
+uuid=""
+for p in "$profile" "$root"/*/; do
+  [ -n "$p" ] || continue
+  f="$root/${p#"$root"/}/prefs.js"; [ -f "$f" ] || f="${p%/}/prefs.js"
+  [ -f "$f" ] || continue
+  uuid=$(grep -o "\\\\\"$ID\\\\\":\\\\\"[0-9a-f-]*" "$f" | grep -o '[0-9a-f-]*$' | head -1)
+  [ -n "$uuid" ] && break
+done
+
+if [ -n "$uuid" ]; then
+  url="moz-extension://$uuid/popup/index.html?uilocation=popout"
+else
+  url="https://vault.bitwarden.com"
+fi
+exec firefox --new-window "$url"
