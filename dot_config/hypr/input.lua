@@ -69,11 +69,17 @@ hl.config({
 -- o.window("foot", { scroll_touchpad = 2.0 })
 -- o.window("com.mitchellh.ghostty", { scroll_touchpad = 0.2 })
 
--- Touchpad gestures already live in ~/.config/hypr/bindings.lua (the
--- "touchpad gestures" block): 3-finger swipe changes workspace, up is
--- fullscreen, down floats. Do not register them here — a second registration is
--- reported as "Gesture will be overshadowed by a previous gesture" and only
--- adds configerrors noise.
+-- Three-finger gestures live in bindings.lua; do not register them here.
+
+-- The red TrackPoint nub is far twitchier than the touchpad on this panel, so
+-- it gets its own speed rather than riding the global sensitivity above.
+-- `hyprctl devices -j` names it: tpps/2-elan-trackpoint. -0.5 is a big cut;
+-- -0.75 if it still overshoots, 0 to go back to stock.
+hl.device({
+  name = "tpps/2-elan-trackpoint",
+  sensitivity = -0.5,
+})
+
 
 -- Enable touchpad gestures for moving focus (helpful on scrolling layout).
 -- hl.gesture({ fingers = 3, direction = "left", action = function() hl.dispatch(hl.dsp.focus({ direction = "l" })) end })

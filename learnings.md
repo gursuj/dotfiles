@@ -41,12 +41,18 @@ orphan prune, log analysis, restart of stale services, `omarchy-update-mise`, AU
 `yay -Sua --noconfirm --cleanafter --ignore gcc14,gcc14-libs`, a boot/loader check, and a reboot
 prompt when the kernel or systemd moved.
 
-The zsh `pac-update` function (`dot_config/shell/arch-aliasrc`) instead refreshes mirrors with
-reflector, runs `sudo pacman -Syu` then `yay -Syu` **interactively**, greps the two logs for the
-failure summary, then `yay -Sc`/`yay -Yc` and deletes leftover `pkg/download-*` dirs. Neither
-subsumes the other: Omarchy has no mirror refresh and no firmware step (firmware is its own menu
-entry, `omarchy-update-firmware`), and pac-update has no lock, free-space check, keyring step,
-boot verification or reboot handling. The sane combination is `pac-mirror-update && omarchy update`.
+The zsh `pac-update` function (`dot_config/shell/arch-aliasrc`) is now the wrapper that combines
+the two: reflector first (`pac-mirror-update`), then `omarchy update`, then the cleanup Omarchy
+skips — `yay -Sc`, `yay -Yc`, and removal of leftover `/var/cache/pacman/pkg/download-*` dirs.
+Its failure summary prints from `/tmp/omarchy-update.log` when Omarchy's pipeline was the thing
+that failed (and from its own `tee` logs on a box without Omarchy, which still takes the old
+interactive `sudo pacman -Syu` + `yay -Syu` path). It returns non-zero when the update failed,
+even though the cleanup still ran.
+
+Neither tool subsumes the other: Omarchy has no mirror refresh and no firmware step (firmware is
+its own menu entry, `omarchy-update-firmware`), while `omarchy update` adds the lock, free-space
+check, keyring step, boot verification and reboot handling that a hand-rolled `pacman -Syu` has
+none of. Hence: `pac-update` = reflector + `omarchy update` + cleanup.
 
 ## Firefox moved its profile root to XDG, so profile scripts did nothing (2026-11-07)
 

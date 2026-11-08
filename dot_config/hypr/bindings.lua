@@ -323,6 +323,16 @@ local benq_sn = "3BG00085019"
 -- CTRL + brightness: Omarchy binds these to the keyboard backlight (its macOS
 -- convention). On the T14 the external panel is what we want on those keys; the
 -- keyboard backlight keeps its own XF86KbdBrightnessUp/Down keys.
+--
+-- The *plain* brightness keys are not overridden here, and Omarchy's own bind
+-- follows focus: it runs `omarchy-brightness-display`, which resolves
+-- `omarchy-hyprland-monitor-focused` and then picks a backend by monitor --
+-- the internal panel through brightnessctl (kernel backlight), an external one
+-- through `omarchy-brightness-display-ddc` (ddcutil getvcp/setvcp 10, with the
+-- i2c bus cached in $XDG_RUNTIME_DIR), an Apple display through asdcontrol. So
+-- pressing them while the cursor is over the BenQ dims the BenQ, and over the
+-- laptop panel dims the panel. The binds below bypass that on purpose: --sn
+-- pins the BenQ whatever has focus.
 hl.unbind("CTRL + XF86MonBrightnessUp")
 hl.unbind("CTRL + XF86MonBrightnessDown")
 o.bind("CTRL + XF86MonBrightnessUp",   "External brightness up",   "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 + 8", { locked = true, repeating = true })
@@ -333,9 +343,23 @@ o.bind("CTRL + SHIFT + XF86MonBrightnessDown", "External brightness down", "ddcu
 o.bind("SUPER + XF86MonBrightnessUp",   "External brightness up fine",   "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 + 2", { locked = true })
 o.bind("SUPER + XF86MonBrightnessDown", "External brightness down fine", "ddcutil --sn " .. benq_sn .. " --noverify setvcp 10 - 2", { locked = true })
 
-o.bind("SUPER + BRACKETRIGHT", "Next track",     "playerctl next",       { locked = true })
-o.bind("SUPER + BRACKETLEFT",  "Previous track", "playerctl previous",   { locked = true })
-o.bind("SUPER + BACKSLASH",    "Play/pause",     "playerctl play-pause", { locked = true })
+-- Media keys, through Omarchy's own service rather than playerctl (which is not
+-- installed on this box, so these three binds used to do nothing). `{ ipc = ... }`
+-- reaches the shell's MPRIS handler -- the same path the hardware XF86Audio*
+-- keys use -- and Firefox 158 exposes its media session over MPRIS, so this
+-- drives a YouTube Music tab as well as mpv/Spotify.
+--
+-- If the hardware play/next keys themselves do nothing, the key never arrives:
+-- Omarchy binds XF86AudioPlay/Next/Prev, and `omarchy-shell media playPause`
+-- does control a Firefox media session when invoked by hand (verified against
+-- Firefox's org.mpris.MediaPlayer2.firefox instance). kanata does not touch the
+-- F-row (its defsrc is caps/grv/the number row/wasd), so the usual cause is the
+-- ThinkPad F-row being in function mode -- Fn+Esc toggles FnLock, and Fn+F7/F8/F9
+-- sends the media keys either way.
+o.bind("SUPER + BRACKETRIGHT", "Next track",     { ipc = "media.next" },      { locked = true })
+o.bind("SUPER + BRACKETLEFT",  "Previous track", { ipc = "media.previous" },  { locked = true })
+o.bind("SUPER + BACKSLASH",    "Play/pause",     { ipc = "media.playPause" }, { locked = true })
+
 
 o.bind("SUPER + PERIOD", "Emoji picker", "rofimoji -r '' -a type copy")
 

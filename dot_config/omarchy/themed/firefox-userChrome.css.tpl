@@ -43,17 +43,16 @@
   --focus-outline-color: {{ accent }} !important;
 }
 
-/* The tab strip. Left visible: with `sidebar.verticalTabs = false` the sidebar
- * holds no tabs, so collapsing this would leave no tab UI at all. To lose the
- * top strip, uncomment this *and* set sidebar.verticalTabs = true in user.js --
- * then tabs live in the sidebar and the nav bar becomes the title bar.
- * `visibility: collapse` (not `display: none`) keeps the window controls usable.
- */
-/*
+/* The tab strip is gone: Sideberry puts the tab list in the sidebar, so the top
+ * strip was a second, redundant tab UI. Nothing here depends on it -- Sideberry
+ * keeps its own chrome. `visibility: collapse` (rather than `display: none`)
+ * keeps the window controls where the window manager expects them.
+ *
+ * Reverting: comment this rule out and Sideberry's sidebar still works, the
+ * strip just comes back. */
 #TabsToolbar {
   visibility: collapse !important;
 }
-*/
 
 #navigator-toolbox {
   background-color: {{ background }} !important;

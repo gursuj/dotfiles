@@ -53,59 +53,72 @@ alias pac-why='pacman -Qi'
 # must be defined before pac-update: zsh expands aliases at function parse time
 alias pac-mirror-update='sudo systemctl start reflector.service'
 pac-update() {
-    local pacman_failed=0 yay_failed=0 answer
+    local failed=0
     local pacman_log yay_log
     pacman_log=$(mktemp) yay_log=$(mktemp)
 
-        echo '○ Updating mirrors (reflector)...'
-        # oneshot unit: systemctl start blocks until reflector finishes, so the status is real
-        if pac-mirror-update; then
-            echo '✓ Mirrors updated.'
-        else
-            echo '⚠️  Mirror update failed. Continuing with the existing mirrorlist.'
-        fi
+    echo '○ Updating mirrors (reflector)...'
+    # oneshot unit: systemctl start blocks until reflector finishes, so the status is real
+    if pac-mirror-update; then
+        echo '✓ Mirrors updated.'
+    else
+        echo '⚠️  Mirror update failed. Continuing with the existing mirrorlist.'
+    fi
+
+    # On Omarchy the update itself is `omarchy update`: update lock, sudo
+    # keepalive, free-space check, keyring refresh, pacman -Syu inside a systemd
+    # scope with --overwrite /usr/share/omarchy/*, orphan prune, stale service
+    # restarts, mise, `yay -Sua`, boot verification, reboot prompt. It does NOT
+    # refresh mirrors (done above) or clean up afterwards (done below) -- that is
+    # all this wrapper adds. Without Omarchy: plain reflector + pacman + yay.
+    if command -v omarchy >/dev/null 2>&1; then
+        omarchy update || failed=1
+    else
         # tee stderr to a log (still shown live) so failures can be summarised below
-        sudo pacman -Syu 2> >(tee "$pacman_log" >&2) || pacman_failed=1
-        yay -Syu 2> >(tee "$yay_log" >&2) || yay_failed=1
-        sleep 0.3 # let the tee subshells flush
+        sudo pacman -Syu 2> >(tee "$pacman_log" >&2) || failed=1
+        yay -Syu 2> >(tee "$yay_log" >&2) || failed=1
+    fi
+    sleep 0.3 # let the tee subshells flush
 
-        # Works when sourced or executed in Bash, zsh, or sh
-        # Clear any leftover input in stdin to prevent auto-confirmation
-        while read -t 0 2>/dev/null; do
-            read -r _
-        done
+    # Works when sourced or executed in Bash, zsh, or sh
+    # Clear any leftover input in stdin to prevent auto-confirmation
+    while read -t 0 2>/dev/null; do
+        read -r _
+    done
 
-				# printf "○ Do you want to check for AppImage updates (Krita nightly)? [Y/n] "
-        # read -r answer
-
-        # # Convert to lowercase safely. zsh and sh both support `tr`
-        # answer=$(printf "%s" "$answer" | tr '[:upper:]' '[:lower:]')
-        # if [[ -z "$answer" || "$answer" == "y" ]]; then
-        #     # based on https://raghukamath.com/automatically-updating-nightly-builds-of-krita-on-linux
-        #     appimageupdatetool -rO ~/.local/bin/krita6-next.AppImage
-				# 		# everdo appimage doesn't have update info so need to download manually
-        #     # appimageupdatetool -rO ~/.local/bin/everdo.AppImage
-        # fi
-
-        echo '\n'
-        if [[ $pacman_failed -eq 1 ]]; then
-            echo '⚠️  Pacman update failed. Why:'
-            grep -iE 'error|failed|conflict|:: ' "$pacman_log" | tail -n 10 | sed 's/^/    /'
+    echo
+    if (( failed )); then
+        echo '⚠️  Update failed. Why:'
+        if [[ -s $pacman_log || -s $yay_log ]]; then
+            grep -iE 'error|failed|conflict|:: ' "$pacman_log" "$yay_log" 2>/dev/null | tail -n 10 | sed 's/^/    /'
+        elif [[ -r /tmp/omarchy-update.log ]]; then
+            # omarchy update runs the whole transaction through `script`
+            grep -iE 'error|failed|conflict|:: ' /tmp/omarchy-update.log 2>/dev/null | tail -n 10 | sed 's/^/    /'
         fi
-        if [[ $yay_failed -eq 1 ]]; then
-            echo '⚠️  Yay (AUR) update failed. Why:'
-            grep -iE 'error|failed|conflict|:: ' "$yay_log" | tail -n 10 | sed 's/^/    /'
-        fi
-        rm -f "$pacman_log" "$yay_log"
+    fi
+    rm -f "$pacman_log" "$yay_log"
 
-				# clean up
-				yay -Sc && yay -Yc
+    # AppImage updates (Krita nightly, Everdo) stay commented out on purpose --
+    # nothing on this box is an AppImage any more.
+    # printf "○ Do you want to check for AppImage updates (Krita nightly)? [Y/n] "
+    # read -r answer
+    # answer=$(printf "%s" "$answer" | tr '[:upper:]' '[:lower:]')
+    # if [[ -z "$answer" || "$answer" == "y" ]]; then
+    #     appimageupdatetool -rO ~/.local/bin/krita6-next.AppImage
+    #     appimageupdatetool -rO ~/.local/bin/everdo.AppImage
+    # fi
 
-				# leftover partial/interrupted downloads pacman fails to clean itself.
-				# these are alpm-owned dirs (mode 700), not files, so need sudo + rm -rf
-				echo '○ Leftover pacman download-* dirs to remove:'
-				sudo find /var/cache/pacman/pkg -mindepth 1 -maxdepth 1 -name 'download-*'
-				sudo find /var/cache/pacman/pkg -mindepth 1 -maxdepth 1 -name 'download-*' -exec rm -rf {} +
+    # clean up
+    yay -Sc && yay -Yc
+
+    # leftover partial/interrupted downloads pacman fails to clean itself.
+    # these are alpm-owned dirs (mode 700), not files, so need sudo + rm -rf
+    echo '○ Leftover pacman download-* dirs to remove:'
+    sudo find /var/cache/pacman/pkg -mindepth 1 -maxdepth 1 -name 'download-*'
+    sudo find /var/cache/pacman/pkg -mindepth 1 -maxdepth 1 -name 'download-*' -exec rm -rf {} +
+
+    # A failed update stays failed even though the cleanup ran.
+    return $failed
 }
 
 alias wifitui='impala'
