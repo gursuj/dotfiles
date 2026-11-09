@@ -6,8 +6,17 @@
 IP=$(ip -4 addr show | awk '/state UP/{iface=$2} /inet /{if (iface) {sub(/\/.*/,"",$2); print $2; exit}}')
 CONFIG_FILE="$HOME/.config/everdo/config.json"
 
+# Desktop notification via dunstify; plain console message if it's missing.
+notify() {
+    if command -v dunstify >/dev/null 2>&1; then
+        dunstify -t 0 "$1" "$2"
+    else
+        echo "$1: $2"
+    fi
+}
+
 if [ -z "$IP" ]; then
-    dunstify -t 0 "Everdo Config Update" "Failed to detect local IP address. Connect to a network, run evrd-addr, then launch Everdo"
+    notify "Everdo Config Update" "Failed to detect local IP address. Connect to a network, run evrd-addr, then launch Everdo"
     exit 1
 fi
 
@@ -17,6 +26,6 @@ CURRENT_HOST=$(grep -oP '"host": *"\K[0-9.]+' "$CONFIG_FILE")
 # Compare and update only if different
 if [ "$IP" != "$CURRENT_HOST" ]; then
     sed -i "s/\"host\": *\"[0-9.]\+\"/\"host\": \"$IP\"/" "$CONFIG_FILE"
-    dunstify -t 0 "Everdo Config Updated" "Host changed to $IP. Change this on your other devices too."
+    notify "Everdo Config Updated" "Host changed to $IP. Change this on your other devices too."
 fi
 
