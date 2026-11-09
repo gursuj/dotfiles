@@ -1,0 +1,8 @@
+[Unit]
+Description=Creates daily backup of Everdo db
+
+[Service]
+Type=oneshot
+# Script lives in the Everdo config dir so it stops running if Everdo and its
+# config are removed (the timer still needs disabling then).
+ExecStart=%h/.config/everdo/everdo-auto-backup

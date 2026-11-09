@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# check readme for instructions about this
+BACKUP_DIR="$HOME/.config/everdo/backups"
+DB_PATH="$HOME/.config/everdo/db"
+MAX_RETRIES=5
+MAX_BACKUPS=10
+
+mkdir -p "$BACKUP_DIR"
+
+STATE_FILE="$BACKUP_DIR/.last_backup_mtime"
+db_mtime=$(stat -c '%Y' "$DB_PATH" 2>/dev/null)
+last_mtime=$(cat "$STATE_FILE" 2>/dev/null)
+
+if [ "$db_mtime" = "$last_mtime" ]; then
+    exit 0
+fi
+
+counter=0
+while [ $counter -lt $MAX_RETRIES ]
+do
+    /usr/bin/sqlite3 "$DB_PATH" ".backup '$BACKUP_DIR/db_backup_$(date +%F_%T | tr ':' '-').sqlite'"
+    return_value=$?
+    if [ $return_value -eq 0 ]; then
+        echo "$db_mtime" > "$STATE_FILE"
+        counter=$MAX_RETRIES
+    else
+        counter=$((counter + 1))
+    fi
+done
+# Prune old backups safely using while read
+backups=()
+while IFS= read -r file; do
+    backups+=("$file")
+done < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'db_backup_*.sqlite' -printf '%T@ %p\n' | sort -n | awk '{print $2}')
+
+num_backups=${#backups[@]}
+
+if [ "$num_backups" -gt $MAX_BACKUPS ]; then
+    for ((i=0; i<num_backups-MAX_BACKUPS; i++)); do
+        file="${backups[i]}"
+        # Safety check: only remove if inside BACKUP_DIR
+        if [[ "$file" == "$BACKUP_DIR"* ]]; then
+            rm -f "$file"
+        else
+            echo "Skipping suspicious file: $file"
+        fi
+    done
+fi

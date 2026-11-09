@@ -82,6 +82,10 @@ scripts/wpc-push.ps1
 # and the t14's systemd --user autostart, so not for vps/windows either.
 .local/bin/omarchy-battery-notify
 .config/systemd/user/omarchy-battery-notify.service
+# Everdo daily db backup (script, readme, systemd timer) -- desktop app only.
+.config/everdo
+.config/systemd/user/everdo-auto-backup.service
+.config/systemd/user/everdo-auto-backup.timer
 # GUI/laptop-only apps and the ssh config (hosts only, encrypted; keys are never
 # tracked). Windows has different config paths for these, so not deployed there yet.
 .config/ghostty
