@@ -34,6 +34,18 @@ user_pref("sidebar.verticalTabs", false);
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enables userChrome.css
 user_pref("browser.backspace_action", 0); // 0 = Backspace navigates back, like the old Back button behavior
 user_pref("browser.urlbar.showSearchSuggestionsFirst", false);
+// Tapping Alt no longer pops up the menu bar. To open it when needed: Alt+F/E/V/S/B/T/H
+// (File, Edit, View, History, Bookmarks, Tools, Help) opens that menu directly, or
+// right-click an empty toolbar area and tick "Menu Bar" to keep it showing.
+user_pref("ui.key.menuAccessKeyFocuses", false);
+user_pref("browser.tabs.tabMinWidth", 60);
+user_pref("browser.tabs.hoverPreview.showThumbnails", false);
+user_pref("browser.download.useDownloadDir", false); // always ask where to save
+user_pref("findbar.highlightAll", true);
+user_pref("accessibility.typeaheadfind.flashBar", 0);
+user_pref("toolkit.scrollbox.verticalScrollDistance", 5); // default 3
+user_pref("toolkit.scrollbox.pagescroll.maxOverlapLines", 15);
+user_pref("toolkit.scrollbox.pagescroll.maxOverlapPercent", 50);
 
 /** PRIVACY ***/
 user_pref("browser.contentblocking.category", "standard");
@@ -53,8 +65,27 @@ user_pref("browser.ml.chat.provider", "https://gemini.google.com");
 user_pref("browser.ml.chat.shortcuts", false);
 user_pref("browser.ml.chat.menu", false);
 user_pref("browser.ml.linkPreview.enabled", false);
+user_pref("browser.ml.linkPreview.longPress", false);
 
 /** MISC ***/
 user_pref("media.av1.enabled", false);
 user_pref("print_printer", "Mozilla Save to PDF");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_headerleft", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_headercenter", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_headerright", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_footerleft", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_footercenter", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_footerright", "");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_margin_top", "0");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_margin_bottom", "0");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_margin_left", "0");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_margin_right", "0");
+user_pref("print.printer_Mozilla_Save_to_PDF.print_ignore_unwriteable_margins", true);
 user_pref("browser.aboutConfig.showWarning", false);
+
+/** DEVTOOLS ***/
+user_pref("devtools.chrome.enabled", true); // browser toolbox
+user_pref("devtools.toolbox.zoomValue", "1.3");
+user_pref("devtools.gridinspector.showGridAreas", true);
+user_pref("devtools.gridinspector.showGridLineNumbers", true);
+user_pref("devtools.responsive.reloadNotification.enabled", false);
