@@ -72,6 +72,8 @@ scripts/wpc-push.ps1
 # vps or windows.
 .config/shell/local-wpcli
 .config/shell/cleanGradle
+# evrd-addr: Everdo API addr updater, needs dunstify -- arch desktop only.
+.config/shell/evrd-addr
 .local/bin/wpl
 # battbench: laptop battery/power benchmark, needs BAT0 + systemd -- not for vps/windows.
 .local/bin/battbench

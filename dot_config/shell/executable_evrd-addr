@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Helper script to auto update everdo API address after switching to a different network 
+# see: https://forum.everdo.net/t/shell-script-to-easily-update-your-everdo-api-address-after-switching-to-a-different-network/4389
+# Get current active local IP
+IP=$(ip -4 addr show | awk '/state UP/{iface=$2} /inet /{if (iface) {sub(/\/.*/,"",$2); print $2; exit}}')
+CONFIG_FILE="$HOME/.config/everdo/config.json"
+
+if [ -z "$IP" ]; then
+    dunstify -t 0 "Everdo Config Update" "Failed to detect local IP address. Connect to a network, run evrd-addr, then launch Everdo"
+    exit 1
+fi
+
+# Get current host value from config
+CURRENT_HOST=$(grep -oP '"host": *"\K[0-9.]+' "$CONFIG_FILE")
+
+# Compare and update only if different
+if [ "$IP" != "$CURRENT_HOST" ]; then
+    sed -i "s/\"host\": *\"[0-9.]\+\"/\"host\": \"$IP\"/" "$CONFIG_FILE"
+    dunstify -t 0 "Everdo Config Updated" "Host changed to $IP. Change this on your other devices too."
+fi
+
