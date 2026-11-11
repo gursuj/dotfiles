@@ -52,6 +52,12 @@ alias pac-rm='sudo pacman -Rns'
 alias pac-why='pacman -Qi'
 # must be defined before pac-update: zsh expands aliases at function parse time
 alias pac-mirror-update='sudo systemctl start reflector.service'
+
+# Hermes isn't mise- or pacman-managed (own installer in ~/.hermes), so
+# `omarchy update` never touches it. pac-update calls this after omarchy update.
+if command -v omarchy >/dev/null 2>&1; then
+    alias hermes-update='hermes update'
+fi
 pac-update() {
     local failed=0
     local pacman_log yay_log
@@ -73,6 +79,11 @@ pac-update() {
     # all this wrapper adds. Without Omarchy: plain reflector + pacman + yay.
     if command -v omarchy >/dev/null 2>&1; then
         omarchy update || failed=1
+        # not covered by omarchy update (own installer, not mise/pacman)
+        if command -v hermes >/dev/null 2>&1; then
+            echo '○ Updating Hermes...'
+            hermes-update || failed=1
+        fi
     else
         # tee stderr to a log (still shown live) so failures can be summarised below
         sudo pacman -Syu 2> >(tee "$pacman_log" >&2) || failed=1
