@@ -42,3 +42,4 @@ video/x-matroska=mpv.desktop
 video/quicktime=mpv.desktop
 video/webm=mpv.desktop
 x-scheme-handler/mindwtr=mindwtr-handler.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
