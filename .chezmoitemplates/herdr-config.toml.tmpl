@@ -53,18 +53,20 @@ detach = "prefix+q"
 copy_mode = "prefix+["
 
 # Panes
-split_horizontal = ["prefix+h", "alt+enter"]
+# prefix+h/j/k/l is pane focus (below), so the h split moved to herdr's own
+# default, prefix+minus.
+split_horizontal = ["prefix+minus", "alt+enter"]
 split_vertical = ["prefix+v", "alt+shift+enter"]
 close_pane = ["prefix+x", "alt+esc"]
 zoom = "prefix+z"
 last_pane = "prefix+;"
 
-focus_pane_left = "ctrl+alt+left"
-focus_pane_down = "ctrl+alt+down"
-focus_pane_up = "ctrl+alt+up"
-focus_pane_right = "ctrl+alt+right"
+focus_pane_left = ["prefix+h", "ctrl+alt+left"]
+focus_pane_down = ["prefix+j", "ctrl+alt+down"]
+focus_pane_up = ["prefix+k", "ctrl+alt+up"]
+focus_pane_right = ["prefix+l", "ctrl+alt+right"]
 
-resize_mode = ["prefix+ctrl+left", "prefix+ctrl+down", "prefix+ctrl+up", "prefix+ctrl+right"]
+resize_mode = ["prefix+r", "prefix+ctrl+left", "prefix+ctrl+down", "prefix+ctrl+up", "prefix+ctrl+right"]
 
 # Like resize-pane on C-M-S-arrows
 resize_pane_left = "ctrl+alt+shift+left"
@@ -77,8 +79,10 @@ rename_pane = "prefix+shift+o"
 
 # Windows -> tabs
 new_tab = "prefix+c"
-rename_tab = "prefix+r"
-close_tab = "prefix+k"
+# herdr's own defaults: prefix+r would shadow resize_mode's default and
+# prefix+k is pane focus up.
+rename_tab = "prefix+shift+t"
+close_tab = "prefix+shift+x"
 switch_tab = ["prefix+1..9", "alt+1..9"]
 previous_tab = ["prefix+p", "alt+left", "prefix+shift+tab"]
 next_tab = ["prefix+n", "alt+right", "prefix+tab"]
