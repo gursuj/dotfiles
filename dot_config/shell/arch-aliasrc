@@ -50,8 +50,6 @@ alias xmp='sudo xampp-manager'
 alias yeet='yay -Rns'
 alias pac-rm='sudo pacman -Rns'
 alias pac-why='pacman -Qi'
-# must be defined before pac-update: zsh expands aliases at function parse time
-alias pac-mirror-update='sudo systemctl start reflector.service'
 
 # Hermes isn't mise- or pacman-managed (own installer in ~/.hermes), so
 # `omarchy update` never touches it. pac-update calls this after omarchy update.
@@ -63,20 +61,17 @@ pac-update() {
     local pacman_log yay_log
     pacman_log=$(mktemp) yay_log=$(mktemp)
 
-    echo '○ Updating mirrors (reflector)...'
-    # oneshot unit: systemctl start blocks until reflector finishes, so the status is real
-    if pac-mirror-update; then
-        echo '✓ Mirrors updated.'
-    else
-        echo '⚠️  Mirror update failed. Continuing with the existing mirrorlist.'
-    fi
+    # No reflector on Omarchy: it overwrites /etc/pacman.d/mirrorlist with live
+    # Arch mirrors, splitting core/extra from the omarchy channel repo and
+    # breaking ABI-pinned packages (e.g. omarchy-hyprland-titlebars).
 
     # On Omarchy the update itself is `omarchy update`: update lock, sudo
     # keepalive, free-space check, keyring refresh, pacman -Syu inside a systemd
     # scope with --overwrite /usr/share/omarchy/*, orphan prune, stale service
-    # restarts, mise, `yay -Sua`, boot verification, reboot prompt. It does NOT
-    # refresh mirrors (done above) or clean up afterwards (done below) -- that is
-    # all this wrapper adds. Without Omarchy: plain reflector + pacman + yay.
+    # restarts, mise, `yay -Sua`, boot verification, reboot prompt. Mirrors come
+    # from the Omarchy channel (edge). It does NOT clean up afterwards (done
+    # below) -- that is all this wrapper adds. Without Omarchy: reflector +
+    # pacman + yay.
     if command -v omarchy >/dev/null 2>&1; then
         omarchy update || failed=1
         # not covered by omarchy update (own installer, not mise/pacman)
@@ -85,6 +80,8 @@ pac-update() {
             hermes-update || failed=1
         fi
     else
+        echo '○ Updating mirrors (reflector)...'
+        sudo systemctl start reflector.service || echo '⚠️  Mirror update failed. Continuing with the existing mirrorlist.'
         # tee stderr to a log (still shown live) so failures can be summarised below
         sudo pacman -Syu 2> >(tee "$pacman_log" >&2) || failed=1
         yay -Syu 2> >(tee "$yay_log" >&2) || failed=1
