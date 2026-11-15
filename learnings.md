@@ -991,3 +991,10 @@ discharge cycle.
 
 Toasts are drawn by the shell's notification service, so the systemd --user unit is
 `After=graphical-session.target`; a udev `RUN+=` as root would never reach the desktop session.
+
+## SUPER+Tab is last workspace, not last window (2026-11-15)
+
+`SUPER + TAB` was `focus({ last = true })` (last window). Now `focus({ workspace =
+"previous_per_monitor" })`, the action Omarchy gave `SUPER + CTRL + TAB` "Former workspace"
+(which this repo already rebinds to next workspace). Behaves like pressing the current
+workspace's number under `binds.workspace_back_and_forth`. Last-window focus has no bind now.

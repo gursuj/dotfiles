@@ -54,12 +54,13 @@ o.bind("SUPER + Z", "Toggle window split", hl.dsp.layout("togglesplit"))
 o.bind("SUPER + SHIFT + Z", "Cycle workspace layout", "omarchy-hyprland-workspace-layout-toggle")
 
 ---------------------------------------------------------------
--- tab = last window
+-- tab = last workspace
 ---------------------------------------------------------------
 -- SUPER+Tab was "next workspace"; the workspace keys (1..0) cover that, so
 -- CTRL+Tab / CTRL+SHIFT+Tab take it over. Omarchy's "former workspace" bind on
--- CTRL+Tab is the casualty.
-o.rebind("SUPER + TAB", "Last window", hl.dsp.focus({ last = true }))
+-- CTRL+Tab is the casualty; SUPER+Tab takes over its action (same as
+-- pressing the current workspace number via workspace_back_and_forth).
+o.rebind("SUPER + TAB", "Last workspace", hl.dsp.focus({ workspace = "previous_per_monitor" }))
 o.rebind("SUPER + CTRL + TAB", "Next workspace", hl.dsp.focus({ workspace = "m+1" }))
 o.bind("SUPER + CTRL + SHIFT + TAB", "Previous workspace", hl.dsp.focus({ workspace = "m-1" }))
 
