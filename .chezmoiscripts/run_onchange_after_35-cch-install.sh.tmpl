@@ -7,12 +7,8 @@
 # Needs a terminal multiplexer (zellij or tmux) on PATH for session resume --
 # not installed by this script, see README.
 #
-# Uses the system default npm prefix (e.g. /usr on Arch), which is
-# root-owned -- `npm install -g` needs sudo here. This script runs as the
-# regular user (chezmoi apply isn't run as root), so it can't do that
-# unattended: it builds the package and prints the install command for you
-# to run yourself with sudo, rather than silently failing with EACCES or
-# guessing at passwordless-sudo.
+# Installs to the fixed user prefix ~/.local (no sudo, independent of the
+# mise-managed node version) -- see the install step at the bottom.
 #
 # fork ref: https://github.com/gursuj/cch (main) -- bump this comment to
 # force a reinstall/update after pulling new fork commits, since npm install
@@ -51,10 +47,8 @@ if ! (cd "$clone_dir" && npm install && npm run build); then
   exit 0
 fi
 
-if [ -w "$(npm root -g)" ]; then
-  (cd "$clone_dir" && npm install -g .)
-else
-  echo "npm's global prefix ($(npm config get prefix)) isn't user-writable." >&2
-  echo "Run this yourself to finish installing ch:" >&2
-  echo "  sudo npm install -g --prefix \"$(npm config get prefix)\" \"$clone_dir\"" >&2
-fi
+# Fixed user prefix, not npm's default: under mise, the default prefix is the
+# active node version's own dir, so a node bump orphans `ch` ("ch is not
+# provided by the active node"). ~/.local/bin is on PATH; the ch shebang is
+# `env node`, so it runs on whatever node is active.
+npm install -g --prefix "$HOME/.local" "$clone_dir"

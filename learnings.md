@@ -1034,3 +1034,18 @@ WantedBy=suspend.target
   `sudo systemctl start psmouse-resume.service`
 - Not covered: breaks with no suspend. Next time, capture `BTN_TOOL_TRIPLETAP` vs
   `DOUBLETAP` with `evtest` (in `extra`) to see what the pad reports.
+
+## `ch` broke after mise node bump: install to fixed prefix (2026-11-16)
+
+`cs` failed with `mise ERROR ch is not provided by the active node@26.13.1`. `ch` had been
+installed with plain `npm install -g`, which under mise's node lands in the version's own dir
+(`~/.local/share/mise/installs/node/26.13.0/lib/node_modules`). Node is `latest` in
+`/etc/mise/conf.d/omarchy-tools.toml`, so each bump orphans it. Supersedes the 2026-09-28
+`sudo npm install -g --prefix /usr` note (that prefix was not what npm used under mise).
+
+Fix: `run_onchange_after_35-cch-install.sh.tmpl` now runs
+`npm install -g --prefix "$HOME/.local" <clone>`. `~/.local/bin` is on PATH ahead of the mise
+dirs, and the `ch` shebang is `env node`, so it runs on any active node. No sudo.
+Not covered: a major node jump that breaks the package. Rebuild by bumping the fork-commit
+comment in the script and running `chezmoi apply`. Old copy in `node/26.13.0` is orphaned;
+mise prunes it.
