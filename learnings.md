@@ -998,3 +998,39 @@ Toasts are drawn by the shell's notification service, so the systemd --user unit
 "previous_per_monitor" })`, the action Omarchy gave `SUPER + CTRL + TAB` "Former workspace"
 (which this repo already rebinds to next workspace). Behaves like pressing the current
 workspace's number under `binds.workspace_back_and_forth`. Last-window focus has no bind now.
+
+## T14 Synaptics 3-finger tap degrades after resume (2026-11-16)
+
+The T14's PS/2 Synaptics pad (`SynPS/2 Synaptics TouchPad`, LEN2064) sometimes loses 3-finger
+tap (reads as a 2-finger tap, so a right click instead of middle click). Reboot or a full
+`psmouse` reload fixes it. `drvctl reconnect` does not, and `psmouse.synaptics_intertouch=1`
+does not switch the bus (`SMbus companion is not ready yet`). Trigger is mostly resume from
+s2idle; at least one break happened with no suspend.
+
+Fix is a system unit, deliberately **not tracked** (lives in `/etc`, outside `$HOME`, so
+chezmoi cannot deploy it). A `/etc/systemd/system-sleep/` hook was tried first and never
+fired on a real resume, hence the unit. Recreate on a fresh T14:
+
+```
+# /etc/systemd/system/psmouse-resume.service
+[Unit]
+Description=Reload psmouse after resume (Synaptics 3-finger tap)
+After=suspend.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/modprobe -r psmouse
+ExecStart=/usr/bin/modprobe psmouse
+
+[Install]
+WantedBy=suspend.target
+```
+
+`sudo systemctl daemon-reload && sudo systemctl enable psmouse-resume.service`
+
+- Verify it ran: `journalctl -u psmouse-resume.service -b`. `systemctl status` shows
+  "inactive (dead)" afterwards; that is normal for a finished oneshot.
+- **Manual fix** when the tap breaks without a suspend:
+  `sudo systemctl start psmouse-resume.service`
+- Not covered: breaks with no suspend. Next time, capture `BTN_TOOL_TRIPLETAP` vs
+  `DOUBLETAP` with `evtest` (in `extra`) to see what the pad reports.

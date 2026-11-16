@@ -55,6 +55,9 @@ Not everything here is `chezmoi apply`-and-done:
   `~/.local/state/syncthing/config.xml` and the TLS keys itself, and running the binary manually
   before enabling it just means stopping that instance again — one process per config dir. The
   config is deliberately not tracked (keys, tokens, per-device index); see `learnings.md`.
+- **T14 touchpad fix** -- `/etc/systemd/system/psmouse-resume.service` reloads `psmouse` after
+  resume (3-finger tap degrades otherwise). Untracked (outside `$HOME`); unit text and manual
+  fix in `learnings.md` ("T14 Synaptics 3-finger tap").
 
 `AGENTS.md` at repo root points agents (opencode natively, Claude Code where it honours
 `AGENTS.md`) at `learnings.md` — the dated log of resolved issues and corrections for
