@@ -1049,3 +1049,37 @@ dirs, and the `ch` shebang is `env node`, so it runs on any active node. No sudo
 Not covered: a major node jump that breaks the package. Rebuild by bumping the fork-commit
 comment in the script and running `chezmoi apply`. Old copy in `node/26.13.0` is orphaned;
 mise prunes it.
+
+## HDMI lock-screen cycling: debounce failed, a lock guard works (2026-11-16)
+
+With the BenQ GW2270 on HDMI (t14, AMD Renoir, Omarchy 4.5 edge), locking made both displays
+cycle off/on until unlock. Upstream: omarchy #13812 (canonical), #18689 (workaround), PR #13129
+(amdgpu HDMI HPD debounce, unmerged).
+
+- **`amdgpu.hdmi_hpd_debounce_delay_ms=1500` did not help.** Param exists in kernel 7.2.15, read
+  back as 1500 after reboot, loop unchanged. Hyprland's socket2 showed a real
+  `monitorremoved` → `monitoradded` pair per cycle, so the drop outlasts 1.5s or bypasses the
+  path the patch filters. dmesg showed no HPD lines either way (drm debug is off by default), so
+  `dmesg` is the wrong tool: watch `socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock -`.
+  Reverted: `/etc/modprobe.d/omarchy-amdgpu-hdmi-hpd.conf` is not tracked (outside $HOME); remove
+  it and run `sudo limine-mkinitcpio` if still present.
+- **Fix in use: `~/.local/bin/omarchy-hdmi-lockguard`**, started from `hypr/autostart.lua`. Polls
+  `omarchy-shell lock isLocked` once a second (no lock-state event exists on the hypr socket).
+  On lock: save HDMI mode/scale and its workspaces, disable the output, DPMS off. On unlock:
+  re-enable, DPMS on, move the saved workspaces back. Windows return to HDMI. HDMI takes a few
+  seconds to come back after unlock.
+- **`hl.monitor` re-enable needs an explicit `disabled = false`.** A rule without it returns
+  `ok` but leaves the output disabled, which looked like a blue screen on the monitor after
+  unlock. The first version of the guard had this bug.
+- **Disabling a monitor moves its windows to the remaining one.** Hence the saved workspace list
+  and `hl.dsp.workspace.move({ workspace = "<id>", monitor = "HDMI-A-1" })` on unlock.
+- **Don't `pkill -f <script>` from the Bash tool**: it matches the tool's own shell and exits 144.
+  Use `kill $(pgrep -f '^/bin/bash .*<script>')`.
+- **Unconfirmed, may be related:** the monitor shows only its blue no-signal screen when HDMI is
+  plugged in while the monitor is already on (no Omarchy UI until it is power-cycled by hand).
+  It worked on one later test after the guard went in, but that is a single run and the cause
+  is not established. Treat as open. If it returns, check `hyprctl monitors all` for
+  `disabled: true` first, then `/sys/class/drm/card*-HDMI-A-1/{status,enabled}`.
+- Caveat on the guard: polling means up to 1s between lock and disable, so one flash is
+  possible. The 5s blank timer makes it unlikely. If the lock plugin ever exposes a signal,
+  swap the poll for it.
