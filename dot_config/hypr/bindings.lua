@@ -119,14 +119,59 @@ o.bind("SUPER + SHIFT + V", "Clipboard manager", { panel = "omarchy.clipboard" }
 
 o.bind("SUPER + SHIFT + S", "Move window to scratchpad", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
 
+-- The populated workspace for a slot, wherever it lives. Omarchy gives every
+-- monitor its own block of ten (the panel 1-10, the next monitor 11-20) and
+-- treats "slot 2" as "slot 2 of the focused monitor", but here "workspace 2" is
+-- one place: the focused monitor's own populated one first (a repeat press stays
+-- put), then the lowest populated one anywhere. Nil when the slot is empty
+-- everywhere.
+local function occupied_slot_id(slot)
+    local focused = hl.get_active_monitor()
+    local focused_id = focused and o.workspaces.workspace_id(focused, slot)
+    local best = nil
+
+    for _, workspace in ipairs(hl.get_workspaces()) do
+        local occupied = not workspace.special and workspace.id > 0 and (workspace.windows or 0) > 0
+
+        if occupied and (workspace.id - 1) % 10 + 1 == slot then
+            if workspace.id == focused_id then
+                return workspace.id
+            elseif not best or workspace.id < best then
+                best = workspace.id
+            end
+        end
+    end
+
+    return best
+end
+
 -- Moving a window to a numbered workspace must NOT follow it: the window goes,
--- the focus stays where it is. Omarchy binds the row by keycode
+-- the focus stays where it is. It goes to the slot's populated workspace even
+-- when that sits on the other monitor, so a slot never ends up as two populated
+-- workspaces; with the slot empty everywhere it falls back to Omarchy's move
+-- (the focused monitor's own slot). Omarchy binds the row by keycode
 -- (SUPER + code:10..19), so the rebind has to use the same form -- a keysym
 -- rebind ("SUPER + 1") does not replace a code bind, it adds a second one.
+local function move_window_slot(slot)
+    local window = hl.get_active_window()
+    local target = occupied_slot_id(slot)
+
+    if window and target then
+        hl.dispatch(hl.dsp.window.move({ workspace = tostring(target), follow = false, window = "address:" .. window.address }))
+    else
+        hl.dispatch(o.workspaces.move_window(slot, false))
+    end
+end
+
+-- Exposed on o.workspaces for the keybindings menu, like focus_occupied below.
+function o.workspaces.move_window_occupied(slot)
+    return function() move_window_slot(slot) end
+end
+
 for i = 1, 10 do
     local key = "code:" .. (i + 9)
-    o.rebind("SUPER + SHIFT + " .. key, "Move window to workspace " .. i .. " (no follow)",
-             o.workspaces.move_window(i, false))
+    o.rebind("SUPER + SHIFT + " .. key, "Move window to workspace " .. i .. " (wherever it has windows, no follow)",
+             function() move_window_slot(i) end)
 end
 
 ---------------------------------------------------------------
@@ -140,22 +185,7 @@ end
 -- populated slot anywhere. With nothing populated, fall back to Omarchy's own
 -- focus, which reuses or creates the local slot.
 local function focus_slot(slot)
-    local focused = hl.get_active_monitor()
-    local focused_id = focused and o.workspaces.workspace_id(focused, slot)
-    local best = nil
-
-    for _, workspace in ipairs(hl.get_workspaces()) do
-        local occupied = not workspace.special and workspace.id > 0 and (workspace.windows or 0) > 0
-
-        if occupied and (workspace.id - 1) % 10 + 1 == slot then
-            if workspace.id == focused_id then
-                best = workspace.id
-                break
-            elseif not best or workspace.id < best then
-                best = workspace.id
-            end
-        end
-    end
+    local best = occupied_slot_id(slot)
 
     if best then
         hl.dispatch(hl.dsp.focus({ workspace = tostring(best) }))
