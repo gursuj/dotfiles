@@ -275,14 +275,19 @@ local function arrange_pip(window)
   -- corner, over the bars (the old reserved-area maths left it ~26px short).
   local width = monitor.width / monitor.scale
   local height = monitor.height / monitor.scale
+  -- move{relative=false} takes layout coordinates, not monitor-relative ones, so
+  -- the monitor's own origin has to be added: without it a PiP on a monitor not
+  -- at 0,0 (HDMI sits above the panel at y = -864) landed on the wrong screen.
+  local origin_x = monitor.x or 0
+  local origin_y = monitor.y or 0
 
   hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
   hl.dispatch(hl.dsp.window.resize({
     x = PIP_SIZE[1], y = PIP_SIZE[2], relative = false, window = window,
   }))
   hl.dispatch(hl.dsp.window.move({
-    x = math.floor(width - PIP_SIZE[1] - PIP_MARGIN),
-    y = math.floor(height - PIP_SIZE[2] - PIP_MARGIN),
+    x = math.floor(origin_x + width - PIP_SIZE[1] - PIP_MARGIN),
+    y = math.floor(origin_y + height - PIP_SIZE[2] - PIP_MARGIN),
     relative = false,
     window = window,
   }))
@@ -301,6 +306,17 @@ local function arrange_pip(window)
 end
 
 hl.on("window.open", arrange_pip)
+
+-- Unplugging a monitor moves its windows to another one at their old offsets, so
+-- a PiP in the old monitor's corner ends up far outside the new one. Re-tuck
+-- every PiP once Omarchy's own reconcile (1s after removal) has settled.
+hl.on("monitor.removed", function()
+  hl.timer(function()
+    for _, window in ipairs(hl.get_windows()) do
+      arrange_pip(window)
+    end
+  end, { type = "oneshot", timeout = 1500 })
+end)
 
 -- Never take keyboard focus when a PiP window opens (keep typing where you were).
 -- Matched on title like Omarchy's own tag rule; ff2mpv by class.

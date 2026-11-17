@@ -1105,3 +1105,13 @@ falls back to append, so the old behaviour returns in that case only.
 Same pass: `SUPER+SHIFT+N` now sends a window to the slot's populated workspace on any
 monitor (shared `occupied_slot_id` with the focus bind), so a slot can't become two
 populated workspaces.
+
+## PiP corner maths ignored the monitor origin (2026-11-17)
+
+`arrange_pip` (`looknfeel.lua`) moved the PiP with `relative = false`, which takes *layout*
+coordinates, using only monitor-sized maths. On eDP (0,0) that is right; on HDMI (above the
+panel at y = -864) the PiP landed on the wrong screen, mostly off the bottom of the panel.
+Unplugging then rebased it again (y = 1475). Fix: add `monitor.x`/`monitor.y`, and re-tuck
+every PiP 1.5s after `monitor.removed` (after Omarchy's own 1s reconcile) so one left in a
+removed monitor's corner is brought back. Side effect: a PiP you dragged elsewhere snaps back
+to the corner when any monitor is unplugged.
