@@ -1083,3 +1083,25 @@ cycle off/on until unlock. Upstream: omarchy #13812 (canonical), #18689 (workaro
 - Caveat on the guard: polling means up to 1s between lock and disable, so one flash is
   possible. The 5s blank timer makes it unlikely. If the lock plugin ever exposes a signal,
   swap the poll for it.
+
+## Unplugged monitor keeps its slot number (2026-11-17)
+
+Omarchy's `monitor-workspaces.lua` `merge()` renumbers an unplugged monitor's workspaces
+into the surviving block via `append_slot`, so HDMI's ws 12 became 4 on the panel (after
+eDP's highest). Here "workspace 2" is a slot (`bindings.lua` `occupied_slot_id`), so it should
+become 2 when free. `~/.config/hypr/monitor-workspaces-patch.lua` (tracked) text-patches that
+one call at load time and falls back to the stock file, with a stderr warning, if upstream
+changes the line. Replug still restores 12 (the merged state is untouched).
+
+**Not tracked, by design:** `hyprland.lua` is in `.chezmoiignore` (Omarchy's entry point), so
+the line that loads the patch is a manual step on a fresh T14, before `require("default.hypr.omarchy")`:
+
+```lua
+require("hypr.monitor-workspaces-patch")
+```
+
+Without it the patch silently does nothing. Collision (slot already populated on the panel)
+falls back to append, so the old behaviour returns in that case only.
+Same pass: `SUPER+SHIFT+N` now sends a window to the slot's populated workspace on any
+monitor (shared `occupied_slot_id` with the focus bind), so a slot can't become two
+populated workspaces.
