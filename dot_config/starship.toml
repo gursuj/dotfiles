@@ -1,20 +1,12 @@
-# Minimal prompt: user@host + path (last 2 dirs) + git branch + git status.
+# Minimal prompt: path (cwd + its parent) + git branch + git status.
 # No Nerd Font glyphs used anywhere below — avoids tofu/missing-icon boxes
 # on Windows Terminal profiles without a Nerd Font installed.
-format = """$username$hostname$directory$git_branch$git_status$character"""
-
-[username]
-show_always = true
-style_user = "bold"
-format = "[$user]($style)"
-
-[hostname]
-ssh_only = false
-format = "[@$hostname]($style) "
-style = "bold"
+format = """$directory$git_branch$git_status$character"""
 
 [directory]
 truncation_length = 2
+# Off so repo roots still show their parent, not just the repo name.
+truncate_to_repo = false
 style = "bold cyan"
 
 [git_branch]
