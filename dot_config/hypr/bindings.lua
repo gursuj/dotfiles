@@ -209,6 +209,17 @@ for i = 1, 10 do
              function() focus_slot(i) end)
 end
 
+-- SUPER+N: new tab. Focus the lowest slot (1-10) with no windows anywhere, on
+-- the focused monitor. No-op when all ten are populated.
+o.bind("SUPER + N", "Focus first empty workspace", function()
+    for slot = 1, 10 do
+        if not occupied_slot_id(slot) then
+            hl.dispatch(o.workspaces.focus(slot))
+            return
+        end
+    end
+end)
+
 ---------------------------------------------------------------
 -- browser / swallow
 ---------------------------------------------------------------
