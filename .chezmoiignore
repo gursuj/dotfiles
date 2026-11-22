@@ -82,6 +82,12 @@ scripts/wpc-push.ps1
 # and the t14's systemd --user autostart, so not for vps/windows either.
 .local/bin/omarchy-battery-notify
 .config/systemd/user/omarchy-battery-notify.service
+# Metrolist Omarchy-block workaround (bwrap launcher, fake os-release, desktop entries) --
+# see learnings.md. Desktop/Omarchy only.
+.local/bin/metrolist-launch
+.local/share/metrolist-spoof
+.local/share/applications/Metrolist.desktop
+.local/share/applications/metrolist.desktop
 # Everdo daily db backup (script, readme, systemd timer) -- desktop app only.
 .config/everdo
 .config/systemd/user/everdo-auto-backup.service

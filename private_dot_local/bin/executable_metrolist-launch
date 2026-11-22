@@ -1,0 +1,49 @@
+#!/bin/bash
+# Launch Metrolist with Omarchy fingerprints hidden. Applies only inside a bwrap sandbox:
+#  os-release, OMARCHY_PATH, [omarchy] in pacman.conf, and omarchy files/dirs (overlay whiteouts).
+# Also makes the app's self-written .desktop entry read-only so it can't undo the launcher Exec.
+#
+# IF A METROLIST UPDATE BREAKS THIS (each release can add new Omarchy checks):
+#  1. Desktop entry: `grep Exec ~/.local/share/applications/Metrolist.desktop`
+#     must show metrolist-launch. If not, re-run `chezmoi apply`.
+#  2. Gate: `metrolist-launch 2>&1 | grep -i "does not run"`. No output = working.
+#  3. If it prints, find the new signal: extract the AppImage into an EMPTY dir
+#     (`/opt/metrolist-desktop-bin/metrolist.AppImage --appimage-extract`), unzip
+#     lib/app/desktopApp-jvm-*.jar 'com/metrolist/desktop/utils/*', then
+#     `strings -n 4 DesktopPlatformSupportKt.class`. Look for new paths, env vars, file reads.
+#  4. Add it below: `hide DIR NAME...` for a file/dir, --unsetenv for a var, --ro-bind for content.
+#  5. If the AUR package moved the AppImage, set METROLIST_APPIMAGE or fix `app=` below.
+#  6. Update learnings.md in the chezmoi repo with the new signal.
+app="${METROLIST_APPIMAGE:-/opt/metrolist-desktop-bin/metrolist.AppImage}"
+spoof="$HOME/.local/share/metrolist-spoof/os-release"
+rt="${XDG_RUNTIME_DIR:-/tmp}"
+ov="$rt/metrolist-ov"
+rm -rf "$ov"; mkdir -p "$ov"
+awk '/^\[/{skip=($0 ~ /^[[:space:]]*\[omarchy\][[:space:]]*$/)} !skip' /etc/pacman.conf > "$ov/pacman.conf"
+
+args=(--dev-bind / /)
+n=0
+# hide DIR NAME...: overlay DIR with whiteouts (char dev 0:0) for each NAME.
+hide() {
+  local dir=$1; shift
+  n=$((n+1)); mkdir -p "$ov/$n/up" "$ov/$n/work"
+  local x; for x in "$@"; do mknod "$ov/$n/up/$x" c 0 0; done
+  args+=(--overlay-src "$dir" --overlay "$ov/$n/up" "$ov/$n/work" "$dir")
+}
+
+hide /usr/share omarchy
+hide /usr/share/uwsm/env.d 10-omarchy
+hide /usr/bin omarchy-version
+hide /etc omarchy.conf
+hide /etc/profile.d omarchy.sh
+hide "$HOME/.config" omarchy
+
+args+=(
+  --bind "$HOME/.config/metrolist" "$HOME/.config/metrolist"   # keep app config persistent
+  --ro-bind "$spoof" /etc/os-release
+  --ro-bind "$spoof" /usr/lib/os-release
+  --ro-bind "$ov/pacman.conf" /etc/pacman.conf
+  --ro-bind "$HOME/.local/share/applications/Metrolist.desktop" "$HOME/.local/share/applications/Metrolist.desktop"
+  --unsetenv OMARCHY_PATH
+)
+exec env APPIMAGE_EXTRACT_AND_RUN=1 bwrap "${args[@]}" -- "$app" "$@"

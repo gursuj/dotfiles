@@ -1115,3 +1115,25 @@ Unplugging then rebased it again (y = 1475). Fix: add `monitor.x`/`monitor.y`, a
 every PiP 1.5s after `monitor.removed` (after Omarchy's own 1s reconcile) so one left in a
 removed monitor's corner is brought back. Side effect: a PiP you dragged elsewhere snaps back
 to the corner when any monitor is unplugged.
+
+## Metrolist refuses to launch on Omarchy; bwrap wrapper hides the fingerprints (2026-11-21)
+
+`metrolist-desktop-bin` (AUR, AppImage under `/opt/metrolist-desktop-bin/`) exits with "does not run
+on Omarchy" via `DesktopPlatformSupport.kt`. 14.0.0 checked three signals (os-release `ID=omarchy`,
+`OMARCHY_PATH`, `/usr/share/omarchy`); 14.0.1 added `[omarchy]` in `/etc/pacman.conf`,
+`/usr/bin/omarchy-version`, `/etc/profile.d/omarchy.sh`, uwsm `10-omarchy`, `/etc/omarchy.conf` and
+`~/.config/omarchy`. Fix without rebuilding: `~/.local/bin/metrolist-launch` runs the AppImage in
+`bwrap`, hiding each of those inside the sandbox only (nothing on the host changes).
+- Hiding a *file or dir* has to make it not exist (`isDirectory`/`exists`), so an empty tmpfs on
+  `/usr/share/omarchy` is not enough. Overlay whiteouts do it: `mknod up/<name> c 0 0` (allowed
+  unprivileged) plus `bwrap --overlay-src DIR --overlay UP WORK DIR`. The first attempt, tmpfs plus
+  bind each sibling, hit bwrap's 9000-arg cap on `/usr/bin` (3.7k entries).
+- Overlays discard writes, so `~/.config/metrolist` is re-bound rw over the `~/.config` overlay.
+- The app rewrites `~/.local/share/applications/Metrolist.desktop` on every launch (Exec back to the
+  raw AppImage). The wrapper ro-binds that file inside the sandbox; the app logs "could not install
+  its AppImage desktop entry", which is harmless. `metrolist.desktop` (lowercase) is `Hidden=true` to
+  suppress the package's own entry, whose Exec goes through the blocked `/usr/bin/metrolist`.
+- Arms race: each Metrolist update can add signals. After an update: check `Exec=` in the desktop
+  file, run `metrolist-launch 2>&1 | grep -i "does not run"`; if it prints, extract the AppImage and
+  `strings` `DesktopPlatformSupportKt.class` in `desktopApp-jvm-*.jar` for the new signal.
+- Open: `DesktopCredentials ... read-back mismatch` in the log, probably keyring, login may not persist.
