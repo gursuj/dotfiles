@@ -54,8 +54,9 @@
             "colorScheme": "Zenwritten Light",
             "font":
             {
-                "face": "CaskaydiaCove NFM",
-                "size": 13
+                "face": "Atkinson Hyperlegible Mono, CaskaydiaCove NFM",
+                "size": 13,
+                "weight": "medium"
             },
             "rightClickContextMenu": true,
             "showMarksOnScrollbar": true,
