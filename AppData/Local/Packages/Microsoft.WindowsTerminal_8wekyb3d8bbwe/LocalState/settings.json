@@ -56,7 +56,7 @@
             {
                 "face": "Atkinson Hyperlegible Mono, CaskaydiaCove NFM",
                 "size": 13,
-                "weight": "medium"
+                "weight": "semi-bold"
             },
             "rightClickContextMenu": true,
             "showMarksOnScrollbar": true,
