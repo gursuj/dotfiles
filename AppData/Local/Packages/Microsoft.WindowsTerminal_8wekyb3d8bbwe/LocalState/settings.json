@@ -54,9 +54,8 @@
             "colorScheme": "Zenwritten Light",
             "font":
             {
-                "face": "Atkinson Hyperlegible Mono, CaskaydiaCove NFM",
-                "size": 12,
-                "weight": "semi-bold"
+                "face": "JetBrainsMono Nerd Font Mono",
+                "size": 12
             },
             "rightClickContextMenu": true,
             "showMarksOnScrollbar": true,
@@ -65,10 +64,6 @@
         "list":
         [
             {
-                "font":
-                {
-                    "face": "JetBrainsMono Nerd Font Mono"
-                },
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
                 "name": "PowerShell",
